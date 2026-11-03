@@ -1,0 +1,6 @@
+{
+  "name": "SAIT Group Visitor Pass",
+  "description": "Visitor registration, digital pass, and multi-branch management app for SAIT Group companies",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

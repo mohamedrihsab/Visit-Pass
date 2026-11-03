@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidVisitor(data) {
+      return data.size() >= 8 &&
+        data.passNumber is string && data.passNumber.size() > 0 &&
+        data.fullName is string && data.fullName.size() > 0 &&
+        data.mobileNumber is string && data.mobileNumber.size() > 0 &&
+        data.companyName is string && data.companyName.size() > 0 &&
+        data.visitType is string &&
+        data.department is string &&
+        data.purpose is string &&
+        data.status in ['CHECKED_IN', 'CHECKED_OUT'];
+    }
+
+    // Central visitors collection for real-time multi-device synchronization
+    // across all kiosk tablets and receptionist/admin tablets
+    match /visitors/{visitorId} {
+      allow read: if isAuthenticated();
+      allow create: if isValidVisitor(request.resource.data);
+      allow update: if isAuthenticated() && isValidVisitor(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+
+    // Multi-branch & department configuration + email notification settings
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Automated visitor registration email dispatch records
+    match /email_notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+    }
+
+    // Per-user subcollection
+    match /users/{userId}/visitors/{visitorId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Visitor": {
+      "title": "Visitor",
+      "description": "Visitor registration record for SAIT FZCO across kiosks and admin tablets",
+      "type": "object",
+      "properties": {
+        "passNumber": { "type": "string" },
+        "fullName": { "type": "string" },
+        "mobileNumber": { "type": "string" },
+        "companyName": { "type": "string" },
+        "visitType": { "type": "string" },
+        "department": { "type": "string" },
+        "purpose": { "type": "string" },
+        "personToMeet": { "type": "string" },
+        "status": { "type": "string" },
+        "checkInFormattedTime": { "type": "string" },
+        "checkOutFormattedTime": { "type": ["string", "null"] },
+        "createdAt": { "type": "object" },
+        "updatedAt": { "type": "object" }
+      },
+      "required": [
+        "passNumber",
+        "fullName",
+        "mobileNumber",
+        "companyName",
+        "visitType",
+        "department",
+        "purpose",
+        "status",
+        "checkInFormattedTime"
+      ]
+    }
+  },
+  "collections": {
+    "/visitors": {
+      "description": "Real-time synchronized visitor registrations shared across all company kiosks and admin tablets",
+      "entity": "Visitor"
+    }
+  }
+}
