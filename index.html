@@ -1,17 +1,705 @@
-<!-- Redirect to docs/index.html or serve directly -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=docs/index.html">
-  <script>
-    // Preserve query parameters during redirect if accessed at root
-    const search = window.location.search;
-    window.location.replace("docs/index.html" + search);
-  </script>
-  <title>SAIT Group Visitor Registration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SAIT Group — Visitor Registration Portal</title>
+  <meta name="description" content="Official touchless visitor registration portal for SAIT Group facilities.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230F2942'/><text x='50' y='62' font-family='sans-serif' font-size='38' font-weight='900' fill='%23FFFFFF' text-anchor='middle'>SAIT</text></svg>">
+  <style>
+    :root {
+      --primary: #0F2942;
+      --primary-light: #1E3A5F;
+      --primary-accent: #0284C7;
+      --bg: #F1F5F9;
+      --card-bg: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #CBD5E1;
+      --border-focus: #0284C7;
+      --success: #10B981;
+      --success-bg: #ECFDF5;
+      --error: #EF4444;
+      --radius: 14px;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+    .header {
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 14px rgba(15, 41, 66, 0.18);
+    }
+    .header-logo-box {
+      width: 64px;
+      height: 64px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+    .header-logo-text {
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--primary);
+      letter-spacing: 1.5px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+    .header p {
+      font-size: 13px;
+      color: #BAE6FD;
+    }
+    .session-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      margin-top: 10px;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+    .required {
+      color: var(--error);
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      background: #fff;
+      color: var(--text-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .phone-row {
+      display: flex;
+      gap: 8px;
+    }
+    .phone-row select {
+      width: 42%;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .phone-row input {
+      width: 58%;
+    }
+    .visit-type-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .visit-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+    .visit-chip.active {
+      background: #E0F2FE;
+      border-color: var(--primary-accent);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
+    }
+    . safety-box, .safety-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 16px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .safety-box input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .safety-box label {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      font-weight: 500;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(15, 41, 66, 0.25);
+      transition: transform 0.1s, background-color 0.2s;
+    }
+    .btn-submit:hover {
+      background: var(--primary-light);
+    }
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+    .btn-submit:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .status-alert {
+      display: none;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .status-alert.error {
+      background: #FEF2F2;
+      color: #991B1B;
+      border: 1px solid #FCA5A5;
+    }
+    .success-modal {
+      display: none;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      border: 2px solid var(--success);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.18);
+    }
+    .badge-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    .badge-pass {
+      background: #F8FAFC;
+      border: 2px dashed var(--primary-accent);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 18px 0;
+      text-align: left;
+    }
+    .badge-pass-header {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .badge-number {
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .badge-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+      border-top: 1px solid #E2E8F0;
+    }
+    .badge-row span {
+      color: var(--text-muted);
+    }
+    .badge-row b {
+      color: var(--text-main);
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 16px;
+      padding-bottom: 24px;
+    }
+  </style>
 </head>
 <body>
-  <p>Redirecting to <a href="docs/index.html">SAIT Group Visitor Portal</a>...</p>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-logo-box">
+        <span class="header-logo-text">SAIT</span>
+      </div>
+      <h1 id="branchTitle">SAIT Group — Visitor Check-In</h1>
+      <p id="branchLocation">Marine, Oil & Gas Engineering Services</p>
+      <div class="session-pill" id="sessionPill">
+        <span>🟢</span>
+        <span id="sessionText">KIOSK STATION CONNECTED</span>
+      </div>
+    </div>
+
+    <div class="status-alert error" id="alertBox"></div>
+
+    <div class="card" id="formCard">
+      <div class="card-title">
+        <span>📋</span>
+        <span>Visitor Entry Details</span>
+      </div>
+      <form id="checkInForm" onsubmit="handleRegistrationSubmit(event)">
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" placeholder="e.g. David Miller" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email ID <span class="required">*</span> <small style="color: var(--text-muted); font-weight: normal;">(Pass & safety rules copy)</small></label>
+          <input type="email" id="email" placeholder="e.g. david.miller@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="mobileNumber">Mobile Number <span class="required">*</span></label>
+          <div class="phone-row">
+            <select id="countryCode">
+              <option value="+971" selected>🇦🇪 +971 (UAE)</option>
+              <option value="+966">🇸🇦 +966 (KSA)</option>
+              <option value="+974">🇶🇦 +974 (Qatar)</option>
+              <option value="+965">🇰🇼 +965 (Kuwait)</option>
+              <option value="+968">🇴🇲 +968 (Oman)</option>
+              <option value="+973">🇧🇭 +973 (Bahrain)</option>
+              <option value="+91">🇮🇳 +91 (India)</option>
+              <option value="+32">🇧🇪 +32 (Belgium)</option>
+              <option value="+44">🇬🇧 +44 (UK)</option>
+              <option value="+213">🇩🇿 +213 (Algeria)</option>
+              <option value="+1">🇨🇦 +1 (Canada)</option>
+              <option value="+1">🇺🇸 +1 (USA)</option>
+              <option value="+33">🇫🇷 +33 (France)</option>
+              <option value="+49">🇩🇪 +49 (Germany)</option>
+              <option value="+39">🇮🇹 +39 (Italy)</option>
+              <option value="+31">🇳🇱 +31 (Netherlands)</option>
+              <option value="+65">🇸🇬 +65 (Singapore)</option>
+              <option value="+60">🇲🇾 +60 (Malaysia)</option>
+              <option value="+86">🇨🇳 +86 (China)</option>
+              <option value="+81">🇯🇵 +81 (Japan)</option>
+              <option value="+82">🇰🇷 +82 (South Korea)</option>
+              <option value="+61">🇦🇺 +61 (Australia)</option>
+              <option value="+20">🇪🇬 +20 (Egypt)</option>
+              <option value="+962">🇯🇴 +962 (Jordan)</option>
+              <option value="+961">🇱🇧 +961 (Lebanon)</option>
+              <option value="+92">🇵🇰 +92 (Pakistan)</option>
+              <option value="+880">🇧🇩 +880 (Bangladesh)</option>
+              <option value="+63">🇵🇭 +63 (Philippines)</option>
+              <option value="+234">🇳🇬 +234 (Nigeria)</option>
+              <option value="+27">🇿🇦 +27 (South Africa)</option>
+            </select>
+            <input type="tel" id="mobileNumber" placeholder="50 123 4567" autocomplete="tel-national" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="companyName">Company / Organization <span class="required">*</span></label>
+          <input type="text" id="companyName" placeholder="e.g. PetroTech International" autocomplete="organization" required>
+        </div>
+
+        <div class="form-group">
+          <label for="visitType">Type of Visit <span class="required">*</span></label>
+          <div class="visit-type-row" style="margin-bottom: 8px;">
+            <button type="button" class="visit-chip active" id="chipWalkIn" onclick="selectVisitType('Walk-In')">
+              <span id="iconWalkIn">✓</span>
+              <span>Walk-In</span>
+            </button>
+            <button type="button" class="visit-chip" id="chipAppointment" onclick="selectVisitType('Appointment')">
+              <span id="iconAppointment" style="display:none;">✓</span>
+              <span>Appointment</span>
+            </button>
+          </div>
+          <select id="visitType" onchange="selectVisitType(this.value)" required>
+            <option value="Walk-In" selected>Walk-In</option>
+            <option value="Appointment">Appointment</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department to Visit <span class="required">*</span></label>
+          <select id="department">
+            <option value="PROJECTS" selected>PROJECTS</option>
+            <option value="QHSE">QHSE (Safety & Environment)</option>
+            <option value="SALES & MARKETING">SALES & MARKETING</option>
+            <option value="OPERATIONS">OPERATIONS</option>
+            <option value="FINANCE">FINANCE</option>
+            <option value="MANAGEMENT">MANAGEMENT</option>
+            <option value="PROCUREMENT">PROCUREMENT & LOGISTICS</option>
+            <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="purpose">Purpose of Visit <span class="required">*</span></label>
+          <select id="purpose" onchange="handlePurposeChange()">
+            <option value="Meeting" selected>Meeting</option>
+            <option value="Inspection">Inspection</option>
+            <option value="Resume Submission">Resume Submission</option>
+            <option value="Interview">Interview</option>
+            <option value="Factory Visit">Factory Visit</option>
+            <option value="Material Delivery">Material Delivery</option>
+            <option value="Technical Audit">Technical Audit & Review</option>
+            <option value="Maintenance / Service">Maintenance & Contractor Work</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="customPurposeGroup" style="display: none;">
+          <label for="customPurpose">Specify Other Purpose <span class="required">*</span></label>
+          <input type="text" id="customPurpose" placeholder="Describe reason for visit">
+        </div>
+
+        <div class="form-group">
+          <label for="personToMeet">Person to Meet (Optional)</label>
+          <input type="text" id="personToMeet" placeholder="Host name or employee to see">
+        </div>
+
+        <div class="safety-box">
+          <input type="checkbox" id="safetyAgree" required checked>
+          <label for="safetyAgree">
+            I acknowledge that I have read and agree to comply with <b>SAIT Group QHSE Safety Guidelines</b>, wear required personal protective equipment (PPE), and remain accompanied in designated zones.
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          Check In & Sync Pass to Kiosk
+        </button>
+      </form>
+    </div>
+
+    <div class="success-modal" id="successCard">
+      <div class="badge-icon">✅</div>
+      <h2 style="color: var(--success); font-size: 22px; font-weight: 800;">Registration Confirmed!</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Your visitor details have been synchronized in real-time to the kiosk terminal screen.
+      </p>
+
+      <div class="badge-pass">
+        <div class="badge-row" style="border-top: none;"><span>Visitor Name:</span> <b id="displayVisitorName">David Miller</b></div>
+        <div class="badge-row"><span>Company:</span> <span id="displayCompany">PetroTech International</span></div>
+        <div class="badge-row"><span>Type of Visit:</span> <b id="displayVisitType">Walk-In</b></div>
+        <div class="badge-row"><span>Department:</span> <span id="displayDept">PROJECTS</span></div>
+        <div class="badge-row"><span>Purpose:</span> <span id="displayPurpose">Meeting</span></div>
+        <div class="badge-row"><span>Host Person:</span> <span id="displayHost">Reception Desk</span></div>
+        <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
+        <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-main); line-height: 1.5; margin-bottom: 14px;">
+        Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and sent to your email!
+      </p>
+
+      <button type="button" class="btn-submit" onclick="resetFormForNextVisitor()" style="background: var(--text-muted); font-size: 14px; padding: 12px;">
+        Register Another Visitor
+      </button>
+    </div>
+
+    <div class="footer">
+      <p>© 2026 SAIT Group • Marine & Industrial Engineering Systems</p>
+      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Zero-Touch Mobile Registration • Cloud Synchronized</p>
+    </div>
+  </div>
+
+  <!-- Firebase Web SDK v10 (Modular via ESM) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
+      authDomain: "gen-lang-client-0825227043.firebaseapp.com",
+      projectId: "gen-lang-client-0825227043",
+      storageBucket: "gen-lang-client-0825227043.firebasestorage.app",
+      messagingSenderId: "381421809663",
+      appId: "1:381421809663:web:sait-visitor-portal"
+    };
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      // Explicitly bind to our Firestore database ID
+      db = getFirestore(app, "ai-studio-android-saitvisi-226bc4de-7e87-4603-a3f9-5c674f11f3ca");
+    } catch (err) {
+      console.warn("Firebase initialization notice:", err);
+    }
+
+    // Official SAIT Group Branch Registry for accurate fallback & matching
+    const BRANCH_REGISTRY = {
+      'BSST-DXB': { name: 'BSS Tech / BSMC - Dubai', city: 'Dubai', location: 'Engineering & Corrosion Control, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'OPERATIONS'] },
+      'SAIT-DXB': { name: 'Sait FZCO - Dubai', city: 'Dubai', location: 'Industrial Free Zone Facility, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'MAINTENANCE'] },
+      'BSST-AUH': { name: 'BSS Tech - Abu Dhabi', city: 'Abu Dhabi', location: 'Cathodic Protection & Inspection, Abu Dhabi', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'COMMERCIAL', 'FINANCE', 'MANAGEMENT', 'ENGINEERING'] },
+      'SSEC-AUH': { name: 'SSEC - Abu Dhabi', city: 'Abu Dhabi', location: 'Specialized Engineering Services, Abu Dhabi', countryCode: '+971', depts: ['OPERATIONS', 'QHSE', 'PROJECTS', 'PROCUREMENT', 'MANAGEMENT', 'MAINTENANCE'] },
+      'SSMI-AUH': { name: 'SSMI - Abu Dhabi', city: 'Abu Dhabi', location: 'Manufacturing & Industrial Support, Abu Dhabi', countryCode: '+971', depts: ['PRODUCTION', 'QHSE', 'LOGISTICS', 'FINANCE', 'MANAGEMENT', 'QUALITY CONTROL'] },
+      '3E-RAK':   { name: '3E - RAK', city: 'Ras Al Khaimah', location: 'Northern Emirates Engineering Branch, Ras Al Khaimah', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'TECHNICAL SERVICES', 'FINANCE', 'MANAGEMENT', 'WORKSHOP'] }
+    };
+
+    // Extract parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
+    const matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
+
+    const branchCode = rawBranchCode.includes('-') ? rawBranchCode : (matchedBranch ? rawBranchCode : 'SAIT-DXB');
+    const branchName = urlParams.get('branchName') || (matchedBranch ? matchedBranch.name : 'Sait FZCO - Dubai');
+    const branchCity = urlParams.get('city') || (matchedBranch ? matchedBranch.city : 'Dubai');
+    const branchLocation = urlParams.get('location') || (matchedBranch ? matchedBranch.location : (branchCity + ' Facility'));
+    const sessionId = urlParams.get('session') || ('KS-' + branchCode + '-T01');
+    const countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
+    const deptsParam = urlParams.get('depts');
+
+    // Populate UI with exact company branch name, location, and code
+    document.getElementById('branchTitle').innerText = branchName;
+    document.getElementById('branchLocation').innerText = branchLocation + ' • Code: ' + branchCode;
+    document.getElementById('sessionText').innerText = 'TERMINAL: ' + sessionId;
+
+    // Populate branch-specific departments if provided in QR or registry
+    const deptList = deptsParam ? deptsParam.split(',').map(d => d.trim()).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
+    if (deptList && deptList.length > 0) {
+      const deptSelect = document.getElementById('department');
+      deptSelect.innerHTML = '';
+      deptList.forEach((d, idx) => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        if (idx === 0) opt.selected = true;
+        deptSelect.appendChild(opt);
+      });
+    }
+
+    if (countryCodeParam) {
+      const ccSelect = document.getElementById('countryCode');
+      for (let i = 0; i < ccSelect.options.length; i++) {
+        if (ccSelect.options[i].value === countryCodeParam) {
+          ccSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+    window.selectVisitType = function(type) {
+      document.getElementById('visitType').value = type;
+      const walkInBtn = document.getElementById('chipWalkIn');
+      const apptBtn = document.getElementById('chipAppointment');
+      const iconWalkIn = document.getElementById('iconWalkIn');
+      const iconAppt = document.getElementById('iconAppointment');
+      if (type === 'Appointment') {
+        walkInBtn.classList.remove('active');
+        apptBtn.classList.add('active');
+        iconWalkIn.style.display = 'none';
+        iconAppt.style.display = 'inline';
+      } else {
+        walkInBtn.classList.add('active');
+        apptBtn.classList.remove('active');
+        iconWalkIn.style.display = 'inline';
+        iconAppt.style.display = 'none';
+      }
+    };
+
+    window.handlePurposeChange = function() {
+      const purposeVal = document.getElementById('purpose').value;
+      const customGroup = document.getElementById('customPurposeGroup');
+      const customInput = document.getElementById('customPurpose');
+      if (purposeVal === 'Other') {
+        customGroup.style.display = 'block';
+        customInput.required = true;
+      } else {
+        customGroup.style.display = 'none';
+        customInput.required = false;
+      }
+    };
+
+    function formatTimeNow() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+    }
+
+    window.handleRegistrationSubmit = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const alertBox = document.getElementById('alertBox');
+      alertBox.style.display = 'none';
+
+      btn.innerText = 'Synchronizing with Kiosk...';
+      btn.disabled = true;
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const countryCode = document.getElementById('countryCode').value;
+      const rawMobile = document.getElementById('mobileNumber').value.trim();
+      const fullMobile = `${countryCode} ${rawMobile}`.trim();
+      const companyName = document.getElementById('companyName').value.trim();
+      const visitType = document.getElementById('visitType').value || 'Walk-In';
+      const department = document.getElementById('department').value;
+      const selectedPurpose = document.getElementById('purpose').value;
+      const customPurpose = document.getElementById('customPurpose').value.trim();
+      const purpose = (selectedPurpose === 'Other' && customPurpose) ? customPurpose : selectedPurpose;
+      const personToMeet = document.getElementById('personToMeet').value.trim() || 'Reception Desk';
+
+      const yearCode = new Date().getFullYear().toString().slice(-2);
+      const codeParts = branchCode.split('-');
+      const companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
+      const cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
+      const expectedPrefix = `${companyPrefix}-${cityShort}-${yearCode}`;
+
+      // Calculate next sequential pass number (ignoring any legacy random test numbers >= 1000)
+      let maxSeq = 0;
+      try {
+        if (db) {
+          const snapshot = await getDocs(collection(db, "visitors"));
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const p = data.passNumber || "";
+            if (p.toUpperCase().startsWith(expectedPrefix)) {
+              const seqStr = p.slice(-4);
+              const num = parseInt(seqStr, 10);
+              if (!isNaN(num) && num >= 1 && num <= 999 && num > maxSeq) {
+                maxSeq = num;
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Could not query existing pass sequences:", err);
+      }
+
+      const nextSeq = maxSeq + 1;
+      const formattedSeq = String(nextSeq).padStart(4, '0');
+      const passNumber = `${expectedPrefix}${formattedSeq}`;
+      const nowTs = Date.now();
+      const formattedTime = formatTimeNow();
+
+      const visitorPayload = {
+        passNumber: passNumber,
+        branchName: branchName,
+        branchCode: branchCode,
+        fullName: fullName,
+        mobileNumber: fullMobile,
+        companyName: companyName,
+        visitType: visitType,
+        department: department,
+        purpose: purpose,
+        personToMeet: personToMeet,
+        email: email,
+        timestamp: nowTs,
+        checkInFormattedTime: formattedTime,
+        status: "CHECKED_IN",
+        kioskSessionId: sessionId
+      };
+
+      try {
+        if (db) {
+          // Write to central visitors collection (triggers real-time Kiosk display + official pass generation + SMTP email dispatch)
+          await setDoc(doc(db, "visitors", passNumber), visitorPayload);
+          console.log("Visitor record synced to Firestore:", passNumber);
+        }
+      } catch (err) {
+        console.warn("Cloud Firestore write note:", err);
+      }
+
+      // Display check-in confirmation summary without pass number on visitor's browser
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('displayVisitorName').innerText = fullName;
+      document.getElementById('displayCompany').innerText = companyName;
+      document.getElementById('displayVisitType').innerText = visitType;
+      document.getElementById('displayDept').innerText = department;
+      document.getElementById('displayPurpose').innerText = purpose;
+      document.getElementById('displayHost').innerText = personToMeet;
+      document.getElementById('displayTime').innerText = formattedTime;
+      document.getElementById('successCard').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.resetFormForNextVisitor = function() {
+      document.getElementById('checkInForm').reset();
+      window.selectVisitType('Walk-In');
+      window.handlePurposeChange();
+      document.getElementById('formCard').style.display = 'block';
+      document.getElementById('successCard').style.display = 'none';
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = 'Check In & Sync Pass to Kiosk';
+      btn.disabled = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
 </body>
 </html>

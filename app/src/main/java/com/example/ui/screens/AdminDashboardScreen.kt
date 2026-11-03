@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -39,6 +42,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
@@ -1737,7 +1741,6 @@ fun AdminDashboardScreen(
                                     val updated = smtpConfig.copy(firebaseTriggerEnabled = it)
                                     viewModel.updateSmtpConfig(updated)
                                 },
-                                enabled = isFirebaseLoggedIn,
                                 modifier = Modifier.testTag("switch_firebase_email")
                             )
                         }
@@ -1781,7 +1784,6 @@ fun AdminDashboardScreen(
                                         val updated = smtpConfig.copy(enabled = it)
                                         viewModel.updateSmtpConfig(updated)
                                     },
-                                    enabled = isFirebaseLoggedIn,
                                     modifier = Modifier.testTag("switch_smtp_enabled")
                                 )
                             }
@@ -1813,7 +1815,6 @@ fun AdminDashboardScreen(
                                                 smtpEncryption = "STARTTLS"
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Gmail", fontSize = 11.sp) },
                                             shape = RoundedCornerShape(8.dp)
                                         )
@@ -1825,7 +1826,6 @@ fun AdminDashboardScreen(
                                                 smtpEncryption = "STARTTLS"
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Office 365", fontSize = 11.sp) },
                                             shape = RoundedCornerShape(8.dp)
                                         )
@@ -1837,7 +1837,6 @@ fun AdminDashboardScreen(
                                                 smtpEncryption = "STARTTLS"
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Corporate SMTP", fontSize = 11.sp) },
                                             shape = RoundedCornerShape(8.dp)
                                         )
@@ -1854,7 +1853,6 @@ fun AdminDashboardScreen(
                                         OutlinedTextField(
                                             value = smtpHost,
                                             onValueChange = { smtpHost = it },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("SMTP Host", fontSize = 12.sp) },
                                             placeholder = { Text("smtp.gmail.com", fontSize = 12.sp) },
                                             singleLine = true,
@@ -1867,7 +1865,6 @@ fun AdminDashboardScreen(
                                         OutlinedTextField(
                                             value = smtpPort,
                                             onValueChange = { smtpPort = it },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Port", fontSize = 12.sp) },
                                             placeholder = { Text("587", fontSize = 12.sp) },
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1899,7 +1896,6 @@ fun AdminDashboardScreen(
                                                             smtpPort = defaultPort
                                                         }
                                                     },
-                                                    enabled = isFirebaseLoggedIn,
                                                     label = { Text(enc, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                                                     shape = RoundedCornerShape(8.dp),
                                                     colors = FilterChipDefaults.filterChipColors(
@@ -1915,7 +1911,6 @@ fun AdminDashboardScreen(
                                     OutlinedTextField(
                                         value = smtpUsername,
                                         onValueChange = { smtpUsername = it },
-                                        enabled = isFirebaseLoggedIn,
                                         label = { Text("SMTP Username / Auth Email", fontSize = 12.sp) },
                                         placeholder = { Text("kiosk-alerts@saitgroup.com", fontSize = 12.sp) },
                                         singleLine = true,
@@ -1929,7 +1924,6 @@ fun AdminDashboardScreen(
                                     OutlinedTextField(
                                         value = smtpPassword,
                                         onValueChange = { smtpPassword = it },
-                                        enabled = isFirebaseLoggedIn,
                                         label = { Text("SMTP Password / App Password", fontSize = 12.sp) },
                                         placeholder = { Text("••••••••••••", fontSize = 12.sp) },
                                         visualTransformation = if (showSmtpPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -1954,7 +1948,6 @@ fun AdminDashboardScreen(
                                         OutlinedTextField(
                                             value = smtpSenderEmail,
                                             onValueChange = { smtpSenderEmail = it },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Sender Email Address", fontSize = 12.sp) },
                                             placeholder = { Text("no-reply@saitgroup.com", fontSize = 12.sp) },
                                             singleLine = true,
@@ -1967,7 +1960,6 @@ fun AdminDashboardScreen(
                                         OutlinedTextField(
                                             value = smtpSenderName,
                                             onValueChange = { smtpSenderName = it },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Display Name", fontSize = 12.sp) },
                                             placeholder = { Text("SAIT Visitor Pass", fontSize = 12.sp) },
                                             singleLine = true,
@@ -1995,7 +1987,6 @@ fun AdminDashboardScreen(
                                             )
                                             viewModel.updateSmtpConfig(newConfig)
                                         },
-                                        enabled = isFirebaseLoggedIn,
                                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                         shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier
@@ -2027,7 +2018,6 @@ fun AdminDashboardScreen(
                                         OutlinedTextField(
                                             value = testRecipientEmail,
                                             onValueChange = { testRecipientEmail = it },
-                                            enabled = isFirebaseLoggedIn,
                                             label = { Text("Test Recipient Email", fontSize = 12.sp) },
                                             placeholder = { Text("admin@saitgroup.com", fontSize = 12.sp) },
                                             singleLine = true,
@@ -2066,7 +2056,7 @@ fun AdminDashboardScreen(
                                                     }
                                                 }
                                             },
-                                            enabled = isFirebaseLoggedIn && !isTestingSmtp && testRecipientEmail.isNotBlank(),
+                                            enabled = !isTestingSmtp && testRecipientEmail.isNotBlank(),
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier
                                                 .height(52.dp)
@@ -2180,6 +2170,28 @@ fun AdminDashboardScreen(
             val touchlessUrl by viewModel.touchlessQrUrl.collectAsState()
             val githubBaseUrl by viewModel.touchlessGithubUrl.collectAsState()
             var editingGithubUrl by remember(githubBaseUrl) { mutableStateOf(githubBaseUrl) }
+            var showAdminWebPortalPreview by remember { mutableStateOf(false) }
+
+            if (showAdminWebPortalPreview) {
+                com.example.ui.components.MobileWebPortalPreviewDialog(
+                    touchlessUrl = touchlessUrl,
+                    onCopyHtml = {
+                        try {
+                            val html = context.assets.open("mobile_portal.html").bufferedReader().use { it.readText() }
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("index.html", html))
+                            viewModel.showNotificationSnackbar("Updated docs/index.html copied! Paste into your GitHub repo or click 'Push to GitHub'.")
+                        } catch (e: Exception) {
+                            viewModel.showNotificationSnackbar("Could not copy HTML: ${e.message}")
+                        }
+                    },
+                    onOpenExternal = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(touchlessUrl))
+                        context.startActivity(intent)
+                    },
+                    onDismiss = { showAdminWebPortalPreview = false }
+                )
+            }
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -2252,6 +2264,34 @@ fun AdminDashboardScreen(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+                    // Pass Sequence Counter Management
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Sequential Pass Numbering", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                "Passes increment sequentially (e.g., ${activeBranch.shortCode}-260001, 0002). Tap to reset counter.",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        OutlinedButton(
+                            onClick = { viewModel.resetPassSequenceCounter() },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.testTag("btn_reset_pass_sequence")
+                        ) {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Reset to 0001", fontSize = 12.sp)
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
                     // GitHub Pages URL Settings
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
@@ -2299,10 +2339,7 @@ fun AdminDashboardScreen(
                             }
 
                             FilledTonalButton(
-                                onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(touchlessUrl))
-                                    context.startActivity(intent)
-                                },
+                                onClick = { showAdminWebPortalPreview = true },
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Icon(
@@ -2311,7 +2348,7 @@ fun AdminDashboardScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Test in Browser", fontSize = 12.sp)
+                                Text("Preview Form", fontSize = 12.sp)
                             }
                         }
                     }
@@ -2358,23 +2395,39 @@ fun AdminDashboardScreen(
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
-                                text = "🚀 How to Enable GitHub Pages (1 Minute)",
+                                text = "🚀 Important: Syncing Form Changes to GitHub Pages",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "1. The web portal code is stored in the repository folder /docs/index.html.\n" +
-                                        "2. Push your project to your GitHub repository.\n" +
-                                        "3. Open your repo on GitHub -> Click 'Settings' -> 'Pages' (in left menu).\n" +
-                                        "4. Under 'Build and deployment', choose Source: 'Deploy from a branch'.\n" +
-                                        "5. Select Branch: 'main', Folder: '/docs' and click Save.\n" +
-                                        "6. Your registration portal is now live with 100% free hosting and SSL!",
+                                text = "1. The updated web portal code (with Type of Visit & no Pass Number on confirmation) is saved in /docs/index.html and /index.html.\n" +
+                                        "2. Because GitHub Pages (mohamedrihsab.github.io) is hosted externally on GitHub, click 'Push to GitHub' in AI Studio (or tap 'Copy Updated HTML' below and paste into your GitHub repo's index.html) so your live GitHub Pages site updates.\n" +
+                                        "3. Tap 'Preview Form' above at any time to preview the updated form directly inside the app.",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 lineHeight = 17.sp
                             )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    try {
+                                        val html = context.assets.open("mobile_portal.html").bufferedReader().use { it.readText() }
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        clipboard.setPrimaryClip(ClipData.newPlainText("index.html", html))
+                                        viewModel.showNotificationSnackbar("Updated docs/index.html copied to clipboard!")
+                                    } catch (e: Exception) {
+                                        viewModel.showNotificationSnackbar("Could not copy HTML: ${e.message}")
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Copy Updated index.html Code for GitHub", fontSize = 12.sp)
+                            }
                         }
                     }
                 }

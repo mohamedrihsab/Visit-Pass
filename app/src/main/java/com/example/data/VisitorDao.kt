@@ -15,8 +15,41 @@ interface VisitorDao {
     @Query("SELECT * FROM visitors WHERE id = :id")
     suspend fun getVisitorById(id: Long): VisitorEntity?
 
+    @Query("SELECT * FROM visitors ORDER BY timestamp ASC")
+    suspend fun getAllVisitorsOnce(): List<VisitorEntity>
+
     @Query("SELECT * FROM visitors WHERE passNumber = :passNumber LIMIT 1")
     suspend fun getVisitorByPassNumber(passNumber: String): VisitorEntity?
+
+    @Query("""
+        SELECT * FROM visitors 
+        WHERE passNumber = :passNumber 
+           OR (timestamp = :timestamp AND LOWER(TRIM(fullName)) = LOWER(TRIM(:fullName)))
+           OR (ABS(timestamp - :timestamp) < 120000 AND LOWER(TRIM(fullName)) = LOWER(TRIM(:fullName)) AND TRIM(mobileNumber) = TRIM(:mobileNumber))
+        ORDER BY id ASC LIMIT 1
+    """)
+    suspend fun findExistingVisitor(
+        passNumber: String,
+        timestamp: Long,
+        fullName: String,
+        mobileNumber: String
+    ): VisitorEntity?
+
+    @Query("""
+        DELETE FROM visitors 
+        WHERE id NOT IN (
+            SELECT MIN(id) FROM visitors GROUP BY LOWER(TRIM(fullName)), TRIM(mobileNumber), timestamp
+        )
+    """)
+    suspend fun deduplicateByIdentityAndTimestamp()
+
+    @Query("""
+        DELETE FROM visitors 
+        WHERE id NOT IN (
+            SELECT MIN(id) FROM visitors GROUP BY UPPER(TRIM(passNumber))
+        )
+    """)
+    suspend fun deduplicateByPassNumber()
 
     @Query("SELECT * FROM visitors WHERE status = :status ORDER BY timestamp DESC")
     fun getVisitorsByStatus(status: String): Flow<List<VisitorEntity>>

@@ -19,9 +19,9 @@ service cloud.firestore {
     }
 
     // Central visitors collection for real-time multi-device synchronization
-    // across all kiosk tablets and receptionist/admin tablets
+    // across all kiosk tablets, mobile check-ins, and receptionist/admin tablets
     match /visitors/{visitorId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isValidVisitor(request.resource.data);
       allow update: if isAuthenticated() && isValidVisitor(request.resource.data);
       allow delete: if isAuthenticated();
@@ -29,14 +29,20 @@ service cloud.firestore {
 
     // Multi-branch & department configuration + email notification settings
     match /settings/{settingId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isAuthenticated();
     }
 
     // Automated visitor registration email dispatch records
     match /email_notifications/{notificationId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow create: if true;
+    }
+
+    // Firebase Trigger Email extension queue ('mail' collection)
+    match /mail/{mailId} {
+      allow read: if isAuthenticated();
+      allow create: if true;
     }
 
     // Per-user subcollection

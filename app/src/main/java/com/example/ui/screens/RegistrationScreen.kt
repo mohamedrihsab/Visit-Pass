@@ -900,19 +900,15 @@ fun HeroHeader(
                                 contentScale = ContentScale.Fit
                             )
                         } else {
-                            Box(
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.sait_logo),
+                                contentDescription = "SAIT Group Logo",
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.White),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Apartment,
-                                    contentDescription = "Company",
-                                    tint = SaitPrimary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
+                                    .background(Color.White)
+                                    .padding(6.dp),
+                                contentScale = ContentScale.Fit
+                            )
                         }
                     }
 

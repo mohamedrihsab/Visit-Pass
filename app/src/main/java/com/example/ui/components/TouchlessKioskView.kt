@@ -5,6 +5,12 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -30,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.HealthAndSafety
@@ -45,6 +52,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -101,11 +110,33 @@ fun TouchlessKioskView(
     val touchlessSessionId by viewModel.touchlessSessionId.collectAsState()
     var showSafetyDialog by remember { mutableStateOf(false) }
     var showMobileSimulatorDialog by remember { mutableStateOf(false) }
+    var showWebPortalPreview by remember { mutableStateOf(false) }
 
     if (showSafetyDialog) {
         SafetyInfoDialog(
             branch = activeBranch,
             onDismiss = { showSafetyDialog = false }
+        )
+    }
+
+    if (showWebPortalPreview) {
+        MobileWebPortalPreviewDialog(
+            touchlessUrl = touchlessUrl,
+            onCopyHtml = {
+                try {
+                    val html = context.assets.open("mobile_portal.html").bufferedReader().use { it.readText() }
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("index.html", html))
+                    viewModel.showNotificationSnackbar("Updated docs/index.html copied! Paste into your GitHub repo or click 'Push to GitHub'.")
+                } catch (e: Exception) {
+                    viewModel.showNotificationSnackbar("Could not copy HTML: ${e.message}")
+                }
+            },
+            onOpenExternal = {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(touchlessUrl))
+                context.startActivity(intent)
+            },
+            onDismiss = { showWebPortalPreview = false }
         )
     }
 
@@ -181,19 +212,15 @@ fun TouchlessKioskView(
                             contentScale = ContentScale.Fit
                         )
                     } else {
-                        Box(
+                        androidx.compose.foundation.Image(
+                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.sait_logo),
+                            contentDescription = "SAIT Group Logo",
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Apartment,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                                .background(Color.White)
+                                .padding(8.dp),
+                            contentScale = ContentScale.Fit
+                        )
                     }
                 }
 
@@ -324,7 +351,7 @@ fun TouchlessKioskView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Session: $touchlessSessionId",
+                        text = "Terminal Session: $touchlessSessionId",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -357,15 +384,12 @@ fun TouchlessKioskView(
                         )
                     }
                     IconButton(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(touchlessUrl))
-                            context.startActivity(intent)
-                        },
+                        onClick = { showWebPortalPreview = true },
                         modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.OpenInBrowser,
-                            contentDescription = "Test in Browser",
+                            contentDescription = "Preview Web Form",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -565,8 +589,9 @@ fun MobileRegistrationSimulatorDialog(
     var mobileNum by remember { mutableStateOf("501234567") }
     var emailId by remember { mutableStateOf("david.miller@example.com") }
     var companyName by remember { mutableStateOf("PetroTech International") }
+    var visitType by remember { mutableStateOf("Walk-In") }
     var department by remember { mutableStateOf(activeBranch.defaultDepartments.firstOrNull() ?: "PROJECTS") }
-    var purpose by remember { mutableStateOf("Technical Audit & Review") }
+    var purpose by remember { mutableStateOf("Meeting") }
     var personToMeet by remember { mutableStateOf("Eng. Tariq Al-Hashimi") }
     var isSubmitting by remember { mutableStateOf(false) }
 
@@ -643,10 +668,63 @@ fun MobileRegistrationSimulatorDialog(
                     singleLine = true
                 )
 
+                Column {
+                    Text(
+                        text = "Type of Visit *",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        listOf("Walk-In", "Appointment").forEach { type ->
+                            val selected = visitType == type
+                            FilterChip(
+                                selected = selected,
+                                onClick = { visitType = type },
+                                label = {
+                                    Text(
+                                        text = type,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                leadingIcon = if (selected) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = department,
                     onValueChange = { department = it },
-                    label = { Text("Host Department") },
+                    label = { Text("Department to Visit *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = purpose,
+                    onValueChange = { purpose = it },
+                    label = { Text("Purpose of Visit *") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -654,7 +732,7 @@ fun MobileRegistrationSimulatorDialog(
                 OutlinedTextField(
                     value = personToMeet,
                     onValueChange = { personToMeet = it },
-                    label = { Text("Person to Meet") },
+                    label = { Text("Person to Meet (Optional)") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -668,6 +746,7 @@ fun MobileRegistrationSimulatorDialog(
                         fullName = visitorName,
                         mobileNumber = "${activeBranch.countryCode} $mobileNum".trim(),
                         companyName = companyName,
+                        visitType = visitType,
                         department = department,
                         purpose = purpose,
                         personToMeet = personToMeet,
@@ -686,4 +765,92 @@ fun MobileRegistrationSimulatorDialog(
             }
         }
     )
+}
+
+@Composable
+fun MobileWebPortalPreviewDialog(
+    touchlessUrl: String,
+    onCopyHtml: () -> Unit,
+    onOpenExternal: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val queryPart = touchlessUrl.substringAfter("?", "")
+    val localAssetUrl = if (queryPart.isNotBlank()) {
+        "file:///android_asset/mobile_portal.html?$queryPart"
+    } else {
+        "file:///android_asset/mobile_portal.html"
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Touchless Mobile Web Form (docs/index.html)",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Push to GitHub so external phones load this latest version",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        OutlinedButton(
+                            onClick = onCopyHtml,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Copy HTML", fontSize = 11.sp)
+                        }
+                        TextButton(onClick = onDismiss) {
+                            Text("Close", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                AndroidView(
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.allowFileAccess = true
+                            settings.allowContentAccess = true
+                            @Suppress("DEPRECATION")
+                            settings.allowFileAccessFromFileURLs = true
+                            @Suppress("DEPRECATION")
+                            settings.allowUniversalAccessFromFileURLs = true
+                            webViewClient = WebViewClient()
+                            webChromeClient = WebChromeClient()
+                            loadUrl(localAssetUrl)
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
 }

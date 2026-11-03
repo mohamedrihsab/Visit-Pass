@@ -1,63 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Safe zone is centered within 66dp (from 21 to 87 in both axes) -->
-
-    <!-- Base Shield / Hexagonal Emblem Container -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,23 L79,33 C80,48 77,65 54,85 C31,65 28,48 29,33 Z" />
-
-    <!-- Inner Shield Inset Accent Border -->
-    <path
-        android:fillColor="#0F2942"
-        android:pathData="M54,26 L76,35 C77,48 74,63 54,81 C34,63 31,48 32,35 Z" />
-
-    <!-- Pure White Central Shield Plate -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,29 L73,37 C74,47 71,60 54,76 C37,60 34,47 35,37 Z" />
-
-    <!-- Top Cyan Engineering Chevron Accent -->
-    <path
-        android:fillColor="#0284C7"
-        android:pathData="M54,32 L68,38 L65,41 L54,36 L43,41 L40,38 Z" />
-
-    <!-- ==================== SAIT LETTERMARK ==================== -->
-    <!-- 'S' Lettermark -->
-    <path
-        android:fillColor="#0F2942"
-        android:pathData="M44.5,45 C44.5,43.5 43,42.5 41,42.5 C39,42.5 37.5,43.5 37.5,45 C37.5,47.5 44.5,47 44.5,51 C44.5,53.5 42.5,55 39.5,55 C36.5,55 35,53.5 35,51.5 L37.5,51.5 C37.5,52.5 38.5,53.2 39.8,53.2 C41.2,53.2 42.2,52.4 42.2,51.2 C42.2,49 35.2,49.2 35.2,45 C35.2,42.5 37.2,41 40.5,41 C43.8,41 46.5,42.5 46.5,45 Z" />
-
-    <!-- 'A' Lettermark -->
-    <path
-        android:fillColor="#0F2942"
-        android:pathData="M49.5,41.2 L53.5,41.2 L57.5,54.8 L54.8,54.8 L53.9,51.5 L49.1,51.5 L48.2,54.8 L45.5,54.8 Z M51.5,44 L49.8,49.6 L53.2,49.6 Z" />
-
-    <!-- 'I' Lettermark -->
-    <path
-        android:fillColor="#0284C7"
-        android:pathData="M59.2,41.2 L62,41.2 L62,54.8 L59.2,54.8 Z" />
-
-    <!-- 'T' Lettermark -->
-    <path
-        android:fillColor="#0F2942"
-        android:pathData="M63.5,41.2 L72.5,41.2 L72.5,43.5 L69.3,43.5 L69.3,54.8 L66.7,54.8 L66.7,43.5 L63.5,43.5 Z" />
-
-    <!-- Lower "PASS" / "GROUP" Tag Badge Bar -->
-    <path
-        android:fillColor="#0284C7"
-        android:pathData="M43,58 L65,58 C66.1,58 67,58.9 67,60 L67,62 C67,63.1 66.1,64 65,64 L43,64 C41.9,64 41,63.1 41,62 L41,60 C41,58.9 41.9,58 43,58 Z" />
-
-    <!-- Star / Verified Emblem Diamond at Bottom Center -->
-    <path
-        android:fillColor="#10B981"
-        android:pathData="M54,67 L56.5,70.5 L54,74 L51.5,70.5 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M53.5,70 L54.5,71 L55.5,69.5 L56,70 L54.5,72 L53,70.5 Z" />
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="66dp"
+        android:height="66dp"
+        android:drawable="@drawable/sait_launcher_fg"
+        android:gravity="center" />
+</layer-list>

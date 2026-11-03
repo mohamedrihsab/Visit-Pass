@@ -139,11 +139,11 @@ fun QrCodeView(
                             contentScale = ContentScale.Fit
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.QrCode2,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(size * 0.14f)
+                        Image(
+                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.sait_logo),
+                            contentDescription = "SAIT Group Logo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
                         )
                     }
                 }

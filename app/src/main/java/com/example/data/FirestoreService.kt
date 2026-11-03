@@ -117,6 +117,51 @@ class FirestoreService(private val context: Context) {
         }
     }
 
+    suspend fun deleteObsoletePassDocument(obsoletePassOrDocId: String) = withContext(Dispatchers.IO) {
+        if (obsoletePassOrDocId.isBlank()) return@withContext
+        try {
+            db.collection("visitors").document(obsoletePassOrDocId).delete().await()
+            currentUserId?.let { uid ->
+                db.collection("users").document(uid).collection("visitors").document(obsoletePassOrDocId).delete().await()
+            }
+            Log.d(TAG, "Removed obsolete non-sequential Firestore document: $obsoletePassOrDocId")
+        } catch (ignore: Exception) {}
+    }
+
+    suspend fun deduplicateRemoteVisitors() = withContext(Dispatchers.IO) {
+        if (!isAuthenticated) return@withContext
+        try {
+            val docs = db.collection("visitors").get().await()
+            // Group documents by (fullName lowercase, mobileNumber, timestamp)
+            val grouped = docs.documents.groupBy { doc ->
+                val name = (doc.getString("fullName") ?: "").trim().lowercase()
+                val mobile = (doc.getString("mobileNumber") ?: "").trim()
+                val ts = doc.getLong("timestamp") ?: 0L
+                "$name|$mobile|$ts"
+            }
+            for ((_, group) in grouped) {
+                if (group.size > 1) {
+                    // Keep the earliest sequential pass number (1..999) and delete later duplicates or random pass numbers (>= 1000)
+                    val sorted = group.sortedWith(compareBy<com.google.firebase.firestore.DocumentSnapshot> { doc ->
+                        val p = doc.getString("passNumber") ?: doc.id
+                        val seq = p.takeLast(4).toIntOrNull() ?: 9999
+                        if (seq in 1..999) seq else 10000 + seq
+                    })
+                    val duplicatesToDelete = sorted.drop(1)
+                    for (dup in duplicatesToDelete) {
+                        val dupPass = dup.getString("passNumber") ?: dup.id
+                        deleteObsoletePassDocument(dup.id)
+                        if (dupPass != dup.id) {
+                            deleteObsoletePassDocument(dupPass)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Remote deduplication note: ${e.message}")
+        }
+    }
+
     suspend fun clearAllVisitorsFromFirestore(): Result<Unit> = withContext(Dispatchers.IO) {
         val uid = currentUserId ?: return@withContext Result.failure(IllegalStateException("Not authenticated"))
         try {
@@ -291,8 +336,6 @@ class FirestoreService(private val context: Context) {
         onVisitorDeleted: (suspend (String) -> Unit)? = null,
         onVisitorUpsert: suspend (VisitorEntity) -> Unit
     ) {
-        if (!isAuthenticated) return
-
         realtimeListener?.remove()
         realtimeListener = db.collection("visitors")
             .addSnapshotListener { snapshot, error ->

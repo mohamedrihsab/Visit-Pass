@@ -41,6 +41,31 @@ class VisitorRepository(
         return Pair(prefix.uppercase(Locale.US), cityCode.uppercase(Locale.US))
     }
 
+    suspend fun allocateSequentialPassNumber(branch: Branch): String {
+        val now = System.currentTimeMillis()
+        val (prefix, cityCode) = resolvePrefixAndCity(branch)
+        val yy = SimpleDateFormat("yy", Locale.US).format(Date(now))
+        val pattern = "$prefix-$cityCode-$yy%"
+
+        val existing = visitorDao.getRecentPassNumbers(pattern)
+        var maxExistingSeq = 0
+        for (pass in existing) {
+            val seqStr = pass.takeLast(4)
+            val parsed = seqStr.toIntOrNull() ?: 0
+            // Ignore legacy random numbers (>= 1000) so sequence stays clean and sequential
+            if (parsed in 1..999 && parsed > maxExistingSeq) {
+                maxExistingSeq = parsed
+            }
+        }
+
+        val prefsSeq = kioskPrefs?.getNextSequence(prefix, cityCode, yy) ?: (maxExistingSeq + 1)
+        val cleanPrefsSeq = if (prefsSeq >= 1000) (maxExistingSeq + 1) else prefsSeq
+        val nextSeq = maxOf(cleanPrefsSeq, maxExistingSeq + 1)
+        kioskPrefs?.setSequenceCounter(prefix, cityCode, yy, nextSeq)
+        val formattedSeq = String.format(Locale.US, "%04d", nextSeq)
+        return "$prefix-$cityCode-$yy$formattedSeq"
+    }
+
     suspend fun registerVisitor(
         fullName: String,
         mobileNumber: String,
@@ -58,23 +83,7 @@ class VisitorRepository(
         val formattedTime = timeFormat.format(Date(now))
 
         val (prefix, cityCode) = resolvePrefixAndCity(branch)
-        val yy = SimpleDateFormat("yy", Locale.US).format(Date(now))
-        val pattern = "$prefix-$cityCode-$yy%"
-
-        val existing = visitorDao.getRecentPassNumbers(pattern)
-        var maxExistingSeq = 0
-        for (pass in existing) {
-            val seqStr = pass.takeLast(4)
-            val parsed = seqStr.toIntOrNull() ?: 0
-            if (parsed > maxExistingSeq) {
-                maxExistingSeq = parsed
-            }
-        }
-
-        val prefsSeq = kioskPrefs?.getNextSequence(prefix, cityCode, yy) ?: (maxExistingSeq + 1)
-        val nextSeq = maxOf(prefsSeq, maxExistingSeq + 1)
-        val formattedSeq = String.format(Locale.US, "%04d", nextSeq)
-        val passNumber = "$prefix-$cityCode-$yy$formattedSeq"
+        val passNumber = allocateSequentialPassNumber(branch)
 
         val visitor = VisitorEntity(
             passNumber = passNumber,
@@ -122,17 +131,123 @@ class VisitorRepository(
         }
     }
 
-    suspend fun upsertRemoteVisitor(remote: VisitorEntity) {
-        val existing = visitorDao.getVisitorByPassNumber(remote.passNumber)
+    data class RemoteUpsertResult(
+        val visitor: VisitorEntity,
+        val isNewlyInserted: Boolean,
+        val obsoleteRemotePassNumber: String? = null
+    )
+
+    suspend fun cleanupDuplicateVisitors() {
+        try {
+            visitorDao.deduplicateByIdentityAndTimestamp()
+            visitorDao.deduplicateByPassNumber()
+            val allLocal = visitorDao.getAllVisitorsOnce()
+            for (v in allLocal) {
+                val sig = "${v.fullName.trim().lowercase(Locale.US)}|${v.mobileNumber.trim()}|${v.timestamp}"
+                kioskPrefs?.markRemoteVisitorProcessed(v.passNumber, sig)
+            }
+            // Recalibrate sequence counters to actual highest valid sequential pass after deduplication
+            val yy = SimpleDateFormat("yy", Locale.US).format(Date())
+            val branches = kioskPrefs?.getBranches() ?: BranchRegistry.INITIAL_BRANCHES
+            for (branch in branches) {
+                val (prefix, cityCode) = resolvePrefixAndCity(branch)
+                val pattern = "$prefix-$cityCode-$yy%"
+                val existingPasses = visitorDao.getRecentPassNumbers(pattern)
+                var maxSeq = 0
+                for (pass in existingPasses) {
+                    val seq = pass.takeLast(4).toIntOrNull() ?: 0
+                    if (seq in 1..999 && seq > maxSeq) {
+                        maxSeq = seq
+                    }
+                }
+                kioskPrefs?.setSequenceCounter(prefix, cityCode, yy, maxSeq)
+            }
+            if (firestoreService.isAuthenticated) {
+                firestoreService.deduplicateRemoteVisitors()
+            }
+        } catch (ignore: Exception) {}
+    }
+
+    suspend fun upsertRemoteVisitor(remote: VisitorEntity, fallbackBranch: Branch? = null): RemoteUpsertResult {
+        // 1. Check if this visitor already exists in Room by passNumber OR by (fullName + mobileNumber + timestamp)
+        val existing = visitorDao.findExistingVisitor(
+            passNumber = remote.passNumber,
+            timestamp = remote.timestamp,
+            fullName = remote.fullName,
+            mobileNumber = remote.mobileNumber
+        )
+
         if (existing != null) {
-            visitorDao.updateVisitor(
-                remote.copy(
-                    id = existing.id,
-                    isSyncedToGoogleForm = true
-                )
+            // Visitor already exists locally — never generate a new pass number or duplicate row!
+            val obsoletePass = if (!existing.passNumber.equals(remote.passNumber, ignoreCase = true)) {
+                remote.passNumber
+            } else {
+                null
+            }
+            val updated = existing.copy(
+                status = remote.status,
+                checkOutFormattedTime = remote.checkOutFormattedTime ?: existing.checkOutFormattedTime,
+                isSyncedToGoogleForm = true
+            )
+            visitorDao.updateVisitor(updated)
+            return RemoteUpsertResult(
+                visitor = updated,
+                isNewlyInserted = false,
+                obsoleteRemotePassNumber = obsoletePass
+            )
+        }
+
+        // 2. Genuinely new remote visitor: resolve canonical branch
+        val branches = kioskPrefs?.getBranches() ?: BranchRegistry.INITIAL_BRANCHES
+        val resolvedBranch = branches.find {
+            it.shortCode.equals(remote.branchCode, ignoreCase = true) ||
+            it.name.equals(remote.branchName, ignoreCase = true)
+        } ?: fallbackBranch ?: branches.firstOrNull() ?: BranchRegistry.INITIAL_BRANCHES[1]
+
+        val (prefix, cityCode) = resolvePrefixAndCity(resolvedBranch)
+        val yy = SimpleDateFormat("yy", Locale.US).format(Date(remote.timestamp))
+        val expectedPrefix = "$prefix-$cityCode-$yy"
+
+        // Check if remote passNumber has a random/legacy sequence (>= 1000) or mismatched prefix
+        val seqPart = remote.passNumber.takeLast(4).toIntOrNull() ?: 0
+        val isCleanSequential = remote.passNumber.startsWith(expectedPrefix, ignoreCase = true) && seqPart in 1..999
+
+        val finalPassNumber = if (isCleanSequential) {
+            remote.passNumber.uppercase(Locale.US)
+        } else {
+            allocateSequentialPassNumber(resolvedBranch)
+        }
+
+        val obsoletePass = if (!finalPassNumber.equals(remote.passNumber, ignoreCase = true)) {
+            remote.passNumber
+        } else {
+            null
+        }
+
+        val normalizedVisitor = remote.copy(
+            id = 0,
+            passNumber = finalPassNumber,
+            branchName = resolvedBranch.name,
+            branchCode = "$prefix-$cityCode",
+            isSyncedToGoogleForm = true
+        )
+
+        val existingNormalized = visitorDao.getVisitorByPassNumber(finalPassNumber)
+        return if (existingNormalized != null) {
+            val saved = normalizedVisitor.copy(id = existingNormalized.id)
+            visitorDao.updateVisitor(saved)
+            RemoteUpsertResult(
+                visitor = saved,
+                isNewlyInserted = false,
+                obsoleteRemotePassNumber = obsoletePass
             )
         } else {
-            visitorDao.insertVisitor(remote.copy(id = 0, isSyncedToGoogleForm = true))
+            val newId = visitorDao.insertVisitor(normalizedVisitor)
+            RemoteUpsertResult(
+                visitor = normalizedVisitor.copy(id = newId),
+                isNewlyInserted = true,
+                obsoleteRemotePassNumber = obsoletePass
+            )
         }
     }
 

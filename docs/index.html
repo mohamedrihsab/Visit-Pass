@@ -150,7 +150,35 @@
     .phone-row input {
       width: 58%;
     }
-    .safety-box {
+    .visit-type-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .visit-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+    .visit-chip.active {
+      background: #E0F2FE;
+      border-color: var(--primary-accent);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
+    }
+    . safety-box, .safety-box {
       background: #F8FAFC;
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -347,7 +375,25 @@
         </div>
 
         <div class="form-group">
-          <label for="department">Host Department</label>
+          <label for="visitType">Type of Visit <span class="required">*</span></label>
+          <div class="visit-type-row" style="margin-bottom: 8px;">
+            <button type="button" class="visit-chip active" id="chipWalkIn" onclick="selectVisitType('Walk-In')">
+              <span id="iconWalkIn">✓</span>
+              <span>Walk-In</span>
+            </button>
+            <button type="button" class="visit-chip" id="chipAppointment" onclick="selectVisitType('Appointment')">
+              <span id="iconAppointment" style="display:none;">✓</span>
+              <span>Appointment</span>
+            </button>
+          </div>
+          <select id="visitType" onchange="selectVisitType(this.value)" required>
+            <option value="Walk-In" selected>Walk-In</option>
+            <option value="Appointment">Appointment</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department to Visit <span class="required">*</span></label>
           <select id="department">
             <option value="PROJECTS" selected>PROJECTS</option>
             <option value="QHSE">QHSE (Safety & Environment)</option>
@@ -361,22 +407,28 @@
         </div>
 
         <div class="form-group">
-          <label for="purpose">Purpose of Visit</label>
-          <select id="purpose">
-            <option value="Meeting" selected>Meeting / Conference</option>
+          <label for="purpose">Purpose of Visit <span class="required">*</span></label>
+          <select id="purpose" onchange="handlePurposeChange()">
+            <option value="Meeting" selected>Meeting</option>
+            <option value="Inspection">Inspection</option>
+            <option value="Resume Submission">Resume Submission</option>
+            <option value="Interview">Interview</option>
+            <option value="Factory Visit">Factory Visit</option>
+            <option value="Material Delivery">Material Delivery</option>
             <option value="Technical Audit">Technical Audit & Review</option>
-            <option value="Inspection">Inspection & Certification</option>
-            <option value="Material Delivery">Material Delivery / Dispatch</option>
             <option value="Maintenance / Service">Maintenance & Contractor Work</option>
-            <option value="Interview">Job Interview</option>
-            <option value="Facility Tour">Facility / Yard Tour</option>
-            <option value="Other">Other Purpose</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
+        <div class="form-group" id="customPurposeGroup" style="display: none;">
+          <label for="customPurpose">Specify Other Purpose <span class="required">*</span></label>
+          <input type="text" id="customPurpose" placeholder="Describe reason for visit">
+        </div>
+
         <div class="form-group">
-          <label for="personToMeet">Person to Meet / Host Contact</label>
-          <input type="text" id="personToMeet" placeholder="e.g. Eng. Tariq Al-Hashimi">
+          <label for="personToMeet">Person to Meet (Optional)</label>
+          <input type="text" id="personToMeet" placeholder="Host name or employee to see">
         </div>
 
         <div class="safety-box">
@@ -396,22 +448,22 @@
       <div class="badge-icon">✅</div>
       <h2 style="color: var(--success); font-size: 22px; font-weight: 800;">Registration Confirmed!</h2>
       <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-        Your visitor check-in has been synchronized in real-time to the kiosk terminal screen.
+        Your visitor details have been synchronized in real-time to the kiosk terminal screen.
       </p>
 
       <div class="badge-pass">
-        <div class="badge-pass-header">OFFICIAL VISITOR PASS NUMBER</div>
-        <div class="badge-number" id="displayPassNumber">SAIT-DXB-260001</div>
-        <div class="badge-row"><span>Visitor Name:</span> <b id="displayVisitorName">David Miller</b></div>
+        <div class="badge-row" style="border-top: none;"><span>Visitor Name:</span> <b id="displayVisitorName">David Miller</b></div>
         <div class="badge-row"><span>Company:</span> <span id="displayCompany">PetroTech International</span></div>
+        <div class="badge-row"><span>Type of Visit:</span> <b id="displayVisitType">Walk-In</b></div>
         <div class="badge-row"><span>Department:</span> <span id="displayDept">PROJECTS</span></div>
+        <div class="badge-row"><span>Purpose:</span> <span id="displayPurpose">Meeting</span></div>
         <div class="badge-row"><span>Host Person:</span> <span id="displayHost">Reception Desk</span></div>
         <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
 
       <p style="font-size: 13px; color: var(--text-main); line-height: 1.5; margin-bottom: 14px;">
-        Please look at the <b>Kiosk Screen</b> in front of you — your pass badge is now visible! Please proceed to the reception counter to collect your badge.
+        Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and sent to your email!
       </p>
 
       <button type="button" class="btn-submit" onclick="resetFormForNextVisitor()" style="background: var(--text-muted); font-size: 14px; padding: 12px;">
@@ -428,7 +480,7 @@
   <!-- Firebase Web SDK v10 (Modular via ESM) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
@@ -448,18 +500,47 @@
       console.warn("Firebase initialization notice:", err);
     }
 
+    // Official SAIT Group Branch Registry for accurate fallback & matching
+    const BRANCH_REGISTRY = {
+      'BSST-DXB': { name: 'BSS Tech / BSMC - Dubai', city: 'Dubai', location: 'Engineering & Corrosion Control, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'OPERATIONS'] },
+      'SAIT-DXB': { name: 'Sait FZCO - Dubai', city: 'Dubai', location: 'Industrial Free Zone Facility, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'MAINTENANCE'] },
+      'BSST-AUH': { name: 'BSS Tech - Abu Dhabi', city: 'Abu Dhabi', location: 'Cathodic Protection & Inspection, Abu Dhabi', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'COMMERCIAL', 'FINANCE', 'MANAGEMENT', 'ENGINEERING'] },
+      'SSEC-AUH': { name: 'SSEC - Abu Dhabi', city: 'Abu Dhabi', location: 'Specialized Engineering Services, Abu Dhabi', countryCode: '+971', depts: ['OPERATIONS', 'QHSE', 'PROJECTS', 'PROCUREMENT', 'MANAGEMENT', 'MAINTENANCE'] },
+      'SSMI-AUH': { name: 'SSMI - Abu Dhabi', city: 'Abu Dhabi', location: 'Manufacturing & Industrial Support, Abu Dhabi', countryCode: '+971', depts: ['PRODUCTION', 'QHSE', 'LOGISTICS', 'FINANCE', 'MANAGEMENT', 'QUALITY CONTROL'] },
+      '3E-RAK':   { name: '3E - RAK', city: 'Ras Al Khaimah', location: 'Northern Emirates Engineering Branch, Ras Al Khaimah', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'TECHNICAL SERVICES', 'FINANCE', 'MANAGEMENT', 'WORKSHOP'] }
+    };
+
     // Extract parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const branchCode = urlParams.get('branch') || 'SAIT-DXB';
-    const branchName = urlParams.get('branchName') || (branchCode.includes('DXB') ? 'Sait FZCO - Dubai' : 'SAIT Group Branch');
-    const branchCity = urlParams.get('city') || 'Dubai Facility';
-    const sessionId = urlParams.get('session') || ('KS-' + branchCode.slice(-3) + '-' + Math.floor(1000 + Math.random() * 9000));
-    const countryCodeParam = urlParams.get('countryCode');
+    const rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
+    const matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
 
-    // Populate UI
+    const branchCode = rawBranchCode.includes('-') ? rawBranchCode : (matchedBranch ? rawBranchCode : 'SAIT-DXB');
+    const branchName = urlParams.get('branchName') || (matchedBranch ? matchedBranch.name : 'Sait FZCO - Dubai');
+    const branchCity = urlParams.get('city') || (matchedBranch ? matchedBranch.city : 'Dubai');
+    const branchLocation = urlParams.get('location') || (matchedBranch ? matchedBranch.location : (branchCity + ' Facility'));
+    const sessionId = urlParams.get('session') || ('KS-' + branchCode + '-T01');
+    const countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
+    const deptsParam = urlParams.get('depts');
+
+    // Populate UI with exact company branch name, location, and code
     document.getElementById('branchTitle').innerText = branchName;
-    document.getElementById('branchLocation').innerText = branchCity + ' • Code: ' + branchCode;
-    document.getElementById('sessionText').innerText = 'SESSION: ' + sessionId;
+    document.getElementById('branchLocation').innerText = branchLocation + ' • Code: ' + branchCode;
+    document.getElementById('sessionText').innerText = 'TERMINAL: ' + sessionId;
+
+    // Populate branch-specific departments if provided in QR or registry
+    const deptList = deptsParam ? deptsParam.split(',').map(d => d.trim()).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
+    if (deptList && deptList.length > 0) {
+      const deptSelect = document.getElementById('department');
+      deptSelect.innerHTML = '';
+      deptList.forEach((d, idx) => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        if (idx === 0) opt.selected = true;
+        deptSelect.appendChild(opt);
+      });
+    }
 
     if (countryCodeParam) {
       const ccSelect = document.getElementById('countryCode');
@@ -470,6 +551,38 @@
         }
       }
     }
+
+    window.selectVisitType = function(type) {
+      document.getElementById('visitType').value = type;
+      const walkInBtn = document.getElementById('chipWalkIn');
+      const apptBtn = document.getElementById('chipAppointment');
+      const iconWalkIn = document.getElementById('iconWalkIn');
+      const iconAppt = document.getElementById('iconAppointment');
+      if (type === 'Appointment') {
+        walkInBtn.classList.remove('active');
+        apptBtn.classList.add('active');
+        iconWalkIn.style.display = 'none';
+        iconAppt.style.display = 'inline';
+      } else {
+        walkInBtn.classList.add('active');
+        apptBtn.classList.remove('active');
+        iconWalkIn.style.display = 'inline';
+        iconAppt.style.display = 'none';
+      }
+    };
+
+    window.handlePurposeChange = function() {
+      const purposeVal = document.getElementById('purpose').value;
+      const customGroup = document.getElementById('customPurposeGroup');
+      const customInput = document.getElementById('customPurpose');
+      if (purposeVal === 'Other') {
+        customGroup.style.display = 'block';
+        customInput.required = true;
+      } else {
+        customGroup.style.display = 'none';
+        customInput.required = false;
+      }
+    };
 
     function formatTimeNow() {
       const now = new Date();
@@ -495,14 +608,43 @@
       const rawMobile = document.getElementById('mobileNumber').value.trim();
       const fullMobile = `${countryCode} ${rawMobile}`.trim();
       const companyName = document.getElementById('companyName').value.trim();
+      const visitType = document.getElementById('visitType').value || 'Walk-In';
       const department = document.getElementById('department').value;
-      const purpose = document.getElementById('purpose').value;
+      const selectedPurpose = document.getElementById('purpose').value;
+      const customPurpose = document.getElementById('customPurpose').value.trim();
+      const purpose = (selectedPurpose === 'Other' && customPurpose) ? customPurpose : selectedPurpose;
       const personToMeet = document.getElementById('personToMeet').value.trim() || 'Reception Desk';
 
       const yearCode = new Date().getFullYear().toString().slice(-2);
-      const cleanBranchCode = branchCode.split('-').pop() || 'DXB';
-      const randSeq = String(Math.floor(1000 + Math.random() * 9000));
-      const passNumber = `SAIT-${cleanBranchCode}-${yearCode}${randSeq}`;
+      const codeParts = branchCode.split('-');
+      const companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
+      const cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
+      const expectedPrefix = `${companyPrefix}-${cityShort}-${yearCode}`;
+
+      // Calculate next sequential pass number (ignoring any legacy random test numbers >= 1000)
+      let maxSeq = 0;
+      try {
+        if (db) {
+          const snapshot = await getDocs(collection(db, "visitors"));
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const p = data.passNumber || "";
+            if (p.toUpperCase().startsWith(expectedPrefix)) {
+              const seqStr = p.slice(-4);
+              const num = parseInt(seqStr, 10);
+              if (!isNaN(num) && num >= 1 && num <= 999 && num > maxSeq) {
+                maxSeq = num;
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Could not query existing pass sequences:", err);
+      }
+
+      const nextSeq = maxSeq + 1;
+      const formattedSeq = String(nextSeq).padStart(4, '0');
+      const passNumber = `${expectedPrefix}${formattedSeq}`;
       const nowTs = Date.now();
       const formattedTime = formatTimeNow();
 
@@ -513,7 +655,7 @@
         fullName: fullName,
         mobileNumber: fullMobile,
         companyName: companyName,
-        visitType: "Walk-In (Mobile QR)",
+        visitType: visitType,
         department: department,
         purpose: purpose,
         personToMeet: personToMeet,
@@ -526,20 +668,21 @@
 
       try {
         if (db) {
-          // Write to central visitors collection
+          // Write to central visitors collection (triggers real-time Kiosk display + official pass generation + SMTP email dispatch)
           await setDoc(doc(db, "visitors", passNumber), visitorPayload);
           console.log("Visitor record synced to Firestore:", passNumber);
         }
       } catch (err) {
-        console.warn("Cloud Firestore write note (will continue with local badge):", err);
+        console.warn("Cloud Firestore write note:", err);
       }
 
-      // Display official pass badge
+      // Display check-in confirmation summary without pass number on visitor's browser
       document.getElementById('formCard').style.display = 'none';
-      document.getElementById('displayPassNumber').innerText = passNumber;
       document.getElementById('displayVisitorName').innerText = fullName;
       document.getElementById('displayCompany').innerText = companyName;
+      document.getElementById('displayVisitType').innerText = visitType;
       document.getElementById('displayDept').innerText = department;
+      document.getElementById('displayPurpose').innerText = purpose;
       document.getElementById('displayHost').innerText = personToMeet;
       document.getElementById('displayTime').innerText = formattedTime;
       document.getElementById('successCard').style.display = 'block';
@@ -548,6 +691,8 @@
 
     window.resetFormForNextVisitor = function() {
       document.getElementById('checkInForm').reset();
+      window.selectVisitType('Walk-In');
+      window.handlePurposeChange();
       document.getElementById('formCard').style.display = 'block';
       document.getElementById('successCard').style.display = 'none';
       const btn = document.getElementById('submitBtn');

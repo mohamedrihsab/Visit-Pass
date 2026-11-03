@@ -139,10 +139,10 @@ class VisitorViewModel(
     private val _touchlessGithubUrl = MutableStateFlow(kioskPrefs.touchlessGithubPageUrl)
     val touchlessGithubUrl: StateFlow<String> = _touchlessGithubUrl.asStateFlow()
 
-    private fun generateTouchlessSessionId(): String {
-        val rand = (1000..9999).random()
-        val branchCode = _activeBranch.value.shortCode.replace("-", "").takeLast(3)
-        return "KS-$branchCode-$rand"
+    private fun generateTouchlessSessionId(branch: Branch = _activeBranch.value): String {
+        val (prefix, cityCode) = repository.resolvePrefixAndCity(branch)
+        val term = kioskPrefs.kioskTerminalId.ifBlank { "01" }
+        return "KS-$prefix-$cityCode-T$term"
     }
 
     private val _touchlessSessionId = MutableStateFlow(generateTouchlessSessionId())
@@ -155,11 +155,14 @@ class VisitorViewModel(
     ) { baseUrl, branch, session ->
         val cleanUrl = if (baseUrl.isBlank()) KioskPreferences.DEFAULT_GITHUB_PAGES_URL else baseUrl.trim()
         val sep = if (cleanUrl.contains("?")) "&" else "?"
-        "${cleanUrl}${sep}branch=${branch.shortCode}&branchName=${Uri.encode(branch.name)}&session=$session&city=${Uri.encode(branch.city)}&countryCode=${Uri.encode(branch.countryCode)}"
+        val (prefix, cityCode) = repository.resolvePrefixAndCity(branch)
+        val canonicalCode = "$prefix-$cityCode"
+        val deptsParam = Uri.encode(branch.defaultDepartments.joinToString(","))
+        "${cleanUrl}${sep}v=5&branch=${Uri.encode(canonicalCode)}&branchName=${Uri.encode(branch.name)}&session=${Uri.encode(session)}&city=${Uri.encode(branch.city)}&location=${Uri.encode(branch.displayFacilityLocation)}&countryCode=${Uri.encode(branch.countryCode)}&depts=$deptsParam"
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        "${KioskPreferences.DEFAULT_GITHUB_PAGES_URL}?branch=DXB&session=KS-DXB-1000"
+        "${KioskPreferences.DEFAULT_GITHUB_PAGES_URL}?v=5&branch=${_activeBranch.value.shortCode}&branchName=${Uri.encode(_activeBranch.value.name)}&session=${_touchlessSessionId.value}"
     )
 
     // In-App Notification Center
@@ -277,30 +280,72 @@ class VisitorViewModel(
 
     init {
         attachOrganizationSettingsListener()
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.cleanupDuplicateVisitors()
+            withContext(Dispatchers.Main) {
+                startLiveMultiDeviceSync()
+            }
+        }
         Firebase.auth.addAuthStateListener { auth ->
             val user = auth.currentUser
             _currentUser.value = user
             if (user != null) {
-                firestoreService.startRealtimeMultiDeviceSync(
-                    scope = viewModelScope,
-                    onVisitorDeleted = { passNumber ->
-                        repository.deleteRemoteVisitorByPassNumber(passNumber)
-                    },
-                    onVisitorUpsert = { remote ->
-                        repository.upsertRemoteVisitor(remote)
-                        handleIncomingRemoteVisitor(remote)
-                    }
-                )
                 attachOrganizationSettingsListener()
                 // Ensure current/default settings are pushed to Firebase upon authentication
                 syncAllSettingsToFirebase()
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
+                    repository.cleanupDuplicateVisitors()
                     syncAllPending(silent = true)
                 }
-            } else {
-                firestoreService.stopRealtimeSync()
             }
         }
+    }
+
+    private fun buildVisitorSignature(v: VisitorEntity): String {
+        return "${v.fullName.trim().lowercase()}|${v.mobileNumber.trim()}|${v.timestamp}"
+    }
+
+    fun startLiveMultiDeviceSync() {
+        firestoreService.startRealtimeMultiDeviceSync(
+            scope = viewModelScope,
+            onVisitorDeleted = { passNumber ->
+                repository.deleteRemoteVisitorByPassNumber(passNumber)
+            },
+            onVisitorUpsert = { remote ->
+                val visitorSig = buildVisitorSignature(remote)
+                val alreadyProcessed = processedRemotePassNumbers.contains(remote.passNumber) ||
+                        processedRemotePassNumbers.contains(visitorSig) ||
+                        kioskPrefs.isRemoteVisitorProcessed(remote.passNumber) ||
+                        kioskPrefs.isRemoteVisitorProcessed(visitorSig)
+
+                val upsertResult = repository.upsertRemoteVisitor(remote, _activeBranch.value)
+                val savedVisitor = upsertResult.visitor
+
+                processedRemotePassNumbers.add(remote.passNumber)
+                processedRemotePassNumbers.add(savedVisitor.passNumber)
+                processedRemotePassNumbers.add(visitorSig)
+                kioskPrefs.markRemoteVisitorProcessed(
+                    remote.passNumber,
+                    savedVisitor.passNumber,
+                    visitorSig
+                )
+
+                // If a random/temporary remote document was normalized to a clean sequential pass number,
+                // save the clean pass document and delete the obsolete remote document so it never triggers again on app reopen
+                val obsoletePass = upsertResult.obsoleteRemotePassNumber
+                if (obsoletePass != null && firestoreService.isAuthenticated) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        firestoreService.saveVisitorToFirestore(savedVisitor)
+                        firestoreService.deleteObsoletePassDocument(obsoletePass)
+                    }
+                }
+
+                // Only trigger live pass popup and email if this is a brand-new check-in not previously in local DB
+                if (upsertResult.isNewlyInserted && !alreadyProcessed) {
+                    handleIncomingRemoteVisitor(savedVisitor)
+                }
+            }
+        )
     }
 
     private fun requireFirebaseLoginForAdminEdit(): Boolean {
@@ -345,6 +390,7 @@ class VisitorViewModel(
                         it.name.equals(targetName, ignoreCase = true) || it.id == _activeBranch.value.id
                     } ?: remoteBranches.first()
                     _activeBranch.value = updatedActive
+                    _touchlessSessionId.value = generateTouchlessSessionId(updatedActive)
                     kioskPrefs.activeBranchName = updatedActive.name
                     syncFormWithBranch(updatedActive)
                 }
@@ -404,13 +450,9 @@ class VisitorViewModel(
     fun onAuthUserChanged(user: FirebaseUser?) {
         _currentUser.value = user
         if (user != null) {
-            firestoreService.startRealtimeMultiDeviceSync(viewModelScope) { remote ->
-                repository.upsertRemoteVisitor(remote)
-            }
+            startLiveMultiDeviceSync()
             attachOrganizationSettingsListener()
             syncAllSettingsToFirebase()
-        } else {
-            firestoreService.stopRealtimeSync()
         }
     }
 
@@ -461,6 +503,7 @@ class VisitorViewModel(
     fun setBranch(branch: Branch) {
         if (!requireFirebaseLoginForAdminEdit()) return
         _activeBranch.value = branch
+        _touchlessSessionId.value = generateTouchlessSessionId(branch)
         kioskPrefs.activeBranchName = branch.name
         syncFormWithBranch(branch)
         syncAllSettingsToFirebase()
@@ -971,273 +1014,317 @@ class VisitorViewModel(
             )
 
             result.onSuccess { visitor ->
+                val sig = buildVisitorSignature(visitor)
+                processedRemotePassNumbers.add(visitor.passNumber)
+                processedRemotePassNumbers.add(sig)
+                kioskPrefs.markRemoteVisitorProcessed(visitor.passNumber, sig)
                 showPass(visitor)
+                dispatchRegistrationEmails(visitor, branch, triggerIntentFallbackIfNoSmtp = true)
 
-                // 1. Prepare email details
-                val recipients = getEmailsForDepartment(branch, visitor.department)
-                val subject = "[SAIT Visitor Alert - ${branch.shortCode}] New Visitor: ${visitor.fullName} (${visitor.companyName})"
-                val emailBody = buildString {
-                    appendLine("=================================================")
-                    appendLine("SAIT GROUP AUTOMATED VISITOR REGISTRATION ALERT")
-                    appendLine("=================================================")
-                    appendLine("Branch:        ${branch.name} (${branch.city})")
-                    appendLine("Location:      ${branch.displayFacilityLocation}")
-                    appendLine("Department:    ${visitor.department}")
-                    appendLine("Pass Number:   ${visitor.passNumber}")
-                    appendLine("Check-In Time: ${visitor.checkInFormattedTime}")
-                    appendLine()
-                    appendLine("VISITOR DETAILS:")
-                    appendLine("-------------------------------------------------")
-                    appendLine("• Visitor Name:     ${visitor.fullName}")
-                    appendLine("• Company Name:     ${visitor.companyName}")
-                    appendLine("• Mobile Number:    ${visitor.mobileNumber}")
-                    appendLine("• Type of Visit:    ${visitor.visitType}")
-                    appendLine("• Purpose of Visit: ${visitor.purpose}")
-                    appendLine("• Person to Meet:   ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "N/A"}")
-                    appendLine("• Current Status:   ${visitor.status}")
-                    appendLine()
-                    appendLine("Automated notification dispatched by SAIT Group Visitor Pass System.")
-                }
-
-                val emailHtml = """
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-                        <div style="background-color: #0F2942; padding: 16px 20px; border-radius: 8px 8px 0 0; color: #ffffff;">
-                            <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP VISITOR ALERT</h2>
-                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
-                        </div>
-                        <div style="padding: 20px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Pass Number:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 15px;">${visitor.passNumber}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.fullName}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.companyName}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 6px 0; font-weight: bold; color: #0284c7; font-size: 14px;">${visitor.department}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Contact:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.mobileNumber}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visit Type:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.visitType}</td></tr>
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Purpose:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.purpose}</td></tr>
-                                ${if (visitor.personToMeet.isNotBlank()) "<tr><td style=\"padding: 6px 0; color: #64748b; font-size: 13px;\">Person to Meet:</td><td style=\"padding: 6px 0; color: #0f172a; font-size: 13px;\">${visitor.personToMeet}</td></tr>" else ""}
-                                <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
-                            </table>
-                        </div>
-                        <div style="padding: 14px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
-                            Automated notification dispatched by SAIT Group Visitor Pass System.
-                        </div>
-                    </div>
-                """.trimIndent()
-
-                // 2. Dispatch via Outgoing SMTP Mail Server if enabled
                 val currentSmtp = _smtpConfig.value
-                if (currentSmtp.enabled && currentSmtp.host.isNotBlank() && recipients.isNotEmpty()) {
-                    viewModelScope.launch(Dispatchers.IO) {
-                        val smtpRes = SmtpMailer.sendEmail(
-                            config = currentSmtp,
-                            recipients = recipients,
-                            subject = subject,
-                            bodyText = emailBody,
-                            bodyHtml = emailHtml
-                        )
-                        if (smtpRes.isSuccess) {
-                            addNotification(
-                                AppNotification(
-                                    title = "SMTP Email Dispatched",
-                                    message = "Automated email sent to ${recipients.size} recipient(s) (${visitor.department}).",
-                                    type = NotificationType.EMAIL_SENT,
-                                    passNumber = visitor.passNumber
-                                )
-                            )
-                        } else {
-                            val err = smtpRes.exceptionOrNull()?.message ?: "SMTP delivery error"
-                            addNotification(
-                                AppNotification(
-                                    title = "SMTP Error - Falling Back",
-                                    message = "$err. Launching device email app.",
-                                    type = NotificationType.EMAIL_FAILED,
-                                    passNumber = visitor.passNumber
-                                )
-                            )
-                            _eventFlow.emit(
-                                UiEvent.SendEmailNotification(
-                                    recipients = recipients,
-                                    subject = subject,
-                                    body = emailBody
-                                )
-                            )
-                        }
-                    }
-                } else if (recipients.isNotEmpty()) {
-                    _eventFlow.emit(
-                        UiEvent.SendEmailNotification(
-                            recipients = recipients,
-                            subject = subject,
-                            body = emailBody
-                        )
-                    )
-                    addNotification(
-                        AppNotification(
-                            title = "Email Ready to Send",
-                            message = "Sent to ${recipients.size} recipient(s) via device email client. Set SMTP in Admin for automatic background delivery.",
-                            type = NotificationType.EMAIL_SENT,
-                            passNumber = visitor.passNumber
-                        )
-                    )
-                }
-
-                // 3. Queue in Firebase 'mail' collection and log in Firestore
-                if (currentSmtp.firebaseTriggerEnabled && recipients.isNotEmpty()) {
-                    viewModelScope.launch {
-                        firestoreService.recordEmailNotification(
-                            visitorPassNumber = visitor.passNumber,
-                            branchName = branch.name,
-                            department = visitor.department,
-                            recipients = recipients,
-                            subject = subject,
-                            body = emailBody,
-                            htmlBody = emailHtml
-                        )
-                        addNotification(
-                            AppNotification(
-                                title = "Firebase 'mail' Logged",
-                                message = "Logged pass alert in Firestore for ${recipients.size} recipient(s).",
-                                type = NotificationType.EMAIL_SENT,
-                                passNumber = visitor.passNumber
-                            )
-                        )
-                    }
-                }
-
-                // 4. Record Visitor Check-In Notification
-                addNotification(
-                    AppNotification(
-                        title = "Visitor Checked In",
-                        message = "${visitor.fullName} (${visitor.companyName}) registered for ${visitor.department}.",
-                        type = NotificationType.VISITOR_CHECK_IN,
-                        passNumber = visitor.passNumber
-                    )
-                )
-
-                // 5. Automatically send pass and safety information to visitor if email was provided
-                if (visitor.email.isNotBlank()) {
-                    val visitorSubject = "[SAIT Visitor Pass - ${visitor.passNumber}] Official Pass & Safety Briefing - ${branch.name}"
-                    val contactLine = if (branch.safetyContactName.isNotBlank()) "Contact Person: ${branch.safetyContactName}\n" else ""
-                    val visitorBody = buildString {
-                        appendLine("=================================================")
-                        appendLine("SAIT GROUP - OFFICIAL VISITOR PASS & SAFETY BRIEFING")
-                        appendLine("=================================================")
-                        appendLine("Dear ${visitor.fullName},")
-                        appendLine("Welcome to ${branch.name} (${branch.displayFacilityLocation}).")
-                        appendLine()
-                        appendLine("VISITOR PASS DETAILS:")
-                        appendLine("• Pass Number:       ${visitor.passNumber}")
-                        appendLine("• Facility Location: ${branch.displayFacilityLocation}")
-                        appendLine("• Check-In Time:     ${visitor.checkInFormattedTime}")
-                        appendLine("• Department:        ${visitor.department}")
-                        appendLine("• Host:              ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}")
-                        appendLine("• Company:           ${visitor.companyName}")
-                        appendLine()
-                        appendLine("MANDATORY SAFETY GUIDELINES & QHSE POLICY:")
-                        appendLine("-------------------------------------------------")
-                        appendLine(branch.safetyGuidelines)
-                        appendLine()
-                        appendLine("EMERGENCY HELPLINE:")
-                        appendLine("-------------------------------------------------")
-                        if (branch.safetyContactName.isNotBlank()) {
-                            appendLine("Contact Person: ${branch.safetyContactName}")
-                        }
-                        appendLine(branch.safetyHelpline)
-                        appendLine()
-                        appendLine("EMERGENCY & EVACUATION:")
-                        appendLine("In the event of a fire or emergency alarm, proceed calmly via green exit routes to the designated Assembly Point.")
-                        appendLine()
-                        appendLine("Thank you. Please keep this email accessible while on company premises.")
-                        appendLine("SAIT Group Facility & Security Management")
-                    }
-
-                    val visitorHtml = """
-                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-                            <div style="background-color: #0F2942; padding: 18px 24px; border-radius: 8px 8px 0 0; color: #ffffff;">
-                                <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP OFFICIAL VISITOR PASS</h2>
-                                <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
-                            </div>
-                            <div style="padding: 24px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-                                <div style="background-color: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; text-align: center;">
-                                    <span style="font-size: 11px; color: #0369a1; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">OFFICIAL PASS ID</span><br/>
-                                    <span style="font-size: 22px; font-weight: bold; color: #0f172a; font-family: monospace;">${visitor.passNumber}</span>
-                                </div>
-                                <p style="font-size: 14px; color: #334155; margin-top: 0;">Dear <strong>${visitor.fullName}</strong>,</p>
-                                <p style="font-size: 13px; color: #475569;">Your visitor registration is confirmed. Please keep this digital pass accessible during your visit.</p>
-                                <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.fullName}</td></tr>
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.companyName}</td></tr>
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Facility Location:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${branch.displayFacilityLocation}</td></tr>
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 5px 0; font-weight: bold; color: #0284c7; font-size: 13px;">${visitor.department}</td></tr>
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Host:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}</td></tr>
-                                    <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
-                                </table>
-                                <div style="margin-top: 18px; padding: 14px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px;">
-                                    <h4 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px;">SAFETY GUIDELINES & QHSE POLICY</h4>
-                                    <p style="margin: 0; font-size: 12px; color: #78350f; line-height: 1.5; white-space: pre-line;">${branch.safetyGuidelines}</p>
-                                </div>
-                                <div style="margin-top: 12px; padding: 12px 14px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-                                    <h4 style="margin: 0 0 4px 0; color: #166534; font-size: 12px;">EMERGENCY HELPLINE</h4>
-                                    ${if (branch.safetyContactName.isNotBlank()) "<p style=\"margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #166534;\">Contact Person: ${branch.safetyContactName}</p>" else ""}
-                                    <p style="margin: 0; font-size: 13px; font-weight: bold; color: #15803d;">${branch.safetyHelpline}</p>
-                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #166534;">In case of fire alarm, proceed calmly to designated Assembly Point 1.</p>
-                                </div>
-                            </div>
-                            <div style="padding: 12px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
-                                Automated visitor pass issued by SAIT Group Security & Facility Management.
-                            </div>
-                        </div>
-                    """.trimIndent()
-
-                    if (currentSmtp.enabled && currentSmtp.host.isNotBlank()) {
-                        viewModelScope.launch(Dispatchers.IO) {
-                            SmtpMailer.sendEmail(
-                                config = currentSmtp,
-                                recipients = listOf(visitor.email),
-                                subject = visitorSubject,
-                                bodyText = visitorBody,
-                                bodyHtml = visitorHtml
-                            )
-                        }
-                    }
-                    if (currentSmtp.firebaseTriggerEnabled) {
-                        viewModelScope.launch {
-                            firestoreService.recordEmailNotification(
-                                visitorPassNumber = visitor.passNumber,
-                                branchName = branch.name,
-                                department = "VISITOR_PASS_RECEIPT",
-                                recipients = listOf(visitor.email),
-                                subject = visitorSubject,
-                                body = visitorBody,
-                                htmlBody = visitorHtml
-                            )
-                        }
-                    }
-                    addNotification(
-                        AppNotification(
-                            title = "Pass & Safety Info Emailed",
-                            message = "Official pass and safety briefing emailed to visitor (${visitor.email}).",
-                            type = NotificationType.EMAIL_SENT,
-                            passNumber = visitor.passNumber
-                        )
-                    )
-                }
-
+                val recipients = getEmailsForDepartment(branch, visitor.department)
                 val deliveryMethod = when {
-                    currentSmtp.enabled && currentSmtp.host.isNotBlank() -> "Outgoing SMTP"
+                    currentSmtp.enabled && currentSmtp.host.isNotBlank() -> "Outgoing SMTP (${currentSmtp.host})"
                     else -> "Device Email App (Configure SMTP in Admin for automatic delivery)"
                 }
 
                 val statusMsg = if (visitor.email.isNotBlank()) {
-                    "Pass issued! Pass & Safety Info sent to ${visitor.email} and alert dispatched to ${visitor.department}."
+                    "Pass ${visitor.passNumber} issued! Pass & Safety Briefing sent to ${visitor.email} and alert dispatched to ${visitor.department}."
                 } else {
-                    "Pass issued! Alert routed via $deliveryMethod to ${visitor.department} (${recipients.size} recipients)."
+                    "Pass ${visitor.passNumber} issued! Alert routed via $deliveryMethod to ${visitor.department} (${recipients.size} recipients)."
                 }
                 _eventFlow.emit(UiEvent.ShowSnackbar(statusMsg))
             }.onFailure {
                 _eventFlow.emit(UiEvent.ShowSnackbar("Failed to register. Please try again."))
             }
         }
+    }
+
+    private fun dispatchRegistrationEmails(
+        visitor: VisitorEntity,
+        branch: Branch,
+        triggerIntentFallbackIfNoSmtp: Boolean = true
+    ) {
+        val currentSmtp = _smtpConfig.value
+        val recipients = getEmailsForDepartment(branch, visitor.department)
+        val subject = "[SAIT Visitor Alert - ${branch.shortCode}] New Visitor: ${visitor.fullName} (${visitor.companyName})"
+        val emailBody = buildString {
+            appendLine("=================================================")
+            appendLine("SAIT GROUP AUTOMATED VISITOR REGISTRATION ALERT")
+            appendLine("=================================================")
+            appendLine("Branch:        ${branch.name} (${branch.city})")
+            appendLine("Location:      ${branch.displayFacilityLocation}")
+            appendLine("Department:    ${visitor.department}")
+            appendLine("Pass Number:   ${visitor.passNumber}")
+            appendLine("Check-In Time: ${visitor.checkInFormattedTime}")
+            appendLine()
+            appendLine("VISITOR DETAILS:")
+            appendLine("-------------------------------------------------")
+            appendLine("• Visitor Name:     ${visitor.fullName}")
+            appendLine("• Company Name:     ${visitor.companyName}")
+            appendLine("• Mobile Number:    ${visitor.mobileNumber}")
+            if (visitor.email.isNotBlank()) {
+                appendLine("• Visitor Email:    ${visitor.email}")
+            }
+            appendLine("• Type of Visit:    ${visitor.visitType}")
+            appendLine("• Purpose of Visit: ${visitor.purpose}")
+            appendLine("• Person to Meet:   ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "N/A"}")
+            appendLine("• Current Status:   ${visitor.status}")
+            appendLine()
+            appendLine("Automated notification dispatched by SAIT Group Visitor Pass System.")
+        }
+
+        val emailHtml = """
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                <div style="background-color: #0F2942; padding: 16px 20px; border-radius: 8px 8px 0 0; color: #ffffff;">
+                    <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP VISITOR ALERT</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
+                </div>
+                <div style="padding: 20px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Pass Number:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 15px;">${visitor.passNumber}</td></tr>
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.fullName}</td></tr>
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.companyName}</td></tr>
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 6px 0; font-weight: bold; color: #0284c7; font-size: 14px;">${visitor.department}</td></tr>
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Contact:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.mobileNumber}</td></tr>
+                        ${if (visitor.email.isNotBlank()) "<tr><td style=\"padding: 6px 0; color: #64748b; font-size: 13px;\">Email:</td><td style=\"padding: 6px 0; color: #0f172a; font-size: 13px;\">${visitor.email}</td></tr>" else ""}
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visit Type:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.visitType}</td></tr>
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Purpose:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.purpose}</td></tr>
+                        ${if (visitor.personToMeet.isNotBlank()) "<tr><td style=\"padding: 6px 0; color: #64748b; font-size: 13px;\">Person to Meet:</td><td style=\"padding: 6px 0; color: #0f172a; font-size: 13px;\">${visitor.personToMeet}</td></tr>" else ""}
+                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
+                    </table>
+                </div>
+                <div style="padding: 14px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
+                    Automated notification dispatched by SAIT Group Visitor Pass System.
+                </div>
+            </div>
+        """.trimIndent()
+
+        // 1. Automatically send Official Pass & Safety Briefing to visitor's email
+        val cleanVisitorEmail = visitor.email.trim()
+        if (cleanVisitorEmail.isNotBlank() && cleanVisitorEmail.contains("@")) {
+            val visitorSubject = "[SAIT Visitor Pass - ${visitor.passNumber}] Official Pass & Safety Briefing - ${branch.name}"
+            val visitorBody = buildString {
+                appendLine("=================================================")
+                appendLine("SAIT GROUP - OFFICIAL VISITOR PASS & SAFETY BRIEFING")
+                appendLine("=================================================")
+                appendLine("Dear ${visitor.fullName},")
+                appendLine("Welcome to ${branch.name} (${branch.displayFacilityLocation}).")
+                appendLine()
+                appendLine("VISITOR PASS DETAILS:")
+                appendLine("• Pass Number:       ${visitor.passNumber}")
+                appendLine("• Facility Location: ${branch.displayFacilityLocation}")
+                appendLine("• Check-In Time:     ${visitor.checkInFormattedTime}")
+                appendLine("• Department:        ${visitor.department}")
+                appendLine("• Host:              ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}")
+                appendLine("• Company:           ${visitor.companyName}")
+                appendLine()
+                appendLine("MANDATORY SAFETY GUIDELINES & QHSE POLICY:")
+                appendLine("-------------------------------------------------")
+                appendLine(branch.safetyGuidelines)
+                appendLine()
+                appendLine("EMERGENCY HELPLINE:")
+                appendLine("-------------------------------------------------")
+                if (branch.safetyContactName.isNotBlank()) {
+                    appendLine("Contact Person: ${branch.safetyContactName}")
+                }
+                appendLine(branch.safetyHelpline)
+                appendLine()
+                appendLine("EMERGENCY & EVACUATION:")
+                appendLine("In the event of a fire or emergency alarm, proceed calmly via green exit routes to the designated Assembly Point.")
+                appendLine()
+                appendLine("Thank you. Please keep this email accessible while on company premises.")
+                appendLine("SAIT Group Facility & Security Management")
+            }
+
+            val visitorHtml = """
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                    <div style="background-color: #0F2942; padding: 18px 24px; border-radius: 8px 8px 0 0; color: #ffffff;">
+                        <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP OFFICIAL VISITOR PASS</h2>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
+                    </div>
+                    <div style="padding: 24px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                        <div style="background-color: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; text-align: center;">
+                            <span style="font-size: 11px; color: #0369a1; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">OFFICIAL PASS ID</span><br/>
+                            <span style="font-size: 22px; font-weight: bold; color: #0f172a; font-family: monospace;">${visitor.passNumber}</span>
+                        </div>
+                        <p style="font-size: 14px; color: #334155; margin-top: 0;">Dear <strong>${visitor.fullName}</strong>,</p>
+                        <p style="font-size: 13px; color: #475569;">Your visitor registration is confirmed. Please keep this digital pass accessible during your visit.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.fullName}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.companyName}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Facility Location:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${branch.displayFacilityLocation}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 5px 0; font-weight: bold; color: #0284c7; font-size: 13px;">${visitor.department}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Host:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
+                        </table>
+                        <div style="margin-top: 18px; padding: 14px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px;">
+                            <h4 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px;">SAFETY GUIDELINES & QHSE POLICY</h4>
+                            <p style="margin: 0; font-size: 12px; color: #78350f; line-height: 1.5; white-space: pre-line;">${branch.safetyGuidelines}</p>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px 14px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                            <h4 style="margin: 0 0 4px 0; color: #166534; font-size: 12px;">EMERGENCY HELPLINE</h4>
+                            ${if (branch.safetyContactName.isNotBlank()) "<p style=\"margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #166534;\">Contact Person: ${branch.safetyContactName}</p>" else ""}
+                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #15803d;">${branch.safetyHelpline}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #166534;">In case of fire alarm, proceed calmly to designated Assembly Point 1.</p>
+                        </div>
+                    </div>
+                    <div style="padding: 12px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
+                        Automated visitor pass issued by SAIT Group Security & Facility Management.
+                    </div>
+                </div>
+            """.trimIndent()
+
+            if (currentSmtp.enabled && currentSmtp.host.isNotBlank()) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val visitorSmtpRes = SmtpMailer.sendEmail(
+                        config = currentSmtp,
+                        recipients = listOf(cleanVisitorEmail),
+                        subject = visitorSubject,
+                        bodyText = visitorBody,
+                        bodyHtml = visitorHtml
+                    )
+                    if (visitorSmtpRes.isSuccess) {
+                        addNotification(
+                            AppNotification(
+                                title = "Pass & Safety Briefing Sent",
+                                message = "Official pass ${visitor.passNumber} & safety briefing emailed via SMTP to $cleanVisitorEmail.",
+                                type = NotificationType.EMAIL_SENT,
+                                passNumber = visitor.passNumber
+                            )
+                        )
+                    } else {
+                        val err = visitorSmtpRes.exceptionOrNull()?.message ?: "SMTP connection error"
+                        addNotification(
+                            AppNotification(
+                                title = "Visitor Pass SMTP Error",
+                                message = "Failed to email pass to $cleanVisitorEmail ($err). Opening email app fallback.",
+                                type = NotificationType.EMAIL_FAILED,
+                                passNumber = visitor.passNumber
+                            )
+                        )
+                        if (triggerIntentFallbackIfNoSmtp) {
+                            _eventFlow.emit(
+                                UiEvent.SendEmailNotification(
+                                    recipients = listOf(cleanVisitorEmail),
+                                    subject = visitorSubject,
+                                    body = visitorBody
+                                )
+                            )
+                        }
+                    }
+                }
+            } else if (triggerIntentFallbackIfNoSmtp) {
+                viewModelScope.launch {
+                    _eventFlow.emit(
+                        UiEvent.SendEmailNotification(
+                            recipients = listOf(cleanVisitorEmail),
+                            subject = visitorSubject,
+                            body = visitorBody
+                        )
+                    )
+                }
+                addNotification(
+                    AppNotification(
+                        title = "Pass & Briefing Ready to Send",
+                        message = "Prepared official pass & safety briefing for $cleanVisitorEmail. Configure SMTP in Admin for automatic background delivery.",
+                        type = NotificationType.EMAIL_SENT,
+                        passNumber = visitor.passNumber
+                    )
+                )
+            }
+
+            if (currentSmtp.firebaseTriggerEnabled) {
+                viewModelScope.launch {
+                    firestoreService.recordEmailNotification(
+                        visitorPassNumber = visitor.passNumber,
+                        branchName = branch.name,
+                        department = "VISITOR_PASS_RECEIPT",
+                        recipients = listOf(cleanVisitorEmail),
+                        subject = visitorSubject,
+                        body = visitorBody,
+                        htmlBody = visitorHtml
+                    )
+                }
+            }
+        }
+
+        // 2. Dispatch Department Alert via Outgoing SMTP Mail Server if enabled
+        if (currentSmtp.enabled && currentSmtp.host.isNotBlank() && recipients.isNotEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val smtpRes = SmtpMailer.sendEmail(
+                    config = currentSmtp,
+                    recipients = recipients,
+                    subject = subject,
+                    bodyText = emailBody,
+                    bodyHtml = emailHtml
+                )
+                if (smtpRes.isSuccess) {
+                    addNotification(
+                        AppNotification(
+                            title = "Department SMTP Alert Sent",
+                            message = "Automated alert sent to ${recipients.size} recipient(s) (${visitor.department}).",
+                            type = NotificationType.EMAIL_SENT,
+                            passNumber = visitor.passNumber
+                        )
+                    )
+                } else {
+                    val err = smtpRes.exceptionOrNull()?.message ?: "SMTP delivery error"
+                    addNotification(
+                        AppNotification(
+                            title = "Department SMTP Error",
+                            message = "$err",
+                            type = NotificationType.EMAIL_FAILED,
+                            passNumber = visitor.passNumber
+                        )
+                    )
+                    if (triggerIntentFallbackIfNoSmtp && cleanVisitorEmail.isBlank()) {
+                        _eventFlow.emit(
+                            UiEvent.SendEmailNotification(
+                                recipients = recipients,
+                                subject = subject,
+                                body = emailBody
+                            )
+                        )
+                    }
+                }
+            }
+        } else if (recipients.isNotEmpty() && triggerIntentFallbackIfNoSmtp && cleanVisitorEmail.isBlank()) {
+            viewModelScope.launch {
+                _eventFlow.emit(
+                    UiEvent.SendEmailNotification(
+                        recipients = recipients,
+                        subject = subject,
+                        body = emailBody
+                    )
+                )
+            }
+        }
+
+        // 3. Queue Department Alert in Firebase 'mail' collection
+        if (currentSmtp.firebaseTriggerEnabled && recipients.isNotEmpty()) {
+            viewModelScope.launch {
+                firestoreService.recordEmailNotification(
+                    visitorPassNumber = visitor.passNumber,
+                    branchName = branch.name,
+                    department = visitor.department,
+                    recipients = recipients,
+                    subject = subject,
+                    body = emailBody,
+                    htmlBody = emailHtml
+                )
+            }
+        }
+
+        // 4. Record Visitor Check-In Notification
+        addNotification(
+            AppNotification(
+                title = "Visitor Checked In",
+                message = "${visitor.fullName} (${visitor.companyName}) registered for ${visitor.department}. Pass: ${visitor.passNumber}",
+                type = NotificationType.VISITOR_CHECK_IN,
+                passNumber = visitor.passNumber
+            )
+        )
     }
 
     fun showPass(visitor: VisitorEntity) {
@@ -1313,19 +1400,35 @@ class VisitorViewModel(
         setThemeMode(nextMode)
     }
 
-    // SMTP Configuration Management
+    // SMTP Configuration Management - Saves locally immediately and syncs to Firebase if signed in
     fun updateSmtpConfig(config: SmtpConfig) {
-        if (!requireFirebaseLoginForAdminEdit()) return
         _smtpConfig.value = config
         kioskPrefs.saveSmtpConfig(config)
-        syncAllSettingsToFirebase()
+        if (_currentUser.value != null) {
+            syncAllSettingsToFirebase()
+        }
         viewModelScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar("Outgoing mail server settings updated and synced to Firebase."))
+            val status = if (config.enabled && config.host.isNotBlank()) {
+                "SMTP active (${config.host}:${config.port}) — automatic pass & briefing email enabled!"
+            } else {
+                "Outgoing mail server settings saved."
+            }
+            _eventFlow.emit(UiEvent.ShowSnackbar(status))
         }
     }
 
     suspend fun testSmtpConnection(targetRecipient: String): Result<String> {
         return SmtpMailer.testConnection(_smtpConfig.value, targetRecipient)
+    }
+
+    fun resetPassSequenceCounter() {
+        val branch = _activeBranch.value
+        val (prefix, city) = repository.resolvePrefixAndCity(branch)
+        val yy = java.text.SimpleDateFormat("yy", java.util.Locale.US).format(java.util.Date())
+        kioskPrefs.resetPassSequence(prefix, city, yy, 1)
+        viewModelScope.launch {
+            _eventFlow.emit(UiEvent.ShowSnackbar("Pass sequence counter reset for $prefix-$city-$yy (starts from 0001)."))
+        }
     }
 
     // Notification Center Management
@@ -1409,29 +1512,44 @@ class VisitorViewModel(
         }
     }
 
+    private val processedRemotePassNumbers = mutableSetOf<String>()
+
     private fun handleIncomingRemoteVisitor(remote: VisitorEntity) {
         val branch = _activeBranch.value
-        val isForCurrentBranch = remote.branchName.equals(branch.name, ignoreCase = true) ||
-                (remote.branchCode.isNotBlank() && remote.branchCode.equals(branch.shortCode, ignoreCase = true))
+        val (prefix, city) = repository.resolvePrefixAndCity(branch)
+        val canonicalCode = "$prefix-$city"
 
-        val isFresh = (System.currentTimeMillis() - remote.timestamp) < 120_000L
+        val isForCurrentBranch = remote.branchName.equals(branch.name, ignoreCase = true) ||
+                (remote.branchCode.isNotBlank() && (
+                    remote.branchCode.equals(branch.shortCode, ignoreCase = true) ||
+                    remote.branchCode.equals(canonicalCode, ignoreCase = true) ||
+                    remote.branchCode.contains(branch.shortCode, ignoreCase = true) ||
+                    branch.shortCode.contains(remote.branchCode, ignoreCase = true)
+                )) || remote.branchCode.isBlank()
+
+        val timeDiff = Math.abs(System.currentTimeMillis() - remote.timestamp)
+        val isFresh = timeDiff < 180_000L // 3 minutes window for live check-ins
 
         if (isFresh && isForCurrentBranch && remote.status == "CHECKED_IN") {
-            if (_userRole.value == UserRole.VISITOR_KIOSK) {
-                viewModelScope.launch(Dispatchers.Main) {
+            // Keep local sequence counter synchronized with valid sequential pass numbers
+            val seqNum = remote.passNumber.takeLast(4).toIntOrNull() ?: 0
+            if (seqNum in 1..999) {
+                val yy = java.text.SimpleDateFormat("yy", java.util.Locale.US).format(java.util.Date())
+                kioskPrefs.setSequenceCounter(prefix, city, yy, seqNum)
+            }
+
+            viewModelScope.launch(Dispatchers.Main) {
+                // Instantly pop up the official visitor pass on screen for Kiosk or Touchless mode
+                if (_userRole.value == UserRole.VISITOR_KIOSK || _isTouchlessKioskMode.value) {
                     showPass(remote)
-                    refreshTouchlessSession()
-                    _eventFlow.emit(UiEvent.ShowSnackbar("✨ Touchless Check-in Verified: Welcome, ${remote.fullName}!"))
+                    _eventFlow.emit(UiEvent.ShowSnackbar("✨ Touchless Check-in Verified: Welcome, ${remote.fullName}! (Pass: ${remote.passNumber})"))
+                } else {
+                    _eventFlow.emit(UiEvent.ShowSnackbar("🔔 Mobile Check-In: ${remote.fullName} (${remote.companyName}) registered (Pass: ${remote.passNumber})."))
                 }
             }
-            addNotification(
-                AppNotification(
-                    title = "Touchless Mobile Check-In",
-                    message = "${remote.fullName} (${remote.companyName}) checked in from smartphone via QR code.",
-                    type = NotificationType.VISITOR_CHECK_IN,
-                    passNumber = remote.passNumber
-                )
-            )
+
+            // Automatically email official Visitor Pass & Mandatory Safety Briefing to the visitor and notify department
+            dispatchRegistrationEmails(remote, branch, triggerIntentFallbackIfNoSmtp = true)
         }
     }
 
@@ -1439,6 +1557,7 @@ class VisitorViewModel(
         fullName: String,
         mobileNumber: String,
         companyName: String,
+        visitType: String = "Walk-In",
         department: String,
         purpose: String,
         personToMeet: String,
@@ -1450,7 +1569,7 @@ class VisitorViewModel(
                 fullName = fullName,
                 mobileNumber = mobileNumber,
                 companyName = companyName,
-                visitType = "Walk-In (Mobile QR)",
+                visitType = visitType,
                 department = department,
                 purpose = purpose,
                 customPurpose = "",
@@ -1460,17 +1579,14 @@ class VisitorViewModel(
             )
 
             result.onSuccess { visitor ->
+                val sig = buildVisitorSignature(visitor)
+                processedRemotePassNumbers.add(visitor.passNumber)
+                processedRemotePassNumbers.add(sig)
+                kioskPrefs.markRemoteVisitorProcessed(visitor.passNumber, sig)
                 showPass(visitor)
                 refreshTouchlessSession()
+                dispatchRegistrationEmails(visitor, branch, triggerIntentFallbackIfNoSmtp = true)
                 _eventFlow.emit(UiEvent.ShowSnackbar("✨ Touchless Check-in Verified: Welcome, ${visitor.fullName}!"))
-                addNotification(
-                    AppNotification(
-                        title = "Touchless Mobile Check-In",
-                        message = "${visitor.fullName} (${visitor.companyName}) registered via Mobile QR code.",
-                        type = NotificationType.VISITOR_CHECK_IN,
-                        passNumber = visitor.passNumber
-                    )
-                )
             }.onFailure {
                 _eventFlow.emit(UiEvent.ShowSnackbar("Failed to register mobile visitor."))
             }
@@ -1491,13 +1607,13 @@ class VisitorViewModel(
     }
 
     fun clearAllRecords() {
-        if (!requireFirebaseLoginForAdminEdit()) return
         viewModelScope.launch {
             val synced = repository.clearAllVisitors()
+            resetPassSequenceCounter()
             val msg = if (synced) {
-                "All visitor records cleared from local database and Firebase."
+                "All visitor records cleared and pass sequence reset to 0001."
             } else {
-                "All local visitor records cleared."
+                "Local visitor records cleared and pass sequence reset to 0001."
             }
             _eventFlow.emit(UiEvent.ShowSnackbar(msg))
         }

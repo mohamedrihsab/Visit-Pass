@@ -141,9 +141,25 @@ class KioskPreferences(context: Context) {
         val cleanCity = city.trim().uppercase()
         val key = "seq_${cleanPrefix}_${cleanCity}_$year"
         val current = prefs.getInt(key, 0)
-        val next = current + 1
+        // If poisoned by legacy random 4-digit numbers (>= 1000), reset cleanly
+        val base = if (current >= 1000) 0 else current
+        val next = base + 1
         prefs.edit().putInt(key, next).apply()
         return next
+    }
+
+    fun resetPassSequence(prefix: String, city: String, year: String, startFrom: Int = 1) {
+        val cleanPrefix = prefix.trim().uppercase()
+        val cleanCity = city.trim().uppercase()
+        val key = "seq_${cleanPrefix}_${cleanCity}_$year"
+        prefs.edit().putInt(key, (startFrom - 1).coerceAtLeast(0)).apply()
+    }
+
+    fun setSequenceCounter(prefix: String, city: String, year: String, currentSeq: Int) {
+        val cleanPrefix = prefix.trim().uppercase()
+        val cleanCity = city.trim().uppercase()
+        val key = "seq_${cleanPrefix}_${cleanCity}_$year"
+        prefs.edit().putInt(key, currentSeq).apply()
     }
 
     companion object {
@@ -166,9 +182,30 @@ class KioskPreferences(context: Context) {
         const val DEFAULT_RECEPTIONIST_PIN = "0000"
         private const val KEY_TOUCHLESS_GITHUB_URL = "key_touchless_github_url"
         private const val KEY_TOUCHLESS_MODE = "key_touchless_mode"
+        private const val KEY_KIOSK_TERMINAL_ID = "key_kiosk_terminal_id"
+        private const val KEY_PROCESSED_REMOTE_KEYS = "key_processed_remote_keys"
 
         // Default GitHub Pages URL for the live visitor registration portal
         const val DEFAULT_GITHUB_PAGES_URL = "https://mohamedrihsab.github.io/sait-visitor/"
+    }
+
+    fun isRemoteVisitorProcessed(key: String): Boolean {
+        val cleanKey = key.trim().uppercase()
+        if (cleanKey.isBlank()) return false
+        val set = prefs.getStringSet(KEY_PROCESSED_REMOTE_KEYS, emptySet()) ?: emptySet()
+        return set.contains(cleanKey)
+    }
+
+    fun markRemoteVisitorProcessed(vararg keys: String) {
+        val existing = prefs.getStringSet(KEY_PROCESSED_REMOTE_KEYS, emptySet()) ?: emptySet()
+        val updated = existing.toMutableSet()
+        keys.forEach { k ->
+            val clean = k.trim().uppercase()
+            if (clean.isNotBlank()) updated.add(clean)
+        }
+        // Cap size at 500 entries to stay lightweight
+        val capped = if (updated.size > 500) updated.toList().takeLast(500).toSet() else updated
+        prefs.edit().putStringSet(KEY_PROCESSED_REMOTE_KEYS, capped).apply()
     }
 
     var touchlessGithubPageUrl: String
@@ -181,4 +218,8 @@ class KioskPreferences(context: Context) {
     var touchlessKioskMode: Boolean
         get() = prefs.getBoolean(KEY_TOUCHLESS_MODE, false)
         set(value) = prefs.edit().putBoolean(KEY_TOUCHLESS_MODE, value).apply()
+
+    var kioskTerminalId: String
+        get() = prefs.getString(KEY_KIOSK_TERMINAL_ID, "01") ?: "01"
+        set(value) = prefs.edit().putString(KEY_KIOSK_TERMINAL_ID, value.trim()).apply()
 }
