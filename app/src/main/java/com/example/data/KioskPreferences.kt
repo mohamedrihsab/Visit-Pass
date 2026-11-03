@@ -186,7 +186,7 @@ class KioskPreferences(context: Context) {
         private const val KEY_PROCESSED_REMOTE_KEYS = "key_processed_remote_keys"
 
         // Default GitHub Pages URL for the live visitor registration portal
-        const val DEFAULT_GITHUB_PAGES_URL = "https://mohamedrihsab.github.io/sait-visitor/"
+        const val DEFAULT_GITHUB_PAGES_URL = "https://mohamedrihsab.github.io/Visit-Pass/"
     }
 
     fun isRemoteVisitorProcessed(key: String): Boolean {
@@ -211,7 +211,7 @@ class KioskPreferences(context: Context) {
     var touchlessGithubPageUrl: String
         get() {
             val url = prefs.getString(KEY_TOUCHLESS_GITHUB_URL, DEFAULT_GITHUB_PAGES_URL) ?: DEFAULT_GITHUB_PAGES_URL
-            return if (url.isBlank()) DEFAULT_GITHUB_PAGES_URL else url
+            return if (url.isBlank() || url.contains("sait-visitor")) DEFAULT_GITHUB_PAGES_URL else url
         }
         set(value) = prefs.edit().putString(KEY_TOUCHLESS_GITHUB_URL, value.trim()).apply()
 

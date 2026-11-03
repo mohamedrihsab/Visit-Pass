@@ -395,6 +395,56 @@ fun TouchlessKioskView(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { showWebPortalPreview = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .testTag("btn_preview_updated_portal"),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.OpenInBrowser,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Preview Updated Form", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                val html = context.assets.open("mobile_portal.html").bufferedReader().use { it.readText() }
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("index.html", html))
+                                viewModel.showNotificationSnackbar("Updated index.html copied! Paste into your GitHub 'Visit-Pass' repo to update mohamedrihsab.github.io/Visit-Pass/")
+                            } catch (e: Exception) {
+                                viewModel.showNotificationSnackbar("Could not copy HTML: ${e.message}")
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .testTag("btn_copy_updated_html"),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Copy index.html", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
         }
 
