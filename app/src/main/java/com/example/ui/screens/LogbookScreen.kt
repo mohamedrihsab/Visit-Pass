@@ -151,9 +151,9 @@ fun LogbookScreen(
     var selectedVisitType by remember { mutableStateOf("ALL") }
     var isAnalyticsExpanded by remember { mutableStateOf(true) }
 
-    val startOfTodayMillis = remember { getStartOfTodayMillis() }
-    val sevenDaysAgoMillis = remember { System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000 }
-    val thirtyDaysAgoMillis = remember { System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000 }
+    val startOfTodayMillis = remember(allVisitors.size) { getStartOfTodayMillis() }
+    val sevenDaysAgoMillis = remember(allVisitors.size) { System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000 }
+    val thirtyDaysAgoMillis = remember(allVisitors.size) { System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000 }
 
     // Visitors strictly scoped to the selected active branch (always used for Receptionist stats & list)
     val activeBranchAllVisitors = remember(allVisitors, activeBranch) {
@@ -232,7 +232,6 @@ fun LogbookScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(contentPadding),
         contentAlignment = Alignment.TopCenter
     ) {

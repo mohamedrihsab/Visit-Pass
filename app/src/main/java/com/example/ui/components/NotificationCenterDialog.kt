@@ -49,11 +49,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.AppNotification
 import com.example.data.NotificationType
+import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.NotificationAlertColor
 import com.example.ui.theme.NotificationEmailColor
 import com.example.ui.theme.NotificationSyncColor
 import com.example.ui.theme.NotificationVisitorColor
 import com.example.ui.theme.StatusError
+import com.example.ui.theme.liquidGlass
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,14 +71,18 @@ fun NotificationCenterDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
                 .heightIn(max = 640.dp)
-                .testTag("notification_center_dialog"),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
+                .liquidGlass(
+                    shape = RoundedCornerShape(28.dp),
+                    cornerRadius = 28.dp,
+                    elevated = true,
+                    strokeWidth = 1.5.dp,
+                    shadowElevation = 20.dp
+                )
+                .testTag("notification_center_dialog")
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 // Header Row
@@ -249,16 +255,10 @@ private fun NotificationItemCard(notification: AppNotification) {
 
     val timeFormatted = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(notification.timestamp))
 
-    Card(
+    LiquidGlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (notification.isRead) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
+        cornerRadius = 16.dp,
+        elevated = !notification.isRead
     ) {
         Row(
             modifier = Modifier

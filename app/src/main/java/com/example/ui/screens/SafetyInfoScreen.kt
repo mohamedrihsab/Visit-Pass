@@ -52,9 +52,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.R
 import com.example.data.Branch
 import com.example.data.BranchRegistry
 import com.example.ui.components.EmergencyEvacuationPlanCanvas
+import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.SaitPrimary
 
 @Composable
@@ -67,19 +69,17 @@ fun SafetyInfoScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(contentPadding)
             .testTag("safety_info_screen"),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Company & Facility Header Card
+        // Company & Facility Header Card (iOS 26 Liquid Glass)
         item {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 24.dp,
+                elevated = true
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -101,19 +101,15 @@ fun SafetyInfoScreen(
                                     contentScale = ContentScale.Fit
                                 )
                             } else {
-                                Box(
+                                androidx.compose.foundation.Image(
+                                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
+                                    contentDescription = "SAIT Group Logo",
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color.White),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Security,
-                                        contentDescription = null,
-                                        tint = SaitPrimary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
+                                        .background(Color.White)
+                                        .padding(4.dp),
+                                    contentScale = ContentScale.Fit
+                                )
                             }
                         }
 
@@ -163,14 +159,12 @@ fun SafetyInfoScreen(
             }
         }
 
-        // Emergency Helpline Card (Numbers & Contact Person Name — No Call Button)
+        // Emergency Helpline Card (Numbers & Contact Person Name — Liquid Glass)
         item {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-                )
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Row(
                     modifier = Modifier
@@ -198,7 +192,7 @@ fun SafetyInfoScreen(
                             text = "24/7 Emergency Helpline (${branch.shortCode})",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         if (branch.safetyContactName.isNotBlank()) {
                             Spacer(modifier = Modifier.height(2.dp))
@@ -223,11 +217,10 @@ fun SafetyInfoScreen(
 
         // Custom Branch Safety Guidelines Card
         item {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 24.dp,
+                elevated = true
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -284,11 +277,10 @@ fun SafetyInfoScreen(
 
         // Emergency Exit Drawing Card
         item {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 24.dp,
+                elevated = true
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(

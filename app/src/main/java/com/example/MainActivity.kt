@@ -1,11 +1,21 @@
 package com.example
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,14 +24,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EditNote
@@ -31,7 +43,6 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.HealthAndSafety
@@ -39,20 +50,15 @@ import androidx.compose.material.icons.outlined.HowToReg
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,16 +67,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -89,9 +98,13 @@ import com.example.ui.screens.AdminDashboardScreen
 import com.example.ui.screens.LogbookScreen
 import com.example.ui.screens.RegistrationScreen
 import com.example.ui.screens.SafetyInfoScreen
+import com.example.ui.theme.LiquidGlassBackground
+import com.example.ui.theme.LiquidGlassBottomDock
+import com.example.ui.theme.LiquidNavTabItem
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.StatusSuccess
-import com.example.ui.theme.StatusWarning
+import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidPressEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -111,7 +124,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val context = LocalContext.current
             val themeMode by viewModel.themeMode.collectAsState()
             val isSystemDark = isSystemInDarkTheme()
             val isDarkTheme = when (themeMode) {
@@ -139,6 +151,11 @@ class MainActivity : ComponentActivity() {
                 val unreadNotifications by viewModel.unreadNotificationCount.collectAsState()
                 val showNotificationCenter by viewModel.showNotificationCenter.collectAsState()
                 val notificationsList by viewModel.notifications.collectAsState()
+
+                // Handle system Back navigation gracefully on non-home tabs
+                BackHandler(enabled = userRole != UserRole.VISITOR_KIOSK && currentTab != 0) {
+                    viewModel.setTab(0)
+                }
 
                 // 3-second touch-and-hold state for the single Top Bar user access shortcut
                 var isHoldingAccessShortcut by remember { mutableStateOf(false) }
@@ -195,19 +212,40 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    snackbarHost = { SnackbarHost(snackbarHostState) },
-                    topBar = {
-                        CenterAlignedTopAppBar(
-                            title = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                LiquidGlassBackground {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        containerColor = Color.Transparent,
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
+                        topBar = {
+                            // Floating iOS 26 Liquid Glass Top Bar
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .statusBarsPadding()
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .liquidGlass(
+                                            shape = RoundedCornerShape(26.dp),
+                                            cornerRadius = 26.dp,
+                                            elevated = true,
+                                            strokeWidth = 1.4.dp,
+                                            shadowElevation = 12.dp
+                                        )
+                                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Company Logo Pill (Pure White Badge with SAIT Logo)
                                     Surface(
-                                        shape = RoundedCornerShape(8.dp),
+                                        shape = RoundedCornerShape(10.dp),
                                         color = Color.White,
+                                        shadowElevation = 2.dp,
                                         modifier = Modifier
-                                            .size(30.dp)
-                                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                                            .size(34.dp)
+                                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
                                     ) {
                                         if (!activeBranch.logoUri.isNullOrBlank()) {
                                             AsyncImage(
@@ -220,362 +258,319 @@ class MainActivity : ComponentActivity() {
                                                 contentScale = ContentScale.Fit
                                             )
                                         } else {
-                                            Box(
+                                            Image(
+                                                painter = painterResource(id = R.drawable.sait_logo),
+                                                contentDescription = "SAIT Group Logo",
                                                 modifier = Modifier
                                                     .fillMaxSize()
-                                                    .background(Color.White),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = when (userRole) {
-                                                        UserRole.VISITOR_KIOSK -> Icons.Default.Store
-                                                        UserRole.RECEPTIONIST -> Icons.Default.Badge
-                                                        UserRole.ADMIN -> Icons.Default.Security
-                                                    },
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
+                                                    .background(Color.White)
+                                                    .padding(4.dp),
+                                                contentScale = ContentScale.Fit
+                                            )
                                         }
                                     }
-                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Spacer(modifier = Modifier.width(10.dp))
+
                                     Text(
                                         text = when (userRole) {
                                             UserRole.VISITOR_KIOSK -> activeBranch.name
                                             UserRole.RECEPTIONIST -> if (currentTab == 0) activeBranch.name else "${activeBranch.shortCode} RECEPTION"
                                             UserRole.ADMIN -> if (currentTab == 0) activeBranch.name else "${activeBranch.shortCode} ADMIN"
                                         },
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 15.sp,
                                         color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
                                     )
-                                }
-                            },
-                            actions = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    // Notification Center Bell & Theme Switcher: ONLY visible in Receptionist and Admin Mode
-                                    if (userRole != UserRole.VISITOR_KIOSK) {
-                                        BadgedBox(
-                                            badge = {
-                                                if (unreadNotifications > 0) {
-                                                    Badge(
-                                                        containerColor = MaterialTheme.colorScheme.primary,
-                                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                                    ) {
-                                                        Text(
-                                                            text = unreadNotifications.toString(),
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        ) {
-                                            IconButton(
-                                                onClick = { viewModel.openNotificationCenter() },
-                                                modifier = Modifier.testTag("appbar_notifications_btn")
-                                            ) {
-                                                Icon(
-                                                    imageVector = if (unreadNotifications > 0) Icons.Default.Notifications else Icons.Outlined.Notifications,
-                                                    contentDescription = "Notification Center",
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
 
-                                        // Theme Switcher Button (Only Receptionist and Admin can change theme)
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Theme Switcher Button (Available across modes for instant Light/Dark Liquid Glass toggle)
                                         IconButton(
                                             onClick = { viewModel.toggleTheme() },
-                                            modifier = Modifier.testTag("appbar_theme_toggle")
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .liquidPressEffect()
+                                                .testTag("appbar_theme_toggle")
                                         ) {
                                             Icon(
                                                 imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                                                 contentDescription = "Toggle Light/Dark Theme",
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
 
-                                        if (totalLoggedCount > 0) {
-                                            Surface(
-                                                shape = RoundedCornerShape(12.dp),
-                                                color = StatusSuccess.copy(alpha = 0.15f),
-                                                modifier = Modifier.padding(end = 4.dp)
+                                        // Notification Center Bell & Logged Counter: visible in Receptionist and Admin Mode
+                                        if (userRole != UserRole.VISITOR_KIOSK) {
+                                            BadgedBox(
+                                                badge = {
+                                                    if (unreadNotifications > 0) {
+                                                        Badge(
+                                                            containerColor = MaterialTheme.colorScheme.primary,
+                                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                                        ) {
+                                                            Text(
+                                                                text = unreadNotifications.toString(),
+                                                                fontSize = 10.sp,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                             ) {
-                                                Text(
-                                                    text = "$totalLoggedCount Logged",
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = StatusSuccess,
-                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                                )
+                                                IconButton(
+                                                    onClick = { viewModel.openNotificationCenter() },
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .liquidPressEffect()
+                                                        .testTag("appbar_notifications_btn")
+                                                ) {
+                                                    Icon(
+                                                        imageVector = if (unreadNotifications > 0) Icons.Default.Notifications else Icons.Outlined.Notifications,
+                                                        contentDescription = "Notification Center",
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            if (totalLoggedCount > 0) {
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = StatusSuccess.copy(alpha = 0.16f),
+                                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "$totalLoggedCount Logged",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = StatusSuccess,
+                                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            if (userRole == UserRole.ADMIN) {
+                                                IconButton(
+                                                    onClick = { viewModel.enterKioskMode() },
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .liquidPressEffect()
+                                                        .testTag("appbar_launch_kiosk")
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Store,
+                                                        contentDescription = "Launch Kiosk",
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
                                             }
                                         }
 
-                                        // Return to Kiosk Mode button ONLY in Admin mode (Receptionist mode does not have switch-to-kiosk button)
-                                        if (userRole == UserRole.ADMIN) {
+                                        if (userRole == UserRole.RECEPTIONIST) {
                                             IconButton(
-                                                onClick = { viewModel.enterKioskMode() },
-                                                modifier = Modifier.testTag("appbar_launch_kiosk")
+                                                onClick = { viewModel.requestRoleUnlock("ADMIN") },
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .liquidPressEffect()
+                                                    .testTag("appbar_admin_lock")
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Default.Store,
-                                                    contentDescription = "Launch Kiosk",
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    imageVector = Icons.Default.AdminPanelSettings,
+                                                    contentDescription = "Switch to Admin",
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(20.dp)
                                                 )
                                             }
-                                        }
-                                    }
-
-                                    // User Access Shortcut in the Top Bar:
-                                    // - In Visitor Kiosk Mode: works ONLY on 3-second touch and hold
-                                    // - In Receptionist Mode: switches to Admin directly using the button (tap or hold)
-                                    if (userRole == UserRole.RECEPTIONIST) {
-                                        IconButton(
-                                            onClick = { viewModel.requestRoleUnlock("ADMIN") },
-                                            modifier = Modifier.testTag("appbar_admin_lock")
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.AdminPanelSettings,
-                                                contentDescription = "Switch to Admin",
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    } else if (userRole == UserRole.VISITOR_KIOSK) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .testTag("appbar_admin_lock")
-                                                .semantics {
-                                                    contentDescription = "Hold 3 Seconds for Staff/Admin Access"
-                                                    role = Role.Button
-                                                }
-                                                .pointerInput(userRole) {
-                                                    detectTapGestures(
-                                                        onPress = {
-                                                            isHoldingAccessShortcut = true
-                                                            tryAwaitRelease()
-                                                            isHoldingAccessShortcut = false
-                                                        }
-                                                    )
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Lock,
-                                                contentDescription = "Hold 3 Seconds for Role Unlock",
-                                                tint = if (isHoldingAccessShortcut) {
-                                                    MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                }
-                                            )
+                                        } else if (userRole == UserRole.VISITOR_KIOSK) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(44.dp)
+                                                    .clip(CircleShape)
+                                                    .testTag("appbar_admin_lock")
+                                                    .semantics {
+                                                        contentDescription = "Hold 3 Seconds for Staff/Admin Access"
+                                                        role = Role.Button
+                                                    }
+                                                    .pointerInput(userRole) {
+                                                        detectTapGestures(
+                                                            onPress = {
+                                                                isHoldingAccessShortcut = true
+                                                                tryAwaitRelease()
+                                                                isHoldingAccessShortcut = false
+                                                            }
+                                                        )
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Lock,
+                                                    contentDescription = "Hold 3 Seconds for Role Unlock",
+                                                    tint = if (isHoldingAccessShortcut) {
+                                                        MaterialTheme.colorScheme.primary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                                    },
+                                                    modifier = Modifier.size(19.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
+                            }
+                        },
+                        bottomBar = {
+                            if (userRole == UserRole.RECEPTIONIST) {
+                                LiquidGlassBottomDock(
+                                    items = listOf(
+                                        LiquidNavTabItem(
+                                            index = 0,
+                                            label = "Manual Entry",
+                                            selectedIcon = Icons.Default.EditNote,
+                                            unselectedIcon = Icons.Outlined.EditNote,
+                                            testTag = "nav_register"
+                                        ),
+                                        LiquidNavTabItem(
+                                            index = 1,
+                                            label = "Visitor Logbook",
+                                            selectedIcon = Icons.Default.ListAlt,
+                                            unselectedIcon = Icons.Default.Assignment,
+                                            badgeCount = totalLoggedCount,
+                                            testTag = "nav_logbook"
+                                        ),
+                                        LiquidNavTabItem(
+                                            index = 3,
+                                            label = "Safety",
+                                            selectedIcon = Icons.Default.HealthAndSafety,
+                                            unselectedIcon = Icons.Outlined.HealthAndSafety,
+                                            testTag = "nav_safety"
+                                        )
+                                    ),
+                                    selectedTab = currentTab,
+                                    onSelectTab = { viewModel.setTab(it) }
+                                )
+                            } else if (userRole == UserRole.ADMIN) {
+                                LiquidGlassBottomDock(
+                                    items = listOf(
+                                        LiquidNavTabItem(
+                                            index = 0,
+                                            label = "Register",
+                                            selectedIcon = Icons.Default.HowToReg,
+                                            unselectedIcon = Icons.Outlined.HowToReg,
+                                            testTag = "nav_register"
+                                        ),
+                                        LiquidNavTabItem(
+                                            index = 1,
+                                            label = "Logbook",
+                                            selectedIcon = Icons.Default.ListAlt,
+                                            unselectedIcon = Icons.Default.Assignment,
+                                            badgeCount = totalLoggedCount,
+                                            testTag = "nav_logbook"
+                                        ),
+                                        LiquidNavTabItem(
+                                            index = 2,
+                                            label = "Cloud & Admin",
+                                            selectedIcon = Icons.Default.CloudDone,
+                                            unselectedIcon = Icons.Default.AdminPanelSettings,
+                                            badgeCount = unsyncedCount,
+                                            badgeIsWarning = true,
+                                            testTag = "nav_admin"
+                                        ),
+                                        LiquidNavTabItem(
+                                            index = 3,
+                                            label = "Safety",
+                                            selectedIcon = Icons.Default.HealthAndSafety,
+                                            unselectedIcon = Icons.Outlined.HealthAndSafety,
+                                            testTag = "nav_safety"
+                                        )
+                                    ),
+                                    selectedTab = currentTab,
+                                    onSelectTab = { viewModel.setTab(it) }
+                                )
+                            }
+                        }
+                    ) { innerPadding ->
+                        val screenStateKey = Pair(userRole, currentTab)
+                        AnimatedContent(
+                            targetState = screenStateKey,
+                            transitionSpec = {
+                                (fadeIn(animationSpec = tween(220)) +
+                                    scaleIn(
+                                        initialScale = 0.96f,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        )
+                                    )).togetherWith(
+                                    fadeOut(animationSpec = tween(160)) +
+                                        scaleOut(targetScale = 0.98f, animationSpec = tween(160))
+                                )
                             },
-                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.surface
+                            label = "liquid_screen_transition"
+                        ) { (role, tab) ->
+                            when (role) {
+                                UserRole.VISITOR_KIOSK -> {
+                                    RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                }
+                                UserRole.RECEPTIONIST -> {
+                                    when (tab) {
+                                        0 -> RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                        3 -> SafetyInfoScreen(contentPadding = innerPadding, branch = activeBranch)
+                                        else -> LogbookScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                    }
+                                }
+                                UserRole.ADMIN -> {
+                                    when (tab) {
+                                        0 -> RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                        1 -> LogbookScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                        2 -> AdminDashboardScreen(viewModel = viewModel, contentPadding = innerPadding)
+                                        3 -> SafetyInfoScreen(contentPadding = innerPadding, branch = activeBranch)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Show active visitor pass popup if non-null
+                        activePass?.let { visitor ->
+                            VisitorPassDialog(
+                                visitor = visitor,
+                                branchLogoUri = activeBranch.logoUri,
+                                countdownSeconds = countdownSec,
+                                totalCountdownSeconds = autoResetSec,
+                                isKioskMode = isKioskMode,
+                                onDismiss = { viewModel.dismissPass() },
+                                onCheckOut = { id -> viewModel.checkOutVisitor(id) }
                             )
-                        )
-                    },
-                    bottomBar = {
-                        // Kiosk Mode: NO navigation bar (locked self-service form, with Safety button directly on form)
-                        if (userRole == UserRole.RECEPTIONIST) {
-                            // Receptionist Mode: Manual Entry, Visitor Logbook, and Safety
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                tonalElevation = 6.dp,
-                                modifier = Modifier.testTag("bottom_nav_bar")
-                            ) {
-                                NavigationBarItem(
-                                    selected = currentTab == 0,
-                                    onClick = { viewModel.setTab(0) },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentTab == 0) Icons.Default.EditNote else Icons.Outlined.EditNote,
-                                            contentDescription = "Manual Entry"
-                                        )
-                                    },
-                                    label = { Text("Manual Entry") },
-                                    modifier = Modifier.testTag("nav_register")
-                                )
-
-                                NavigationBarItem(
-                                    selected = currentTab == 1,
-                                    onClick = { viewModel.setTab(1) },
-                                    icon = {
-                                        BadgedBox(
-                                            badge = {
-                                                if (totalLoggedCount > 0) {
-                                                    Badge { Text(totalLoggedCount.toString()) }
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = if (currentTab == 1) Icons.Default.ListAlt else Icons.Default.Assignment,
-                                                contentDescription = "Visitor Logbook"
-                                            )
-                                        }
-                                    },
-                                    label = { Text("Visitor Logbook") },
-                                    modifier = Modifier.testTag("nav_logbook")
-                                )
-
-                                NavigationBarItem(
-                                    selected = currentTab == 3,
-                                    onClick = { viewModel.setTab(3) },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentTab == 3) Icons.Default.HealthAndSafety else Icons.Outlined.HealthAndSafety,
-                                            contentDescription = "Safety"
-                                        )
-                                    },
-                                    label = { Text("Safety") },
-                                    modifier = Modifier.testTag("nav_safety")
-                                )
-                            }
-                        } else if (userRole == UserRole.ADMIN) {
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                tonalElevation = 6.dp,
-                                modifier = Modifier.testTag("bottom_nav_bar")
-                            ) {
-                                // Tab 0: Register / Kiosk View
-                                NavigationBarItem(
-                                    selected = currentTab == 0,
-                                    onClick = { viewModel.setTab(0) },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentTab == 0) Icons.Default.HowToReg else Icons.Outlined.HowToReg,
-                                            contentDescription = "Register"
-                                        )
-                                    },
-                                    label = { Text("Register") },
-                                    modifier = Modifier.testTag("nav_register")
-                                )
-
-                                // Tab 1: Logbook
-                                NavigationBarItem(
-                                    selected = currentTab == 1,
-                                    onClick = { viewModel.setTab(1) },
-                                    icon = {
-                                        BadgedBox(
-                                            badge = {
-                                                if (totalLoggedCount > 0) {
-                                                    Badge { Text(totalLoggedCount.toString()) }
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = if (currentTab == 1) Icons.Default.ListAlt else Icons.Default.Assignment,
-                                                contentDescription = "Logbook"
-                                            )
-                                        }
-                                    },
-                                    label = { Text("Logbook") },
-                                    modifier = Modifier.testTag("nav_logbook")
-                                )
-
-                                // Tab 2: Cloud Sync & Admin Controls
-                                NavigationBarItem(
-                                    selected = currentTab == 2,
-                                    onClick = { viewModel.setTab(2) },
-                                    icon = {
-                                        BadgedBox(
-                                            badge = {
-                                                if (unsyncedCount > 0) {
-                                                    Badge(containerColor = StatusWarning) {
-                                                        Text(unsyncedCount.toString(), color = Color.Black)
-                                                    }
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = if (currentTab == 2) Icons.Default.CloudDone else Icons.Default.AdminPanelSettings,
-                                                contentDescription = "Cloud & Admin"
-                                            )
-                                        }
-                                    },
-                                    label = { Text("Cloud & Admin") },
-                                    modifier = Modifier.testTag("nav_admin")
-                                )
-
-                                // Tab 3: Safety & Info
-                                NavigationBarItem(
-                                    selected = currentTab == 3,
-                                    onClick = { viewModel.setTab(3) },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentTab == 3) Icons.Default.HealthAndSafety else Icons.Outlined.HealthAndSafety,
-                                            contentDescription = "Safety"
-                                        )
-                                    },
-                                    label = { Text("Safety") },
-                                    modifier = Modifier.testTag("nav_safety")
-                                )
-                            }
                         }
-                    }
-                ) { innerPadding ->
-                    when (userRole) {
-                        UserRole.VISITOR_KIOSK -> {
-                            RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
-                        }
-                        UserRole.RECEPTIONIST -> {
-                            when (currentTab) {
-                                0 -> RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
-                                3 -> SafetyInfoScreen(contentPadding = innerPadding, branch = activeBranch)
-                                else -> LogbookScreen(viewModel = viewModel, contentPadding = innerPadding)
-                            }
-                        }
-                        UserRole.ADMIN -> {
-                            when (currentTab) {
-                                0 -> RegistrationScreen(viewModel = viewModel, contentPadding = innerPadding)
-                                1 -> LogbookScreen(viewModel = viewModel, contentPadding = innerPadding)
-                                2 -> AdminDashboardScreen(viewModel = viewModel, contentPadding = innerPadding)
-                                3 -> SafetyInfoScreen(contentPadding = innerPadding, branch = activeBranch)
-                            }
-                        }
-                    }
 
-                    // Show active visitor pass popup if non-null
-                    activePass?.let { visitor ->
-                        VisitorPassDialog(
-                            visitor = visitor,
-                            branchLogoUri = activeBranch.logoUri,
-                            countdownSeconds = countdownSec,
-                            totalCountdownSeconds = autoResetSec,
-                            isKioskMode = isKioskMode,
-                            onDismiss = { viewModel.dismissPass() }
-                        )
-                    }
+                        // Role PIN Entry Dialog for role elevation
+                        if (showPinDialog) {
+                            AdminPinDialog(
+                                adminPin = adminPin,
+                                receptionistPin = receptionistPin,
+                                targetRoleOnly = targetPinRole,
+                                onDismiss = { viewModel.dismissPinDialog() },
+                                onAdminSuccess = { viewModel.unlockRole(UserRole.ADMIN) },
+                                onReceptionistSuccess = { viewModel.unlockRole(UserRole.RECEPTIONIST) }
+                            )
+                        }
 
-                    // Role PIN Entry Dialog for role elevation
-                    if (showPinDialog) {
-                        AdminPinDialog(
-                            adminPin = adminPin,
-                            receptionistPin = receptionistPin,
-                            targetRoleOnly = targetPinRole,
-                            onDismiss = { viewModel.dismissPinDialog() },
-                            onAdminSuccess = { viewModel.unlockRole(UserRole.ADMIN) },
-                            onReceptionistSuccess = { viewModel.unlockRole(UserRole.RECEPTIONIST) }
-                        )
-                    }
-
-                    // In-App Notification Center Dialog (Receptionist & Admin only)
-                    if (showNotificationCenter && userRole != UserRole.VISITOR_KIOSK) {
-                        NotificationCenterDialog(
-                            notifications = notificationsList,
-                            onDismiss = { viewModel.closeNotificationCenter() },
-                            onClearAll = { viewModel.clearNotifications() },
-                            onMarkAllRead = { viewModel.markAllNotificationsRead() }
-                        )
+                        // In-App Notification Center Dialog (Receptionist & Admin only)
+                        if (showNotificationCenter && userRole != UserRole.VISITOR_KIOSK) {
+                            NotificationCenterDialog(
+                                notifications = notificationsList,
+                                onDismiss = { viewModel.closeNotificationCenter() },
+                                onClearAll = { viewModel.clearNotifications() },
+                                onMarkAllRead = { viewModel.markAllNotificationsRead() }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-

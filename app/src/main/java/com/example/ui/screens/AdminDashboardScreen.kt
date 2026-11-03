@@ -135,9 +135,11 @@ import com.example.data.Branch
 import com.example.data.BranchRegistry
 import com.example.data.CountryDialOption
 import com.example.ui.VisitorViewModel
+import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.StatusError
 import com.example.ui.theme.StatusSuccess
 import com.example.ui.theme.StatusWarning
+import com.example.ui.theme.liquidPressEffect
 import com.example.util.GoogleDriveExportHelper
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -320,19 +322,17 @@ fun AdminDashboardScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(contentPadding)
             .testTag("admin_dashboard_screen"),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Banner with Role Mode Switchers
+        // Top Banner with Role Mode Switchers (iOS 26 Liquid Glass)
         item(key = "top_banner_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 24.dp,
+                elevated = true
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -359,18 +359,15 @@ fun AdminDashboardScreen(
                                         contentScale = ContentScale.Fit
                                     )
                                 } else {
-                                    Box(
+                                    androidx.compose.foundation.Image(
+                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
+                                        contentDescription = "SAIT Group Logo",
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .background(Color.White),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.AdminPanelSettings,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                            .background(Color.White)
+                                            .padding(4.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))

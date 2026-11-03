@@ -58,9 +58,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.example.R
 import com.example.data.Branch
 import com.example.ui.theme.SaitPrimary
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.liquidGlass
 
 @Composable
 fun SafetyInfoDialog(
@@ -73,15 +75,19 @@ fun SafetyInfoDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(0.95f)
                 .heightIn(max = 700.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .testTag("dialog_safety_info"),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp
+                .liquidGlass(
+                    shape = RoundedCornerShape(28.dp),
+                    cornerRadius = 28.dp,
+                    elevated = true,
+                    strokeWidth = 1.5.dp,
+                    shadowElevation = 20.dp
+                )
+                .testTag("dialog_safety_info")
         ) {
             Column(
                 modifier = Modifier
@@ -116,19 +122,15 @@ fun SafetyInfoDialog(
                                     contentScale = ContentScale.Fit
                                 )
                             } else {
-                                Box(
+                                androidx.compose.foundation.Image(
+                                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
+                                    contentDescription = "SAIT Group Logo",
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color.White),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.HealthAndSafety,
-                                        contentDescription = null,
-                                        tint = SaitPrimary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
+                                        .background(Color.White)
+                                        .padding(4.dp),
+                                    contentScale = ContentScale.Fit
+                                )
                             }
                         }
 

@@ -84,10 +84,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.BackHandler
 import coil.compose.AsyncImage
 import com.example.data.Branch
 import com.example.ui.VisitorViewModel
+import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidPressEffect
 import com.example.util.QrCodeView
 
 /**
@@ -170,21 +174,24 @@ fun TouchlessKioskView(
         label = "pulseAlpha"
     )
 
+    // Allow system Back gesture to return to Touchscreen Kiosk mode
+    BackHandler {
+        onSwitchToTouchscreen()
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
             .testTag("touchless_kiosk_view"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Corporate Header Card with pure white logo background
-        Card(
+        // Corporate Header Card (iOS 26 Liquid Glass Surface)
+        LiquidGlassCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            cornerRadius = 24.dp,
+            elevated = true
         ) {
             Column(
                 modifier = Modifier
@@ -273,12 +280,11 @@ fun TouchlessKioskView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Center QR Code Hero Card (Direct GitHub Pages)
-        Card(
+        // Center QR Code Hero Card (Direct GitHub Pages — iOS 26 Liquid Glass)
+        LiquidGlassCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            cornerRadius = 28.dp,
+            elevated = true
         ) {
             Column(
                 modifier = Modifier
@@ -450,11 +456,11 @@ fun TouchlessKioskView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 3-Step Touchless Guidance Card
-        Card(
+        // 3-Step Touchless Guidance Card (iOS 26 Liquid Glass)
+        LiquidGlassCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            cornerRadius = 24.dp,
+            elevated = false
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Text(
@@ -510,8 +516,10 @@ fun TouchlessKioskView(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
+                    .liquidPressEffect()
+                    .liquidGlass(shape = RoundedCornerShape(14.dp), cornerRadius = 14.dp, shadowElevation = 4.dp)
                     .testTag("btn_touchless_safety_info"),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.HealthAndSafety,
@@ -527,8 +535,9 @@ fun TouchlessKioskView(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
+                    .liquidPressEffect()
                     .testTag("btn_switch_to_touchscreen"),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(
@@ -549,8 +558,9 @@ fun TouchlessKioskView(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(46.dp)
+                .liquidPressEffect()
                 .testTag("btn_demo_mobile_registration"),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(14.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.PhoneAndroid,

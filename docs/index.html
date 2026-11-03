@@ -1,286 +1,403 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SAIT Group — Visitor Registration Portal</title>
-  <meta name="description" content="Official touchless visitor registration portal for SAIT Group facilities.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230F2942'/><text x='50' y='62' font-family='sans-serif' font-size='38' font-weight='900' fill='%23FFFFFF' text-anchor='middle'>SAIT</text></svg>">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SAIT Group — Touchless Visitor Registration</title>
   <style>
-    :root {
+    :root, [data-theme="light"] {
+      --bg-start: #E8F1FC;
+      --bg-end: #F4F8FE;
+      --orb-1: rgba(56, 189, 248, 0.30);
+      --orb-2: rgba(99, 102, 241, 0.20);
+      --orb-3: rgba(20, 184, 166, 0.22);
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-elevated: rgba(255, 255, 255, 0.85);
+      --glass-input: rgba(255, 255, 255, 0.78);
+      --glass-border-top: rgba(255, 255, 255, 0.96);
+      --glass-border-side: rgba(125, 211, 252, 0.45);
+      --glass-shadow: 0 16px 40px -8px rgba(15, 41, 66, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.95);
       --primary: #0F2942;
-      --primary-light: #1E3A5F;
       --primary-accent: #0284C7;
-      --bg: #F1F5F9;
-      --card-bg: #FFFFFF;
+      --pill-grad: linear-gradient(135deg, rgba(15, 41, 66, 0.94), rgba(2, 132, 199, 0.90));
       --text-main: #0F172A;
-      --text-muted: #64748B;
-      --border: #CBD5E1;
-      --border-focus: #0284C7;
+      --text-muted: #475569;
+      --border-subtle: rgba(148, 163, 184, 0.32);
       --success: #10B981;
-      --success-bg: #ECFDF5;
       --error: #EF4444;
-      --radius: 14px;
     }
+
+    [data-theme="dark"] {
+      --bg-start: #050914;
+      --bg-end: #0B1528;
+      --orb-1: rgba(14, 165, 233, 0.28);
+      --orb-2: rgba(79, 70, 229, 0.24);
+      --orb-3: rgba(16, 185, 129, 0.20);
+      --glass-bg: rgba(30, 41, 59, 0.62);
+      --glass-elevated: rgba(38, 53, 77, 0.74);
+      --glass-input: rgba(15, 23, 42, 0.68);
+      --glass-border-top: rgba(224, 242, 254, 0.38);
+      --glass-border-side: rgba(56, 189, 248, 0.25);
+      --glass-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(224, 242, 254, 0.24);
+      --primary: #38BDF8;
+      --primary-accent: #0284C7;
+      --pill-grad: linear-gradient(135deg, rgba(2, 132, 199, 0.92), rgba(3, 105, 161, 0.88));
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border-subtle: rgba(71, 85, 105, 0.45);
+      --success: #34D399;
+      --error: #F87171;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
+
     body {
-      background-color: var(--bg);
+      background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
       color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+      transition: background 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
     }
+
+    /* iOS 26 Liquid Glass Ambient Aurora Orbs */
+    .aurora-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .aurora-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(55px);
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+    .aurora-orb.orb-1 {
+      width: 320px;
+      height: 320px;
+      background: var(--orb-1);
+      top: -60px;
+      left: -60px;
+    }
+    .aurora-orb.orb-2 {
+      width: 290px;
+      height: 290px;
+      background: var(--orb-2);
+      top: 38%;
+      right: -70px;
+      animation-delay: -5s;
+    }
+    .aurora-orb.orb-3 {
+      width: 280px;
+      height: 280px;
+      background: var(--orb-3);
+      bottom: -50px;
+      left: 10%;
+      animation-delay: -9s;
+    }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(0.95); }
+      100% { transform: translate(28px, 24px) scale(1.12); }
+    }
+
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
+      position: relative;
+      z-index: 1;
     }
+
+    /* iOS 26 Liquid Glass Header Card */
     .header {
-      background: var(--primary);
-      color: #fff;
-      border-radius: var(--radius);
-      padding: 24px 20px;
+      background: linear-gradient(145deg, rgba(15, 41, 66, 0.88), rgba(2, 132, 199, 0.78));
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      color: #ffffff;
+      border-radius: 26px;
+      padding: 22px 20px;
       text-align: center;
+      box-shadow: var(--glass-shadow);
+      border: 1.5px solid rgba(255, 255, 255, 0.38);
       margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(15, 41, 66, 0.18);
+      position: relative;
     }
-    .header-logo-box {
-      width: 64px;
-      height: 64px;
-      background: #FFFFFF;
-      border-radius: 12px;
-      margin: 0 auto 12px;
+
+    .theme-toggle-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      border: 1px solid rgba(255,255,255,0.8);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
+    }
+    .theme-toggle-btn:active {
+      transform: scale(0.88);
+    }
+
+    .header-logo-box {
+      width: 60px;
+      height: 60px;
+      background: #ffffff;
+      border-radius: 16px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
     }
     .header-logo-text {
+      color: #0F2942;
       font-weight: 900;
-      font-size: 20px;
-      color: var(--primary);
-      letter-spacing: 1.5px;
+      font-size: 18px;
+      letter-spacing: 1px;
     }
     .header h1 {
       font-size: 20px;
       font-weight: 800;
-      letter-spacing: -0.3px;
-      margin-bottom: 4px;
+      letter-spacing: 0.4px;
     }
     .header p {
       font-size: 13px;
       color: #BAE6FD;
+      margin-top: 4px;
+      font-weight: 500;
     }
     .session-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 4px 12px;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      padding: 5px 14px;
+      border-radius: 999px;
       font-size: 11px;
-      margin-top: 10px;
-      font-family: monospace;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 15px;
       font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 14px;
+      color: #E0F2FE;
+      margin-top: 10px;
+    }
+
+    /* iOS 26 Liquid Glass Form Card */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border-radius: 28px;
+      padding: 22px;
+      box-shadow: var(--glass-shadow);
+      border-top: 1.5px solid var(--glass-border-top);
+      border-left: 1.2px solid var(--glass-border-top);
+      border-right: 1px solid var(--glass-border-side);
+      border-bottom: 1px solid var(--glass-border-side);
+      margin-bottom: 18px;
+      transition: background 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 15px;
     }
     label {
       display: block;
       font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
+      font-weight: 700;
       color: var(--text-main);
+      margin-bottom: 6px;
     }
     .required {
       color: var(--error);
-      font-weight: bold;
     }
+
     input, select {
       width: 100%;
-      padding: 12px 14px;
+      padding: 13px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 15px;
       font-size: 15px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      outline: none;
-      background: #fff;
       color: var(--text-main);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--glass-input);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      outline: none;
     }
     input:focus, select:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
     }
+
     .phone-row {
       display: flex;
       gap: 8px;
     }
     .phone-row select {
-      width: 42%;
-      font-size: 13px;
-      font-weight: 600;
+      width: 145px;
+      flex-shrink: 0;
     }
-    .phone-row input {
-      width: 58%;
-    }
+
+    /* iOS 26 Segmented Liquid Glass Capsule Selector for Type of Visit */
     .visit-type-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      display: flex;
+      gap: 8px;
+      padding: 5px;
+      border-radius: 18px;
+      background: var(--glass-input);
+      border: 1.2px solid var(--border-subtle);
+      margin-bottom: 8px;
     }
     .visit-chip {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: #fff;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.18s ease;
-      user-select: none;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
+    }
+    .visit-chip:active {
+      transform: scale(0.95);
     }
     .visit-chip.active {
-      background: #E0F2FE;
-      border-color: var(--primary-accent);
-      color: var(--primary);
-      font-weight: 700;
-      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
+      background: var(--pill-grad);
+      color: #ffffff;
+      border-color: rgba(125, 211, 252, 0.75);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      transform: scale(1.01);
     }
-    . safety-box, .safety-box {
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
+
+    .safety-box {
+      background: rgba(2, 132, 199, 0.10);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 16px;
+      padding: 13px;
       margin: 16px 0;
       display: flex;
-      align-items: flex-start;
       gap: 10px;
+      align-items: flex-start;
     }
-    .safety-box input {
-      width: 18px;
-      height: 18px;
+    .safety-box input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
       margin-top: 2px;
-      cursor: pointer;
+      accent-color: var(--primary-accent);
+      flex-shrink: 0;
     }
     .safety-box label {
       font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.45;
       font-weight: 500;
-      margin-bottom: 0;
-      cursor: pointer;
+      color: var(--text-main);
+      line-height: 1.45;
+      margin: 0;
     }
+
     .btn-submit {
       width: 100%;
-      background: var(--primary);
-      color: #fff;
-      padding: 15px;
+      padding: 16px;
+      background: var(--pill-grad);
+      color: #ffffff;
       font-size: 16px;
-      font-weight: 700;
-      border: none;
-      border-radius: 12px;
+      font-weight: 800;
+      border: 1.2px solid rgba(125, 211, 252, 0.65);
+      border-radius: 18px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(15, 41, 66, 0.25);
-      transition: transform 0.1s, background-color 0.2s;
-    }
-    .btn-submit:hover {
-      background: var(--primary-light);
+      box-shadow: 0 10px 24px rgba(2, 132, 199, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
     }
     .btn-submit:active {
-      transform: scale(0.98);
+      transform: scale(0.965);
     }
     .btn-submit:disabled {
-      background: var(--text-muted);
+      opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
     }
+
     .status-alert {
       display: none;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      margin-bottom: 16px;
       font-size: 13px;
+      font-weight: 600;
       line-height: 1.4;
+      backdrop-filter: blur(16px);
     }
     .status-alert.error {
-      background: #FEF2F2;
-      color: #991B1B;
-      border: 1px solid #FCA5A5;
+      display: block;
+      background: rgba(239, 68, 68, 0.16);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
+
+    /* Confirmation Modal (No Visitor Pass Number section displayed on visitor phone) */
     .success-modal {
       display: none;
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 24px 20px;
+      background: var(--glass-elevated);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border-radius: 28px;
+      padding: 26px 22px;
       text-align: center;
-      border: 2px solid var(--success);
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.18);
+      border: 1.5px solid var(--success);
+      box-shadow: var(--glass-shadow);
+      animation: popSpring 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popSpring {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .badge-icon {
       font-size: 48px;
       margin-bottom: 8px;
     }
     .badge-pass {
-      background: #F8FAFC;
-      border: 2px dashed var(--primary-accent);
-      border-radius: 12px;
-      padding: 18px;
+      background: var(--glass-input);
+      border: 1.5px dashed var(--primary-accent);
+      border-radius: 16px;
+      padding: 16px;
       margin: 18px 0;
       text-align: left;
-    }
-    .badge-pass-header {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-muted);
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
-    }
-    .badge-number {
-      font-family: monospace;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--primary);
-      margin-bottom: 10px;
     }
     .badge-row {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
-      padding: 4px 0;
-      border-top: 1px solid #E2E8F0;
+      padding: 6px 0;
+      border-top: 1px solid var(--border-subtle);
     }
     .badge-row span {
       color: var(--text-muted);
@@ -299,8 +416,15 @@
 </head>
 <body>
 
+  <div class="aurora-canvas">
+    <div class="aurora-orb orb-1"></div>
+    <div class="aurora-orb orb-2"></div>
+    <div class="aurora-orb orb-3"></div>
+  </div>
+
   <div class="container">
     <div class="header">
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleLiquidTheme()" title="Switch Light / Dark Mode">🌙</button>
       <div class="header-logo-box">
         <span class="header-logo-text">SAIT</span>
       </div>
@@ -376,7 +500,7 @@
 
         <div class="form-group">
           <label for="visitType">Type of Visit <span class="required">*</span></label>
-          <div class="visit-type-row" style="margin-bottom: 8px;">
+          <div class="visit-type-row">
             <button type="button" class="visit-chip active" id="chipWalkIn" onclick="selectVisitType('Walk-In')">
               <span id="iconWalkIn">✓</span>
               <span>Walk-In</span>
@@ -453,11 +577,11 @@
 
       <div class="badge-pass">
         <div class="badge-row" style="border-top: none;"><span>Visitor Name:</span> <b id="displayVisitorName">David Miller</b></div>
-        <div class="badge-row"><span>Company:</span> <span id="displayCompany">PetroTech International</span></div>
+        <div class="badge-row"><span>Company:</span> <b id="displayCompany">PetroTech International</b></div>
         <div class="badge-row"><span>Type of Visit:</span> <b id="displayVisitType">Walk-In</b></div>
-        <div class="badge-row"><span>Department:</span> <span id="displayDept">PROJECTS</span></div>
-        <div class="badge-row"><span>Purpose:</span> <span id="displayPurpose">Meeting</span></div>
-        <div class="badge-row"><span>Host Person:</span> <span id="displayHost">Reception Desk</span></div>
+        <div class="badge-row"><span>Department:</span> <b id="displayDept">PROJECTS</b></div>
+        <div class="badge-row"><span>Purpose:</span> <b id="displayPurpose">Meeting</b></div>
+        <div class="badge-row"><span>Host Person:</span> <b id="displayHost">Reception Desk</b></div>
         <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
@@ -473,7 +597,7 @@
 
     <div class="footer">
       <p>© 2026 SAIT Group • Marine & Industrial Engineering Systems</p>
-      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Zero-Touch Mobile Registration • Cloud Synchronized</p>
+      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Zero-Touch Mobile Registration • iOS 26 Liquid Glass UI</p>
     </div>
   </div>
 
@@ -481,6 +605,20 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Initialize Light / Dark Liquid Glass Theme
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('sait_liquid_theme') || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    window.toggleLiquidTheme = function() {
+      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('sait_liquid_theme', next);
+      document.getElementById('themeToggleBtn').innerText = next === 'dark' ? '☀️' : '🌙';
+    };
 
     const firebaseConfig = {
       apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
@@ -494,13 +632,11 @@
     let db = null;
     try {
       const app = initializeApp(firebaseConfig);
-      // Explicitly bind to our Firestore database ID
       db = getFirestore(app, "ai-studio-android-saitvisi-226bc4de-7e87-4603-a3f9-5c674f11f3ca");
     } catch (err) {
       console.warn("Firebase initialization notice:", err);
     }
 
-    // Official SAIT Group Branch Registry for accurate fallback & matching
     const BRANCH_REGISTRY = {
       'BSST-DXB': { name: 'BSS Tech / BSMC - Dubai', city: 'Dubai', location: 'Engineering & Corrosion Control, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'OPERATIONS'] },
       'SAIT-DXB': { name: 'Sait FZCO - Dubai', city: 'Dubai', location: 'Industrial Free Zone Facility, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'MAINTENANCE'] },
@@ -510,7 +646,6 @@
       '3E-RAK':   { name: '3E - RAK', city: 'Ras Al Khaimah', location: 'Northern Emirates Engineering Branch, Ras Al Khaimah', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'TECHNICAL SERVICES', 'FINANCE', 'MANAGEMENT', 'WORKSHOP'] }
     };
 
-    // Extract parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
     const matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
@@ -523,12 +658,10 @@
     const countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
     const deptsParam = urlParams.get('depts');
 
-    // Populate UI with exact company branch name, location, and code
     document.getElementById('branchTitle').innerText = branchName;
     document.getElementById('branchLocation').innerText = branchLocation + ' • Code: ' + branchCode;
     document.getElementById('sessionText').innerText = 'TERMINAL: ' + sessionId;
 
-    // Populate branch-specific departments if provided in QR or registry
     const deptList = deptsParam ? deptsParam.split(',').map(d => d.trim()).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
     if (deptList && deptList.length > 0) {
       const deptSelect = document.getElementById('department');
@@ -621,7 +754,6 @@
       const cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
       const expectedPrefix = `${companyPrefix}-${cityShort}-${yearCode}`;
 
-      // Calculate next sequential pass number (ignoring any legacy random test numbers >= 1000)
       let maxSeq = 0;
       try {
         if (db) {
@@ -668,7 +800,6 @@
 
       try {
         if (db) {
-          // Write to central visitors collection (triggers real-time Kiosk display + official pass generation + SMTP email dispatch)
           await setDoc(doc(db, "visitors", passNumber), visitorPayload);
           console.log("Visitor record synced to Firestore:", passNumber);
         }
@@ -676,7 +807,6 @@
         console.warn("Cloud Firestore write note:", err);
       }
 
-      // Display check-in confirmation summary without pass number on visitor's browser
       document.getElementById('formCard').style.display = 'none';
       document.getElementById('displayVisitorName').innerText = fullName;
       document.getElementById('displayCompany').innerText = companyName;

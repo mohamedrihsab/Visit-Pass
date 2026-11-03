@@ -103,8 +103,13 @@ import com.example.data.UserRole
 import com.example.data.VisitorEntity
 import com.example.ui.VisitorViewModel
 import com.example.ui.components.SafetyInfoDialog
+import com.example.ui.theme.LiquidGlassCard
+import com.example.ui.theme.LiquidGlassSegmentedControl
+import com.example.ui.theme.LocalLiquidGlassPalette
 import com.example.ui.theme.SaitDarkBackground
 import com.example.ui.theme.SaitPrimary
+import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidPressEffect
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -159,10 +164,9 @@ fun RegistrationScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(contentPadding)
             .testTag("registration_screen"),
-        contentPadding = PaddingValues(bottom = 32.dp)
+        contentPadding = PaddingValues(bottom = 36.dp)
     ) {
         // Hero Header with company logo
         item {
@@ -179,8 +183,15 @@ fun RegistrationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .liquidPressEffect()
+                    .liquidGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        cornerRadius = 16.dp,
+                        elevated = false,
+                        shadowElevation = 4.dp
+                    )
                     .testTag("btn_view_safety_info"),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
@@ -202,28 +213,25 @@ fun RegistrationScreen(
         // In Kiosk Mode, show prominent Touchless Mobile Check-In card
         if (userRole == UserRole.VISITOR_KIOSK) {
             item {
-                Card(
+                LiquidGlassCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .clickable { viewModel.setTouchlessKioskMode(true) }
                         .testTag("card_touchless_kiosk_prompt"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    cornerRadius = 20.dp,
+                    elevated = true,
+                    onClick = { viewModel.setTouchlessKioskMode(true) }
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(14.dp),
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(42.dp)
+                            modifier = Modifier.size(44.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -240,21 +248,23 @@ fun RegistrationScreen(
                                 text = "📱 Prefer Touchless Check-in?",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Scan QR with your phone to register without touching the screen.",
                                 fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 15.sp
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         FilledTonalButton(
                             onClick = { viewModel.setTouchlessKioskMode(true) },
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                            modifier = Modifier.testTag("btn_open_touchless_mode")
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier
+                                .liquidPressEffect()
+                                .testTag("btn_open_touchless_mode")
                         ) {
                             Text("Scan QR", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
@@ -322,18 +332,17 @@ fun RegistrationScreen(
             }
         }
 
-        // Main Registration Card
+        // Main Registration Card (iOS 26 Liquid Glass Surface)
         item {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 28.dp,
+                elevated = true
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(22.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     Row(
@@ -343,8 +352,8 @@ fun RegistrationScreen(
                     ) {
                         Text(
                             text = "Visitor Registration",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -589,7 +598,7 @@ fun RegistrationScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    // 4. Type of Visit
+                    // 4. Type of Visit (iOS 26 Segmented Liquid Glass Control)
                     Column {
                         Text(
                             text = "Type of Visit *",
@@ -598,42 +607,16 @@ fun RegistrationScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            listOf("Walk-In", "Appointment").forEach { type ->
-                                val selected = formState.visitType == type
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { viewModel.onVisitTypeChange(type) },
-                                    label = {
-                                        Text(
-                                            text = type,
-                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                                        )
-                                    },
-                                    leadingIcon = if (selected) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(44.dp)
-                                        .testTag("chip_visit_${type.lowercase().replace("-", "")}"),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                )
-                            }
-                        }
+                        LiquidGlassSegmentedControl(
+                            options = listOf("Walk-In", "Appointment"),
+                            selectedOption = formState.visitType,
+                            onOptionSelected = { viewModel.onVisitTypeChange(it) },
+                            icons = mapOf(
+                                "Walk-In" to Icons.Default.Person,
+                                "Appointment" to Icons.Default.CheckCircle
+                            ),
+                            testTagPrefix = "chip_visit"
+                        )
                     }
 
                     // 5. Department to Visit
@@ -793,15 +776,16 @@ fun RegistrationScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Submit Button
+                    // Submit Button (Liquid Glass Capsule CTA with Spring Press)
                     Button(
                         onClick = { viewModel.submitRegistration() },
                         enabled = !formState.isSubmitting,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp)
+                            .height(56.dp)
+                            .liquidPressEffect(pressedScale = 0.96f)
                             .testTag("btn_submit_registration"),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
@@ -851,6 +835,7 @@ fun HeroHeader(
     activeBranch: Branch,
     userRole: UserRole
 ) {
+    val palette = LocalLiquidGlassPalette.current
     val roleSubtitle = when (userRole) {
         UserRole.VISITOR_KIOSK -> "VISITOR REGISTRATION"
         UserRole.RECEPTIONIST -> "RECEPTION MANUAL ENTRY DESK"
@@ -860,15 +845,31 @@ fun HeroHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .liquidGlass(
+                shape = RoundedCornerShape(28.dp),
+                cornerRadius = 28.dp,
+                elevated = true,
+                tintColor = if (palette.isDark) Color(0xFF0369A1) else SaitPrimary,
+                strokeWidth = 1.5.dp,
+                shadowElevation = 14.dp
+            )
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        SaitPrimary,
-                        Color(0xFF034A6E)
-                    )
+                Brush.linearGradient(
+                    colors = if (palette.isDark) {
+                        listOf(
+                            Color(0xFF0C2440).copy(alpha = 0.85f),
+                            Color(0xFF034A6E).copy(alpha = 0.72f)
+                        )
+                    } else {
+                        listOf(
+                            SaitPrimary.copy(alpha = 0.90f),
+                            Color(0xFF0284C7).copy(alpha = 0.82f)
+                        )
+                    }
                 )
             )
-            .padding(top = 20.dp, bottom = 24.dp, start = 20.dp, end = 20.dp)
+            .padding(20.dp)
     ) {
         Column {
             Row(
@@ -882,11 +883,11 @@ fun HeroHeader(
                 ) {
                     // Company Logo or Security Badge (Always Solid White Background)
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = Color.White,
-                        shadowElevation = 2.dp,
+                        shadowElevation = 4.dp,
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(54.dp)
                             .testTag("company_logo_header")
                     ) {
                         if (!activeBranch.logoUri.isNullOrBlank()) {
@@ -925,15 +926,15 @@ fun HeroHeader(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color.White.copy(alpha = 0.2f)
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color.White.copy(alpha = 0.22f)
                             ) {
                                 Text(
                                     text = activeBranch.city,
                                     color = Color(0xFFE0F2FE),
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                 )
                             }
                         }
@@ -941,8 +942,8 @@ fun HeroHeader(
                         Text(
                             text = activeBranch.name,
                             color = Color(0xFFBAE6FD),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
@@ -956,19 +957,19 @@ fun HeroHeader(
                             text = roleSubtitle,
                             color = Color(0xFF7DD3FC),
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.8.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Welcome Text Banner
+            // Welcome Text Banner (Refractive Glass Pill)
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.White.copy(alpha = 0.1f)
+                shape = RoundedCornerShape(14.dp),
+                color = Color.White.copy(alpha = 0.14f)
             ) {
                 Row(
                     modifier = Modifier

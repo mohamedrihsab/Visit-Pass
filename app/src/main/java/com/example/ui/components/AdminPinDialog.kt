@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidPressEffect
 
 @Composable
 fun AdminPinDialog(
@@ -112,14 +114,18 @@ fun AdminPinDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surface,
+        Box(
             modifier = Modifier
                 .padding(20.dp)
                 .fillMaxWidth(0.92f)
-                .testTag("dialog_admin_pin"),
-            tonalElevation = 8.dp
+                .liquidGlass(
+                    shape = RoundedCornerShape(28.dp),
+                    cornerRadius = 28.dp,
+                    elevated = true,
+                    strokeWidth = 1.5.dp,
+                    shadowElevation = 20.dp
+                )
+                .testTag("dialog_admin_pin")
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -230,12 +236,18 @@ fun AdminPinDialog(
                             Surface(
                                 shape = CircleShape,
                                 color = when (key) {
-                                    "C", "DEL" -> MaterialTheme.colorScheme.surfaceVariant
-                                    else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                    "C", "DEL" -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f)
+                                    else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
                                 },
                                 modifier = Modifier
-                                    .size(62.dp)
-                                    .clip(CircleShape)
+                                    .size(64.dp)
+                                    .liquidPressEffect(pressedScale = 0.90f)
+                                    .liquidGlass(
+                                        shape = CircleShape,
+                                        cornerRadius = 32.dp,
+                                        elevated = key !in listOf("C", "DEL"),
+                                        shadowElevation = 4.dp
+                                    )
                                     .testTag("keypad_$key"),
                                 onClick = {
                                     when (key) {

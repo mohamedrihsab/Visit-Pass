@@ -59,9 +59,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.data.VisitorEntity
+import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.SaitDarkBackground
 import com.example.ui.theme.SaitPrimary
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidPressEffect
 
 @Composable
 fun VisitorPassDialog(
@@ -80,14 +83,18 @@ fun VisitorPassDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(0.95f)
-                .clip(RoundedCornerShape(24.dp))
-                .testTag("visitor_pass_dialog"),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
+                .liquidGlass(
+                    shape = RoundedCornerShape(28.dp),
+                    cornerRadius = 28.dp,
+                    elevated = true,
+                    strokeWidth = 1.6.dp,
+                    shadowElevation = 20.dp
+                )
+                .testTag("visitor_pass_dialog")
         ) {
             Column(
                 modifier = Modifier
@@ -126,14 +133,11 @@ fun VisitorPassDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Official Pass Badge Card
-                Card(
+                // Official Pass Badge Card (Liquid Glass Inner Lens)
+                LiquidGlassCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    cornerRadius = 22.dp,
+                    elevated = false
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -212,10 +216,14 @@ fun VisitorPassDialog(
                                 .padding(20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Status Pill
+                            // Status Pill (High-contrast in both Light & Dark modes)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isCheckedIn) StatusSuccess.copy(alpha = 0.15f) else Color.LightGray.copy(alpha = 0.3f),
+                                color = if (isCheckedIn) {
+                                    StatusSuccess.copy(alpha = 0.16f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
                                 modifier = Modifier.padding(bottom = 12.dp)
                             ) {
                                 Row(
@@ -225,7 +233,7 @@ fun VisitorPassDialog(
                                     Icon(
                                         imageVector = if (isCheckedIn) Icons.Default.CheckCircle else Icons.Default.ExitToApp,
                                         contentDescription = null,
-                                        tint = if (isCheckedIn) StatusSuccess else Color.DarkGray,
+                                        tint = if (isCheckedIn) StatusSuccess else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -233,7 +241,7 @@ fun VisitorPassDialog(
                                         text = if (isCheckedIn) "ACTIVE ON PREMISES" else "CHECKED OUT",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp,
-                                        color = if (isCheckedIn) StatusSuccess else Color.DarkGray
+                                        color = if (isCheckedIn) StatusSuccess else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -377,9 +385,10 @@ fun VisitorPassDialog(
                         onClick = onDismiss,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
+                            .height(50.dp)
+                            .liquidPressEffect()
                             .testTag("btn_kiosk_next_visitor"),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(18.dp))
