@@ -219,7 +219,8 @@ class FirestoreService(private val context: Context) {
         autoResetSeconds: Int? = null,
         themeMode: String? = null,
         smtpConfig: SmtpConfig? = null,
-        visitPurposes: List<String>? = null
+        visitPurposes: List<String>? = null,
+        screenTimeoutMinutes: Int? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val uid = currentUserId ?: return@withContext Result.failure(
@@ -257,6 +258,7 @@ class FirestoreService(private val context: Context) {
             autoResetSeconds?.let { data["autoResetSeconds"] = it }
             themeMode?.let { data["themeMode"] = it }
             visitPurposes?.let { data["visitPurposes"] = it }
+            screenTimeoutMinutes?.let { data["screenTimeoutMinutes"] = it }
             smtpConfig?.let { smtp ->
                 data["smtpConfig"] = hashMapOf(
                     "enabled" to smtp.enabled,
@@ -416,7 +418,8 @@ class FirestoreService(private val context: Context) {
             autoResetSeconds: Int?,
             themeMode: String?,
             smtpConfig: SmtpConfig?,
-            visitPurposes: List<String>?
+            visitPurposes: List<String>?,
+            screenTimeoutMinutes: Int?
         ) -> Unit
     ) {
         orgSettingsListener?.remove()
@@ -488,6 +491,7 @@ class FirestoreService(private val context: Context) {
                         val receptionistPin = snapshot.getString("receptionistPin")
                         val autoResetSeconds = snapshot.getLong("autoResetSeconds")?.toInt()
                         val themeMode = snapshot.getString("themeMode")
+                        val screenTimeoutMinutes = snapshot.getLong("screenTimeoutMinutes")?.toInt()
 
                         @Suppress("UNCHECKED_CAST")
                         val visitPurposesRaw = snapshot.get("visitPurposes") as? List<String>
@@ -523,7 +527,8 @@ class FirestoreService(private val context: Context) {
                                     autoResetSeconds,
                                     themeMode,
                                     parsedSmtp,
-                                    parsedVisitPurposes
+                                    parsedVisitPurposes,
+                                    screenTimeoutMinutes
                                 )
                             }
                         } else {

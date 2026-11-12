@@ -1,5 +1,7 @@
 package com.example.data
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.json.JSONObject
 
 data class SmtpConfig(
@@ -14,20 +16,31 @@ data class SmtpConfig(
     val firebaseTriggerEnabled: Boolean = true
 ) {
     fun toJson(): String {
-        val obj = JSONObject()
-        obj.put("enabled", enabled)
-        obj.put("host", host)
-        obj.put("port", port)
-        obj.put("encryption", encryption)
-        obj.put("username", username)
-        obj.put("password", password)
-        obj.put("senderEmail", senderEmail)
-        obj.put("senderName", senderName)
-        obj.put("firebaseTriggerEnabled", firebaseTriggerEnabled)
-        return obj.toString()
+        return try {
+            val obj = JSONObject()
+            obj.put("enabled", enabled)
+            obj.put("host", host)
+            obj.put("port", port)
+            obj.put("encryption", encryption)
+            obj.put("username", username)
+            obj.put("password", password)
+            obj.put("senderEmail", senderEmail)
+            obj.put("senderName", senderName)
+            obj.put("firebaseTriggerEnabled", firebaseTriggerEnabled)
+            obj.toString()
+        } catch (_: Throwable) {
+            moshiAdapter.toJson(this)
+        }
     }
 
     companion object {
+        private val moshiAdapter by lazy {
+            Moshi.Builder()
+                .addLast(KotlinJsonAdapterFactory())
+                .build()
+                .adapter(SmtpConfig::class.java)
+        }
+
         fun fromJson(json: String?): SmtpConfig {
             if (json.isNullOrBlank()) return SmtpConfig()
             return try {
@@ -43,8 +56,12 @@ data class SmtpConfig(
                     senderName = obj.optString("senderName", "SAIT Group Visitor Pass"),
                     firebaseTriggerEnabled = obj.optBoolean("firebaseTriggerEnabled", true)
                 )
-            } catch (e: Exception) {
-                SmtpConfig()
+            } catch (_: Throwable) {
+                try {
+                    moshiAdapter.fromJson(json) ?: SmtpConfig()
+                } catch (_: Throwable) {
+                    SmtpConfig()
+                }
             }
         }
     }

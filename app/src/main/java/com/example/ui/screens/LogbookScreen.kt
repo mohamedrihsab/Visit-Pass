@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -94,6 +95,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.R
@@ -101,6 +103,14 @@ import com.example.data.Branch
 import com.example.data.UserRole
 import com.example.data.VisitorEntity
 import com.example.ui.VisitorViewModel
+import com.example.ui.theme.LiquidGlassCard
+import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.liquidAppearAnimation
+import com.example.ui.theme.liquidButtonGlass
+import com.example.ui.theme.liquidFilterChipColors
+import com.example.ui.theme.liquidInnerGlass
+import com.example.ui.theme.liquidPressEffect
+import com.example.ui.theme.liquidTextFieldColors
 import java.util.Calendar
 import kotlin.math.roundToInt
 
@@ -486,14 +496,13 @@ private fun AdminComprehensiveDashboard(
         }
     }
 
-    Card(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
+            .liquidAppearAnimation(delayMillis = 0)
             .testTag("admin_comprehensive_dashboard"),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+        cornerRadius = 22.dp,
+        elevated = true
     ) {
         Column(
             modifier = Modifier
@@ -509,13 +518,13 @@ private fun AdminComprehensiveDashboard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Surface(
                         color = Color.White,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         if (!activeBranch.logoUri.isNullOrBlank()) {
                             AsyncImage(
@@ -524,7 +533,7 @@ private fun AdminComprehensiveDashboard(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(Color.White)
-                                    .padding(4.dp),
+                                    .padding(3.dp),
                                 contentScale = ContentScale.Fit
                             )
                         } else {
@@ -538,27 +547,33 @@ private fun AdminComprehensiveDashboard(
                                     imageVector = Icons.Default.Analytics,
                                     contentDescription = "Executive Analytics",
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
                             text = "Executive Visitor Intelligence",
-                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = "Scope: $scopeLabel",
-                            style = MaterialTheme.typography.labelMedium,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.width(6.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -567,25 +582,42 @@ private fun AdminComprehensiveDashboard(
                     OutlinedButton(
                         onClick = onExportCsv,
                         shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                        modifier = Modifier.testTag("admin_logbook_export_csv_btn")
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)),
+                        modifier = Modifier
+                            .heightIn(min = 32.dp)
+                            .liquidPressEffect()
+                            .testTag("admin_logbook_export_csv_btn")
                     ) {
                         Icon(
                             imageVector = Icons.Default.TableView,
                             contentDescription = "Export CSV",
-                            modifier = Modifier.size(16.dp)
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Export CSV", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Export CSV",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
                     }
 
                     IconButton(
                         onClick = onToggleExpanded,
-                        modifier = Modifier.testTag("toggle_admin_analytics_btn")
+                        modifier = Modifier
+                            .size(32.dp)
+                            .liquidPressEffect(pressedScale = 0.90f)
+                            .liquidInnerGlass(shape = CircleShape, cornerRadius = 16.dp)
+                            .testTag("toggle_admin_analytics_btn")
                     ) {
                         Icon(
                             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (isExpanded) "Collapse Detailed Charts" else "Expand Detailed Charts"
+                            contentDescription = if (isExpanded) "Collapse Detailed Charts" else "Expand Detailed Charts",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -632,7 +664,7 @@ private fun AdminComprehensiveDashboard(
                     label = "Cloud Synced",
                     value = "$syncedCount / $totalScoped",
                     subtitle = if (pendingSyncCount == 0) "100% Synced" else "$pendingSyncCount Pending",
-                    accentColor = if (pendingSyncCount == 0) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
+                    accentColor = if (pendingSyncCount == 0) StatusSuccess else MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f)
                 )
                 val emailPct = if (totalScoped > 0) ((emailCoverageCount * 100f) / totalScoped).roundToInt() else 0
@@ -661,7 +693,7 @@ private fun AdminComprehensiveDashboard(
                 exit = shrinkVertically() + fadeOut()
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
 
                     // 1. Branch-by-Branch Visitor Distribution (Interactive)
                     BranchDistributionPanel(
@@ -699,29 +731,30 @@ private fun ExecutiveKpiTile(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        color = accentColor.copy(alpha = 0.08f),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.22f))
+    Box(
+        modifier = modifier.liquidInnerGlass(
+            shape = RoundedCornerShape(10.dp),
+            cornerRadius = 10.dp,
+            accentColor = accentColor
+        )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
                     tint = accentColor,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(12.dp)
                 )
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 9.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -729,7 +762,7 @@ private fun ExecutiveKpiTile(
             }
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -737,9 +770,9 @@ private fun ExecutiveKpiTile(
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.labelSmall,
+                fontSize = 8.5.sp,
                 color = accentColor,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -758,11 +791,10 @@ private fun BranchDistributionPanel(
 ) {
     val totalAll = allVisitors.size.coerceAtLeast(1)
 
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidInnerGlass(shape = RoundedCornerShape(16.dp), cornerRadius = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -793,7 +825,8 @@ private fun BranchDistributionPanel(
                 Text(
                     text = "Tap branch to filter",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
@@ -807,19 +840,15 @@ private fun BranchDistributionPanel(
                         logBranchFilter.equals(branch.name, ignoreCase = true) ||
                         logBranchFilter.equals(branch.shortCode, ignoreCase = true)
 
-                Surface(
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                    ),
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .liquidPressEffect(pressedScale = 0.985f)
+                        .liquidInnerGlass(
+                            shape = RoundedCornerShape(12.dp),
+                            cornerRadius = 12.dp,
+                            selected = isSelected
+                        )
                         .clickable {
                             if (isSelected) {
                                 onSelectBranchScope("ALL")
@@ -843,7 +872,7 @@ private fun BranchDistributionPanel(
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Surface(
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
@@ -870,14 +899,14 @@ private fun BranchDistributionPanel(
                             ) {
                                 if (branchToday > 0) {
                                     Surface(
-                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                        color = StatusSuccess.copy(alpha = 0.16f),
                                         shape = RoundedCornerShape(6.dp)
                                     ) {
                                         Text(
                                             text = "+$branchToday today",
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            color = StatusSuccess,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                         )
                                     }
@@ -898,7 +927,7 @@ private fun BranchDistributionPanel(
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp)),
                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                         )
                     }
                 }
@@ -944,11 +973,10 @@ private fun DepartmentAndPurposeBreakdownPanel(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Department Traffic Card
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-            shape = RoundedCornerShape(14.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-            modifier = Modifier.weight(1f)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .liquidInnerGlass(shape = RoundedCornerShape(16.dp), cornerRadius = 16.dp)
         ) {
             Column(
                 modifier = Modifier.padding(12.dp),
@@ -965,7 +993,8 @@ private fun DepartmentAndPurposeBreakdownPanel(
                     Text(
                         text = "Department Traffic",
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -1014,7 +1043,7 @@ private fun DepartmentAndPurposeBreakdownPanel(
                                     .height(4.dp)
                                     .clip(RoundedCornerShape(2.dp)),
                                 color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                             )
                         }
                     }
@@ -1023,11 +1052,10 @@ private fun DepartmentAndPurposeBreakdownPanel(
         }
 
         // Purpose Breakdown Card
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-            shape = RoundedCornerShape(14.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-            modifier = Modifier.weight(1f)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .liquidInnerGlass(shape = RoundedCornerShape(16.dp), cornerRadius = 16.dp)
         ) {
             Column(
                 modifier = Modifier.padding(12.dp),
@@ -1044,7 +1072,8 @@ private fun DepartmentAndPurposeBreakdownPanel(
                     Text(
                         text = "Visit Purposes",
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -1088,7 +1117,7 @@ private fun DepartmentAndPurposeBreakdownPanel(
                                     .height(4.dp)
                                     .clip(RoundedCornerShape(2.dp)),
                                 color = MaterialTheme.colorScheme.tertiary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
                             )
                         }
                     }
@@ -1122,11 +1151,10 @@ private fun TopCompaniesAndPeakInsightsPanel(
             .take(3)
     }
 
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidInnerGlass(shape = RoundedCornerShape(16.dp), cornerRadius = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1150,14 +1178,15 @@ private fun TopCompaniesAndPeakInsightsPanel(
                     Text(
                         text = "Top Visiting Organizations & Frequent Hosts",
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
             if (topCompanies.isEmpty()) {
                 Text(
-                    text = "Register visitors to see top organizations and host insights.",
+                    text = "No organization data yet",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1166,34 +1195,30 @@ private fun TopCompaniesAndPeakInsightsPanel(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(topCompanies, key = { it.key }) { (company, count) ->
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        Row(
+                            modifier = Modifier
+                                .liquidInnerGlass(shape = RoundedCornerShape(12.dp), cornerRadius = 12.dp)
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            Text(
+                                text = company,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),
+                                shape = CircleShape
                             ) {
                                 Text(
-                                    text = company,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    text = "$count",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
-                                Surface(
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    shape = CircleShape
-                                ) {
-                                    Text(
-                                        text = "$count",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
                             }
                         }
                     }
@@ -1234,12 +1259,12 @@ private fun AdminMultiFilterCard(
     onSearchQueryChange: (String) -> Unit,
     onResetFilters: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    LiquidGlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidAppearAnimation(delayMillis = 45),
+        cornerRadius = 20.dp,
+        elevated = false
     ) {
         Column(
             modifier = Modifier
@@ -1269,11 +1294,8 @@ private fun AdminMultiFilterCard(
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-                ),
+                shape = RoundedCornerShape(14.dp),
+                colors = liquidTextFieldColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("logbook_search_input")
@@ -1297,7 +1319,11 @@ private fun AdminMultiFilterCard(
                         selected = logBranchFilter == "ALL" || logBranchFilter == null,
                         onClick = { onBranchFilterChange("ALL") },
                         label = { Text("All Group Branches (${allVisitors.size})") },
-                        modifier = Modifier.testTag("filter_branch_all")
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier
+                            .liquidPressEffect()
+                            .testTag("filter_branch_all")
                     )
                 }
                 item {
@@ -1306,7 +1332,11 @@ private fun AdminMultiFilterCard(
                         selected = logBranchFilter == "CURRENT",
                         onClick = { onBranchFilterChange("CURRENT") },
                         label = { Text("${activeBranch.shortCode} (Active: $activeCount)") },
-                        modifier = Modifier.testTag("filter_branch_current")
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier
+                            .liquidPressEffect()
+                            .testTag("filter_branch_current")
                     )
                 }
                 items(branches.filter { it.id != activeBranch.id }, key = { it.id }) { branch ->
@@ -1315,7 +1345,10 @@ private fun AdminMultiFilterCard(
                         selected = logBranchFilter.equals(branch.name, ignoreCase = true) ||
                                 logBranchFilter.equals(branch.shortCode, ignoreCase = true),
                         onClick = { onBranchFilterChange(branch.name) },
-                        label = { Text("${branch.shortCode} ($bCount)") }
+                        label = { Text("${branch.shortCode} ($bCount)") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
             }
@@ -1337,7 +1370,10 @@ private fun AdminMultiFilterCard(
                     FilterChip(
                         selected = selectedTimeRange == range,
                         onClick = { onTimeRangeChange(range) },
-                        label = { Text(range.label) }
+                        label = { Text(range.label) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(useSecondaryAccent = true),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
@@ -1346,7 +1382,10 @@ private fun AdminMultiFilterCard(
                         onClick = {
                             onVisitTypeChange(if (selectedVisitType == "Walk-In") "ALL" else "Walk-In")
                         },
-                        label = { Text("Walk-In Only") }
+                        label = { Text("Walk-In Only") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
@@ -1355,7 +1394,10 @@ private fun AdminMultiFilterCard(
                         onClick = {
                             onVisitTypeChange(if (selectedVisitType == "Appointment") "ALL" else "Appointment")
                         },
-                        label = { Text("Appointments Only") }
+                        label = { Text("Appointments Only") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(useSecondaryAccent = true),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
             }
@@ -1378,7 +1420,10 @@ private fun AdminMultiFilterCard(
                         FilterChip(
                             selected = selectedDepartment == "ALL",
                             onClick = { onDepartmentChange("ALL") },
-                            label = { Text("All Depts") }
+                            label = { Text("All Depts") },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = liquidFilterChipColors(),
+                            modifier = Modifier.liquidPressEffect()
                         )
                     }
                     items(availableDepartments, key = { it }) { dept ->
@@ -1389,7 +1434,10 @@ private fun AdminMultiFilterCard(
                                     if (selectedDepartment.equals(dept, ignoreCase = true)) "ALL" else dept
                                 )
                             },
-                            label = { Text(dept) }
+                            label = { Text(dept) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = liquidFilterChipColors(),
+                            modifier = Modifier.liquidPressEffect()
                         )
                     }
                 }
@@ -1411,7 +1459,9 @@ private fun AdminMultiFilterCard(
                     TextButton(
                         onClick = onResetFilters,
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                        modifier = Modifier.testTag("admin_reset_filters_btn")
+                        modifier = Modifier
+                            .liquidPressEffect()
+                            .testTag("admin_reset_filters_btn")
                     ) {
                         Icon(
                             imageVector = Icons.Default.FilterAltOff,
@@ -1463,14 +1513,13 @@ private fun ReceptionistBranchLogbookHeader(
         branchVisitors.count { it.isSyncedToGoogleForm }
     }
 
-    Card(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
+            .liquidAppearAnimation(delayMillis = 0)
             .testTag("receptionist_branch_logbook_header"),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+        cornerRadius = 22.dp,
+        elevated = true
     ) {
         Column(
             modifier = Modifier
@@ -1486,56 +1535,60 @@ private fun ReceptionistBranchLogbookHeader(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Surface(
                         color = Color.White,
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.size(34.dp)
                     ) {
                         if (!activeBranch.logoUri.isNullOrBlank()) {
                             AsyncImage(
                                 model = activeBranch.logoUri,
                                 contentDescription = "${activeBranch.name} Logo",
                                 modifier = Modifier
-                                    .size(42.dp)
+                                    .fillMaxSize()
                                     .background(Color.White)
-                                    .padding(4.dp),
+                                    .padding(3.dp),
                                 contentScale = ContentScale.Fit
                             )
                         } else {
                             Text(
                                 text = activeBranch.shortCode,
-                                style = MaterialTheme.typography.titleSmall,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .background(Color.White)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .padding(horizontal = 6.dp, vertical = 6.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
                             text = "${activeBranch.name} Visitor Logbook",
-                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = "Facility Location",
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = activeBranch.displayFacilityLocation,
-                                style = MaterialTheme.typography.labelSmall,
+                                fontSize = 10.5.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -1544,16 +1597,23 @@ private fun ReceptionistBranchLogbookHeader(
                     }
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(8.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+
+                Box(
+                    modifier = Modifier
+                        .liquidInnerGlass(
+                            shape = RoundedCornerShape(8.dp),
+                            cornerRadius = 8.dp,
+                            accentColor = MaterialTheme.colorScheme.secondary
+                        )
+                        .padding(horizontal = 7.dp, vertical = 3.dp)
                 ) {
                     Text(
                         text = "${activeBranch.city} Only",
-                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        color = MaterialTheme.colorScheme.secondary,
+                        maxLines = 1
                     )
                 }
             }
@@ -1611,11 +1671,8 @@ private fun ReceptionistBranchLogbookHeader(
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-                ),
+                shape = RoundedCornerShape(14.dp),
+                colors = liquidTextFieldColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("logbook_search_input")
@@ -1630,21 +1687,30 @@ private fun ReceptionistBranchLogbookHeader(
                     FilterChip(
                         selected = selectedTimeRange == LogTimeRange.ALL_TIME,
                         onClick = { onTimeRangeChange(LogTimeRange.ALL_TIME) },
-                        label = { Text("All (${branchVisitors.size})") }
+                        label = { Text("All (${branchVisitors.size})") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedTimeRange == LogTimeRange.TODAY,
                         onClick = { onTimeRangeChange(LogTimeRange.TODAY) },
-                        label = { Text("Today ($branchToday)") }
+                        label = { Text("Today ($branchToday)") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedTimeRange == LogTimeRange.LAST_7_DAYS,
                         onClick = { onTimeRangeChange(LogTimeRange.LAST_7_DAYS) },
-                        label = { Text("Last 7 Days") }
+                        label = { Text("Last 7 Days") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
@@ -1653,7 +1719,10 @@ private fun ReceptionistBranchLogbookHeader(
                         onClick = {
                             onVisitTypeChange(if (selectedVisitType == "Walk-In") "ALL" else "Walk-In")
                         },
-                        label = { Text("Walk-In") }
+                        label = { Text("Walk-In") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(useSecondaryAccent = true),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
                 item {
@@ -1662,7 +1731,10 @@ private fun ReceptionistBranchLogbookHeader(
                         onClick = {
                             onVisitTypeChange(if (selectedVisitType == "Appointment") "ALL" else "Appointment")
                         },
-                        label = { Text("Appointment") }
+                        label = { Text("Appointment") },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = liquidFilterChipColors(useSecondaryAccent = true),
+                        modifier = Modifier.liquidPressEffect()
                     )
                 }
             }
@@ -1677,7 +1749,10 @@ private fun ReceptionistBranchLogbookHeader(
                         FilterChip(
                             selected = selectedDepartment == "ALL",
                             onClick = { onDepartmentChange("ALL") },
-                            label = { Text("All ${activeBranch.shortCode} Depts") }
+                            label = { Text("All ${activeBranch.shortCode} Depts") },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = liquidFilterChipColors(),
+                            modifier = Modifier.liquidPressEffect()
                         )
                     }
                     items(availableDepartments, key = { it }) { dept ->
@@ -1688,7 +1763,10 @@ private fun ReceptionistBranchLogbookHeader(
                                     if (selectedDepartment.equals(dept, ignoreCase = true)) "ALL" else dept
                                 )
                             },
-                            label = { Text(dept) }
+                            label = { Text(dept) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = liquidFilterChipColors(),
+                            modifier = Modifier.liquidPressEffect()
                         )
                     }
                 }
@@ -1707,7 +1785,8 @@ private fun ReceptionistBranchLogbookHeader(
                     )
                     TextButton(
                         onClick = onResetFilters,
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.liquidPressEffect()
                     ) {
                         Text("Clear Filters", style = MaterialTheme.typography.labelSmall)
                     }
@@ -1729,21 +1808,16 @@ private fun VisitorLogCard(
     showBranchBadge: Boolean,
     onDeleteClick: () -> Unit
 ) {
-    Card(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
+            .liquidAppearAnimation(delayMillis = 20)
             .testTag("visitor_card_${visitor.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-        )
+        cornerRadius = 16.dp,
+        elevated = false
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            // Header Row: Pass Pill + Branch Pill on left, Sync + Visit Type + Delete on right
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1751,113 +1825,122 @@ private fun VisitorLogCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
-                    // Pass Number Pill
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(8.dp)
+                    // Pass Number Refractive Glass Pill
+                    Row(
+                        modifier = Modifier
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(7.dp),
+                                cornerRadius = 7.dp,
+                                accentColor = MaterialTheme.colorScheme.primary
+                            )
+                            .padding(horizontal = 7.dp, vertical = 2.5.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Badge,
+                            contentDescription = "Pass",
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = visitor.passNumber,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                    }
+
+                    // Branch / Company Code Pill (shown in Admin mode)
+                    val displayBranchCode = remember(visitor.branchCode, visitor.branchName) {
+                        visitor.branchCode.ifBlank {
+                            visitor.branchName.split(" ").firstOrNull()?.take(5)?.uppercase() ?: "SAIT"
+                        }
+                    }
+                    if (showBranchBadge && (visitor.branchCode.isNotBlank() || visitor.branchName.isNotBlank())) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(7.dp),
+                                    cornerRadius = 7.dp,
+                                    accentColor = MaterialTheme.colorScheme.secondary
+                                )
+                                .padding(horizontal = 5.dp, vertical = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Badge,
-                                contentDescription = "Pass",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                imageVector = Icons.Default.Apartment,
+                                contentDescription = "Branch",
+                                modifier = Modifier.size(10.dp),
+                                tint = MaterialTheme.colorScheme.secondary
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Text(
-                                text = visitor.passNumber,
-                                style = MaterialTheme.typography.labelMedium,
+                                text = displayBranchCode,
+                                fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.secondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.widthIn(max = 65.dp)
                             )
-                        }
-                    }
-
-                    // Branch Pill (shown in Admin mode so multi-branch records are immediately identifiable)
-                    if (showBranchBadge && visitor.branchName.isNotBlank()) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Apartment,
-                                    contentDescription = "Branch",
-                                    modifier = Modifier.size(12.dp),
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = visitor.branchCode.ifBlank { visitor.branchName },
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
                         }
                     }
                 }
 
+                Spacer(modifier = Modifier.width(6.dp))
+
                 // Cloud Sync Status + Visit Type + Admin Delete
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Icon(
                         imageVector = if (visitor.isSyncedToGoogleForm) Icons.Default.CloudDone else Icons.Default.CloudUpload,
                         contentDescription = if (visitor.isSyncedToGoogleForm) "Synced to Cloud" else "Pending Cloud Sync",
-                        modifier = Modifier.size(18.dp),
-                        tint = if (visitor.isSyncedToGoogleForm) Color(0xFF2E7D32) else MaterialTheme.colorScheme.outline
+                        modifier = Modifier.size(15.dp),
+                        tint = if (visitor.isSyncedToGoogleForm) StatusSuccess else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Surface(
-                        color = if (visitor.visitType.equals("Appointment", ignoreCase = true)) {
-                            MaterialTheme.colorScheme.tertiaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                        },
-                        shape = CircleShape
+                    val isAppointment = visitor.visitType.equals("Appointment", ignoreCase = true)
+                    val visitAccent = if (isAppointment) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    }
+                    Row(
+                        modifier = Modifier
+                            .liquidInnerGlass(
+                                shape = CircleShape,
+                                cornerRadius = 12.dp,
+                                accentColor = visitAccent
+                            )
+                            .padding(horizontal = 7.dp, vertical = 2.5.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = if (visitor.visitType.equals("Appointment", ignoreCase = true)) {
-                                    Icons.Default.EventAvailable
-                                } else {
-                                    Icons.Default.VerifiedUser
-                                },
-                                contentDescription = visitor.visitType,
-                                tint = if (visitor.visitType.equals("Appointment", ignoreCase = true)) {
-                                    MaterialTheme.colorScheme.onTertiaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = visitor.visitType,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (visitor.visitType.equals("Appointment", ignoreCase = true)) {
-                                    MaterialTheme.colorScheme.onTertiaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                }
-                            )
-                        }
+                        Icon(
+                            imageVector = if (isAppointment) {
+                                Icons.Default.EventAvailable
+                            } else {
+                                Icons.Default.VerifiedUser
+                            },
+                            contentDescription = visitor.visitType,
+                            tint = visitAccent,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = visitor.visitType,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = visitAccent,
+                            maxLines = 1
+                        )
                     }
 
                     if (isAdmin) {
@@ -1865,165 +1948,192 @@ private fun VisitorLogCard(
                             onClick = onDeleteClick,
                             enabled = isFirebaseSignedIn,
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(28.dp)
+                                .liquidPressEffect(enabled = isFirebaseSignedIn)
                                 .testTag("delete_visitor_btn_${visitor.id}")
                         ) {
                             Icon(
                                 imageVector = if (isFirebaseSignedIn) Icons.Default.DeleteOutline else Icons.Default.Lock,
                                 contentDescription = if (isFirebaseSignedIn) "Delete Visitor Record" else "Sign in to Firebase to delete",
-                                tint = if (isFirebaseSignedIn) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(18.dp)
+                                tint = if (isFirebaseSignedIn) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Visitor Name & Company
+            // Visitor Name
             Text(
                 text = visitor.fullName,
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
+            // Company & Phone row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Business,
                         contentDescription = "Company",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier.size(13.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = visitor.companyName,
-                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Phone,
                         contentDescription = "Mobile",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier.size(13.dp),
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = visitor.mobileNumber,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
             if (visitor.email.isNotBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email ID",
-                        modifier = Modifier.size(15.dp),
+                        modifier = Modifier.size(12.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = visitor.email,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Department, Purpose, Host & Timestamp
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = visitor.department,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(6.dp),
+                                cornerRadius = 6.dp,
+                                accentColor = MaterialTheme.colorScheme.secondary
                             )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        val displayPurpose = if (visitor.purpose == "Other" && visitor.customPurpose.isNotBlank()) {
-                            visitor.customPurpose
-                        } else {
-                            visitor.purpose
-                        }
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
                         Text(
-                            text = "• $displayPurpose",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = visitor.department,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary,
+                            maxLines = 1
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    val displayPurpose = if (visitor.purpose == "Other" && visitor.customPurpose.isNotBlank()) {
+                        visitor.customPurpose
+                    } else {
+                        visitor.purpose
+                    }
+                    Text(
+                        text = "• $displayPurpose",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                }
+
+                if (visitor.personToMeet.isNotBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Host",
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Host: ${visitor.personToMeet}",
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                }
 
-                    if (visitor.personToMeet.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Host",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Host: ${visitor.personToMeet}",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = "Check-In Time",
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Registered: ${visitor.checkInFormattedTime}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = "Check-In Time",
+                        modifier = Modifier.size(12.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Registered: ${visitor.checkInFormattedTime}",
+                        fontSize = 10.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
@@ -2036,19 +2146,29 @@ private fun EmptyLogbookState(
     branchName: String,
     onResetFilters: (() -> Unit)? = null
 ) {
-    Column(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 48.dp, horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(vertical = 24.dp),
+        cornerRadius = 24.dp
     ) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-            shape = CircleShape,
-            modifier = Modifier.size(76.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 36.dp, horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .size(76.dp)
+                    .liquidInnerGlass(
+                        shape = CircleShape,
+                        cornerRadius = 38.dp,
+                        accentColor = MaterialTheme.colorScheme.primary
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
                 Icon(
                     imageVector = Icons.Default.History,
                     contentDescription = "Empty Logbook",
@@ -2056,37 +2176,38 @@ private fun EmptyLogbookState(
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
-        }
-        Spacer(modifier = Modifier.height(14.dp))
-        Text(
-            text = if (isSearching) "No Matching Visitor Records" else "No Visitor Records Yet",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = if (isSearching) {
-                "No visitors matched your current filters in $branchName."
-            } else {
-                "Visitors registered at $branchName will appear here automatically."
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (onResetFilters != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onResetFilters,
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FilterAltOff,
-                    contentDescription = "Reset Filters",
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Reset All Filters")
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = if (isSearching) "No Matching Visitor Records" else "No Visitor Records Yet",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (isSearching) {
+                    "No visitors matched your filters in $branchName."
+                } else {
+                    "No visitor entries recorded for $branchName."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (onResetFilters != null) {
+                Spacer(modifier = Modifier.height(14.dp))
+                OutlinedButton(
+                    onClick = onResetFilters,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.liquidPressEffect()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FilterAltOff,
+                        contentDescription = "Reset Filters",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Reset All Filters")
+                }
             }
         }
     }

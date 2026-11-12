@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.ui.components.CompanyBrandLogoBadge
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -116,38 +117,16 @@ fun QrCodeView(
                 contentScale = ContentScale.Fit
             )
 
-            // Center Branding Badge (Uses 15% center space, protected by ErrorCorrectionLevel.H)
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = Color.White,
-                modifier = Modifier
-                    .size(size * 0.22f)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
-                shadowElevation = 2.dp
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(3.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (!centerLogoUri.isNullOrBlank()) {
-                        AsyncImage(
-                            model = centerLogoUri,
-                            contentDescription = "Company Center Logo",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
-                    } else {
-                        Image(
-                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.sait_logo),
-                            contentDescription = "SAIT Group Logo",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
-                }
-            }
+            // Center Branding Badge (Uses center space, protected by ErrorCorrectionLevel.H)
+            CompanyBrandLogoBadge(
+                modifier = Modifier.size(size * 0.22f),
+                logoUri = centerLogoUri,
+                branchName = centerLabel,
+                cornerRadius = 8.dp,
+                horizontalPadding = 3.dp,
+                verticalPadding = 2.dp,
+                testTag = "qrcode_center_logo"
+            )
         } else {
             Box(
                 modifier = Modifier.fillMaxSize(),

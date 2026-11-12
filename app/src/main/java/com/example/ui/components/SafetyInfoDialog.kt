@@ -1,7 +1,5 @@
 package com.example.ui.components
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,10 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Emergency
-import androidx.compose.material.icons.filled.HealthAndSafety
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,10 +43,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -60,17 +52,15 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.R
 import com.example.data.Branch
-import com.example.ui.theme.SaitPrimary
-import com.example.ui.theme.StatusSuccess
-import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidButtonGlass
+import com.example.ui.theme.liquidInnerGlass
+import com.example.ui.theme.liquidModalGlass
 
 @Composable
 fun SafetyInfoDialog(
     branch: Branch,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
-
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -78,14 +68,12 @@ fun SafetyInfoDialog(
         Box(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(0.95f)
-                .heightIn(max = 700.dp)
-                .liquidGlass(
+                .fillMaxWidth(0.94f)
+                .heightIn(max = 680.dp)
+                .liquidModalGlass(
                     shape = RoundedCornerShape(28.dp),
                     cornerRadius = 28.dp,
-                    elevated = true,
-                    strokeWidth = 1.5.dp,
-                    shadowElevation = 20.dp
+                    strokeWidth = 1.6.dp
                 )
                 .testTag("dialog_safety_info")
         ) {
@@ -94,7 +82,6 @@ fun SafetyInfoDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(20.dp)
             ) {
-                // Header with Logo & Close Button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -104,35 +91,14 @@ fun SafetyInfoDialog(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White,
+                        CompanyBrandLogoBadge(
                             modifier = Modifier
-                                .size(44.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                        ) {
-                            if (!branch.logoUri.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = branch.logoUri,
-                                    contentDescription = "${branch.name} Logo",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.White)
-                                        .padding(4.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                            } else {
-                                androidx.compose.foundation.Image(
-                                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
-                                    contentDescription = "SAIT Group Logo",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.White)
-                                        .padding(4.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                            }
-                        }
+                                .width(88.dp)
+                                .height(38.dp),
+                            logoUri = branch.logoUri,
+                            branchName = branch.name,
+                            testTag = "company_logo_safety_dialog"
+                        )
 
                         Spacer(modifier = Modifier.width(12.dp))
 
@@ -164,17 +130,17 @@ fun SafetyInfoDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Safety Guidelines Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidInnerGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            cornerRadius = 16.dp
+                        )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -193,7 +159,7 @@ fun SafetyInfoDialog(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = branch.safetyGuidelines,
@@ -204,15 +170,16 @@ fun SafetyInfoDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Emergency Helpline Card (Numbers & Contact Person Name — No Call Button)
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidInnerGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            cornerRadius = 16.dp,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -229,7 +196,7 @@ fun SafetyInfoDialog(
                                 Icon(
                                     imageVector = Icons.Default.Call,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -239,7 +206,7 @@ fun SafetyInfoDialog(
                                     text = "Emergency & Security Helpline",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 if (branch.safetyContactName.isNotBlank()) {
                                     Spacer(modifier = Modifier.height(2.dp))
@@ -262,20 +229,14 @@ fun SafetyInfoDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Emergency Exit & Evacuation Drawing
                 Text(
                     text = "Emergency Exit & Assembly Point Map",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Follow green illuminated exit markers to designated Emergency Assembly Point 1.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 if (!branch.emergencyExitDrawingUri.isNullOrBlank()) {
@@ -284,13 +245,12 @@ fun SafetyInfoDialog(
                         contentDescription = "Emergency Exit Plan",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(220.dp)
+                            .height(210.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp)),
                         contentScale = ContentScale.Fit
                     )
                 } else {
-                    // Crisp, informative Vector Schematic Diagram
                     EmergencyEvacuationPlanCanvas()
                 }
 
@@ -300,11 +260,21 @@ fun SafetyInfoDialog(
                     onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .padding(horizontal = 8.dp)
+                        .height(44.dp)
+                        .liquidButtonGlass(
+                            shape = RoundedCornerShape(14.dp),
+                            cornerRadius = 14.dp,
+                            baseColor = MaterialTheme.colorScheme.primary
+                        )
                         .testTag("btn_dismiss_safety_dialog"),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text("I Acknowledge & Understand", fontWeight = FontWeight.Bold)
+                    Text("I Acknowledge & Understand", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
@@ -321,11 +291,14 @@ fun EmergencyEvacuationPlanCanvas() {
         colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
                 val w = size.width
                 val h = size.height
 
-                // Building boundary
                 drawRoundRect(
                     color = Color(0xFF334155),
                     topLeft = Offset(w * 0.12f, h * 0.22f),
@@ -333,24 +306,19 @@ fun EmergencyEvacuationPlanCanvas() {
                     cornerRadius = CornerRadius(12f, 12f)
                 )
 
-                // Internal Zones
-                // Zone 1: Main Workshop / Hall
                 drawRect(
                     color = Color(0xFF1E293B),
                     topLeft = Offset(w * 0.15f, h * 0.26f),
                     size = Size(w * 0.42f, h * 0.57f)
                 )
 
-                // Zone 2: Offices / Reception
                 drawRect(
                     color = Color(0xFF1E293B),
                     topLeft = Offset(w * 0.60f, h * 0.26f),
                     size = Size(w * 0.25f, h * 0.57f)
                 )
 
-                // Evacuation Route Line (Green Dashed)
                 val pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
-                // From Offices out to Exit A
                 drawLine(
                     color = Color(0xFF34D399),
                     start = Offset(w * 0.72f, h * 0.55f),
@@ -358,7 +326,6 @@ fun EmergencyEvacuationPlanCanvas() {
                     strokeWidth = 4f,
                     pathEffect = pathEffect
                 )
-                // From Workshop out to Exit B
                 drawLine(
                     color = Color(0xFF34D399),
                     start = Offset(w * 0.35f, h * 0.55f),
@@ -367,7 +334,6 @@ fun EmergencyEvacuationPlanCanvas() {
                     pathEffect = pathEffect
                 )
 
-                // Emergency Exit Doors (North)
                 drawRect(
                     color = Color(0xFF10B981),
                     topLeft = Offset(w * 0.30f, h * 0.20f),
@@ -379,7 +345,6 @@ fun EmergencyEvacuationPlanCanvas() {
                     size = Size(w * 0.10f, h * 0.04f)
                 )
 
-                // Assembly Point circle (North Yard)
                 drawCircle(
                     color = Color(0xFF10B981),
                     radius = 24f,
@@ -387,7 +352,6 @@ fun EmergencyEvacuationPlanCanvas() {
                 )
             }
 
-            // Text Labels overlay
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -396,7 +360,6 @@ fun EmergencyEvacuationPlanCanvas() {
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Assembly Point Top Label
                 Surface(
                     shape = RoundedCornerShape(6.dp),
                     color = Color(0xFF10B981)
@@ -439,13 +402,13 @@ fun EmergencyEvacuationPlanCanvas() {
                     Text(
                         text = "OPERATIONAL ZONE",
                         fontSize = 10.sp,
-                        color = Color(0xFF94A3B8),
+                        color = Color(0xFFCBD5E1),
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = "MAIN RECEPTION",
                         fontSize = 10.sp,
-                        color = Color(0xFF94A3B8),
+                        color = Color(0xFFCBD5E1),
                         fontWeight = FontWeight.SemiBold
                     )
                 }

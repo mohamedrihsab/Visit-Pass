@@ -78,11 +78,14 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.LocalTextStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
+import com.example.ui.components.CompanyBrandLogoBadge
 import com.example.ui.components.SafetyInfoDialog
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -139,7 +142,13 @@ import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.StatusError
 import com.example.ui.theme.StatusSuccess
 import com.example.ui.theme.StatusWarning
+import com.example.ui.theme.liquidAppearAnimation
+import com.example.ui.theme.liquidButtonGlass
+import com.example.ui.theme.liquidFilterChipColors
+import com.example.ui.theme.liquidInnerGlass
 import com.example.ui.theme.liquidPressEffect
+import com.example.ui.theme.liquidSwitchColors
+import com.example.ui.theme.liquidTextFieldColors
 import com.example.util.GoogleDriveExportHelper
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -169,6 +178,7 @@ fun AdminDashboardScreen(
     val visitPurposes by viewModel.visitPurposes.collectAsState()
     val departmentEmails by viewModel.departmentEmails.collectAsState()
     val autoResetSec by viewModel.autoResetSeconds.collectAsState()
+    val screenTimeoutMin by viewModel.screenTimeoutMinutes.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val smtpConfig by viewModel.smtpConfig.collectAsState()
     val isFirebaseLoggedIn = currentUser != null
@@ -330,113 +340,124 @@ fun AdminDashboardScreen(
         // Top Banner with Role Mode Switchers (iOS 26 Liquid Glass)
         item(key = "top_banner_card") {
             LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 0),
                 cornerRadius = 24.dp,
                 elevated = true
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            CompanyBrandLogoBadge(
                                 modifier = Modifier
-                                    .size(44.dp)
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                            ) {
-                                if (!activeBranch.logoUri.isNullOrBlank()) {
-                                    AsyncImage(
-                                        model = activeBranch.logoUri,
-                                        contentDescription = "${activeBranch.name} Logo",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.White)
-                                            .padding(4.dp),
-                                        contentScale = ContentScale.Fit
-                                    )
-                                } else {
-                                    androidx.compose.foundation.Image(
-                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
-                                        contentDescription = "SAIT Group Logo",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.White)
-                                            .padding(4.dp),
-                                        contentScale = ContentScale.Fit
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
+                                    .width(72.dp)
+                                    .height(32.dp),
+                                logoUri = activeBranch.logoUri,
+                                branchName = activeBranch.name,
+                                testTag = "company_logo_admin"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = "SAIT Group Admin Portal",
-                                    fontSize = 18.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "Terminal Role & Multi-Branch Control",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
 
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(8.dp),
+                                    cornerRadius = 8.dp,
+                                    accentColor = MaterialTheme.colorScheme.primary
+                                )
+                                .padding(horizontal = 7.dp, vertical = 3.dp)
                         ) {
                             Text(
                                 text = "Admin Mode",
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                maxLines = 1
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Put this tablet into one of the 3 user access modes:",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
                             onClick = { viewModel.enterReceptionistMode() },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                             modifier = Modifier
                                 .weight(1f)
+                                .heightIn(min = 38.dp)
+                                .liquidPressEffect()
                                 .testTag("btn_switch_to_receptionist")
                         ) {
-                            Icon(imageVector = Icons.Default.SupportAgent, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Receptionist Mode", fontSize = 12.sp)
+                            Icon(imageVector = Icons.Default.SupportAgent, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Receptionist Mode",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
 
                         Button(
                             onClick = { viewModel.enterKioskMode() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                             modifier = Modifier
                                 .weight(1f)
+                                .heightIn(min = 38.dp)
+                                .liquidButtonGlass(cornerRadius = 10.dp)
+                                .liquidPressEffect()
                                 .testTag("btn_switch_to_kiosk")
                         ) {
-                            Icon(imageVector = Icons.Default.Store, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Launch Kiosk", fontSize = 12.sp)
+                            Icon(imageVector = Icons.Default.Store, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Launch Kiosk",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }
@@ -445,38 +466,57 @@ fun AdminDashboardScreen(
 
         // Active Branch Selection Card
         item(key = "active_branch_card") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            LiquidGlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 35),
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Business,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        accentColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Business,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = "Active Device Branch",
-                                    fontSize = 16.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "Current: ${activeBranch.name} (${activeBranch.countryCode})",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -484,72 +524,73 @@ fun AdminDashboardScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text(
-                        text = "Select which branch or company this kiosk/tablet terminal represents. Switching branch automatically updates the pass code prefix, facility location, and default mobile country code.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         branches.forEach { branch ->
                             val isSelected = branch.id == activeBranch.id || branch.name == activeBranch.name
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                tonalElevation = if (isSelected) 2.dp else 0.dp,
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(12.dp),
+                                        cornerRadius = 12.dp,
+                                        selected = isSelected
+                                    )
                                     .clickable(enabled = isFirebaseLoggedIn) { viewModel.setBranch(branch) }
-                                    .testTag("branch_item_${branch.shortCode}")
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    .testTag("branch_item_${branch.shortCode}"),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                                            contentDescription = null,
-                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Column {
-                                            Text(
-                                                text = branch.name,
-                                                fontSize = 14.sp,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text(
-                                                text = "Code: ${branch.shortCode} • Dial: ${branch.countryCode} • ${branch.defaultDepartments.size} Depts",
-                                                fontSize = 11.sp,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-
-                                    Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                                    ) {
+                                    Icon(
+                                        imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                                        contentDescription = null,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column(modifier = Modifier.weight(1f, fill = false)) {
                                         Text(
-                                            text = branch.city,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                            text = branch.name,
+                                            fontSize = 13.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = "Code: ${branch.shortCode} • Dial: ${branch.countryCode} • ${branch.defaultDepartments.size} Depts",
+                                            fontSize = 10.5.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
+                                }
+
+                                Spacer(modifier = Modifier.width(6.dp))
+
+                                Box(
+                                    modifier = Modifier
+                                        .liquidInnerGlass(
+                                            shape = RoundedCornerShape(6.dp),
+                                            cornerRadius = 6.dp,
+                                            selected = isSelected,
+                                            accentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                        )
+                                        .padding(horizontal = 7.dp, vertical = 2.5.dp)
+                                ) {
+                                    Text(
+                                        text = branch.city,
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                                        maxLines = 1
+                                    )
                                 }
                             }
                         }
@@ -560,120 +601,109 @@ fun AdminDashboardScreen(
 
         // Appearance & Display Theme Card
         item(key = "theme_settings_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 60)
                     .testTag("card_theme_settings"),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .size(36.dp)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(10.dp),
+                                    cornerRadius = 10.dp,
+                                    accentColor = MaterialTheme.colorScheme.primary
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Palette,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
                             Text(
                                 text = "Appearance & Theme",
-                                fontSize = 16.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "Light & Dark Mode Color Palette",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "Liquid Glass 2.0 Light & Dark Mode Palette",
+                                fontSize = 11.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text(
-                        text = "Choose the display theme for this kiosk terminal. High-contrast colors ensure status bar and notification panel icons remain prominently visible in both light and dark environments.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
                     val themeOptions = listOf(
-                        Triple(KioskPreferences.THEME_LIGHT, "Light Theme (Corporate Crisp)", Icons.Default.LightMode),
-                        Triple(KioskPreferences.THEME_DARK, "Dark Theme (Midnight Obsidian)", Icons.Default.DarkMode),
+                        Triple(KioskPreferences.THEME_LIGHT, "Light Theme (Crystal Sky Glass)", Icons.Default.LightMode),
+                        Triple(KioskPreferences.THEME_DARK, "Dark Theme (Midnight Sapphire Glass)", Icons.Default.DarkMode),
                         Triple(KioskPreferences.THEME_SYSTEM, "System Default", Icons.Default.BrightnessAuto)
                     )
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         themeOptions.forEach { (mode, label, icon) ->
                             val isSelected = themeMode == mode
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                tonalElevation = if (isSelected) 2.dp else 0.dp,
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(12.dp),
+                                        cornerRadius = 12.dp,
+                                        selected = isSelected
+                                    )
                                     .clickable(enabled = isFirebaseLoggedIn) { viewModel.setThemeMode(mode) }
-                                    .testTag("theme_option_$mode")
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    .testTag("theme_option_$mode"),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 14.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    modifier = Modifier.weight(1f, fill = false)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Column {
-                                            Text(
-                                                text = label,
-                                                fontSize = 14.sp,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text(
-                                                text = if (mode == KioskPreferences.THEME_LIGHT) "Recommended for daylight reception desks"
-                                                else if (mode == KioskPreferences.THEME_DARK) "Deep obsidian palette with vivid cyan accents"
-                                                else "Follows system Android OS setting",
-                                                fontSize = 11.sp,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-
                                     Icon(
-                                        imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                                        imageVector = icon,
                                         contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                        modifier = Modifier.size(20.dp)
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = label,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
+
+                                Icon(
+                                    imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                                    contentDescription = null,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
                             }
                         }
                     }
@@ -683,136 +713,161 @@ fun AdminDashboardScreen(
 
         // Firebase Cloud Firestore Authentication & Database Card
         item(key = "firebase_auth_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.CloudDone,
-                                contentDescription = null,
-                                tint = if (isFirebaseLoggedIn) StatusSuccess else MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        accentColor = if (isFirebaseLoggedIn) StatusSuccess else MaterialTheme.colorScheme.primary
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CloudDone,
+                                    contentDescription = null,
+                                    tint = if (isFirebaseLoggedIn) StatusSuccess else MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Firebase Cloud Firestore",
-                                fontSize = 16.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
+                        Spacer(modifier = Modifier.width(6.dp))
+
                         // Connection Status Pill
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isFirebaseLoggedIn) StatusSuccess.copy(alpha = 0.15f) else StatusWarning.copy(alpha = 0.15f)
+                        Row(
+                            modifier = Modifier
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(8.dp),
+                                    cornerRadius = 8.dp,
+                                    accentColor = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning
+                                )
+                                .padding(horizontal = 6.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(if (isFirebaseLoggedIn) StatusSuccess else StatusWarning)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = if (isFirebaseLoggedIn) "Connected & Unlocked" else "Login Required to Edit",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning
-                                )
-                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isFirebaseLoggedIn) StatusSuccess else StatusWarning)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (isFirebaseLoggedIn) "Connected" else "Login Required",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning,
+                                maxLines = 1
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Real-time Multi-Device Sync: Every admin edit requires Firebase login and is synchronized instantly across all kiosk tablets and receptionist/admin terminals via Cloud Firestore.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // Account Status or Sign-In Button
                     if (isFirebaseLoggedIn) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier.fillMaxWidth()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(12.dp),
+                                    cornerRadius = 12.dp,
+                                    accentColor = StatusSuccess
+                                )
+                                .padding(10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f, fill = false)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.AccountCircle,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f, fill = false)) {
+                                    Text(
+                                        text = currentUser?.displayName ?: "Reception Admin",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Column {
-                                        Text(
-                                            text = currentUser?.displayName ?: "Reception Admin",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp
-                                        )
-                                        Text(
-                                            text = currentUser?.email ?: "",
-                                            fontSize = 11.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
+                                    Text(
+                                        text = currentUser?.email ?: "",
+                                        fontSize = 10.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
+                            }
 
-                                TextButton(onClick = { signOut() }) {
-                                    Icon(imageVector = Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Sign Out", fontSize = 12.sp)
-                                }
+                            Spacer(modifier = Modifier.width(6.dp))
+
+                            TextButton(
+                                onClick = { signOut() },
+                                modifier = Modifier.liquidPressEffect()
+                            ) {
+                                Icon(imageVector = Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(15.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Sign Out", fontSize = 11.5.sp)
                             }
                         }
                     } else {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = StatusWarning.copy(alpha = 0.12f),
-                            modifier = Modifier.fillMaxWidth()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(10.dp),
+                                    cornerRadius = 10.dp,
+                                    accentColor = StatusWarning
+                                )
+                                .padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = null,
-                                    tint = StatusWarning,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Admin editing is locked. Sign in with Google below to unlock all Admin edits and sync changes to Firebase.",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = StatusWarning,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Admin editing is locked. Sign in with Google below to unlock all Admin edits and sync changes to Firebase.",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -822,54 +877,76 @@ fun AdminDashboardScreen(
                             enabled = !isSigningIn,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(48.dp)
+                                .padding(horizontal = 2.dp)
+                                .heightIn(min = 42.dp)
+                                .liquidButtonGlass(cornerRadius = 12.dp, enabled = !isSigningIn)
+                                .liquidPressEffect(enabled = !isSigningIn)
                                 .testTag("btn_google_signin"),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                disabledContainerColor = Color.Transparent,
+                                disabledContentColor = Color.White.copy(alpha = 0.7f)
+                            )
                         ) {
                             if (isSigningIn) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Signing in...")
+                                Text("Signing in...", color = Color.White, fontSize = 12.sp)
                             } else {
-                                Icon(imageVector = Icons.Default.Login, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Sign In with Google (Unlock Admin Edits & Sync)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Sync Stats
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text("In Cloud Firestore", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("$syncedCount Records", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = StatusSuccess)
-                            }
-                        }
-
-                        Surface(
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Pending Sync", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("$unsyncedCount Records", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (unsyncedCount > 0) StatusWarning else MaterialTheme.colorScheme.outline)
+                                Icon(imageVector = Icons.Default.Login, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Sign In with Google", fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = Color.White, maxLines = 1)
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
+
+                    // Sync Stats
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(12.dp),
+                                    cornerRadius = 12.dp,
+                                    accentColor = StatusSuccess
+                                )
+                                .padding(10.dp)
+                        ) {
+                            Text("In Cloud Firestore", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("$syncedCount Records", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = StatusSuccess, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(12.dp),
+                                    cornerRadius = 12.dp,
+                                    accentColor = if (unsyncedCount > 0) StatusWarning else MaterialTheme.colorScheme.secondary
+                                )
+                                .padding(10.dp)
+                        ) {
+                            Text("Pending Sync", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                "$unsyncedCount Records",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (unsyncedCount > 0) StatusWarning else MaterialTheme.colorScheme.secondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // Sync All Button
                     Button(
@@ -877,19 +954,28 @@ fun AdminDashboardScreen(
                         enabled = !isSyncing && isFirebaseLoggedIn,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp)
+                            .padding(horizontal = 2.dp)
+                            .heightIn(min = 42.dp)
+                            .liquidButtonGlass(cornerRadius = 12.dp, enabled = !isSyncing && isFirebaseLoggedIn)
+                            .liquidPressEffect(enabled = !isSyncing && isFirebaseLoggedIn)
                             .testTag("btn_sync_firestore"),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.White.copy(alpha = 0.7f)
+                        )
                     ) {
                         if (isSyncing) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Syncing with Firestore...", fontSize = 13.sp)
+                            Text("Syncing with Firestore...", fontSize = 12.sp, color = Color.White)
                         } else {
-                            Icon(imageVector = Icons.Default.CloudSync, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(imageVector = Icons.Default.CloudSync, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Sync Pending & Settings to Firestore", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text("Sync Pending to Firestore", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }
@@ -898,41 +984,57 @@ fun AdminDashboardScreen(
 
         // Branch & Department Management Header Card (Flattened for Smooth LazyColumn Scrolling)
         item(key = "branch_mgmt_header") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            Icon(
-                                imageVector = Icons.Default.Business,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f, fill = false)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        accentColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Business,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = "Branches, Logos & Safety Info",
-                                    fontSize = 16.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = if (isFirebaseLoggedIn) "Cloud Synced & Unlocked for Edits" else "Sign in with Google above to edit",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning
+                                    color = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
+
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         Button(
                             onClick = {
@@ -946,22 +1048,24 @@ fun AdminDashboardScreen(
                             },
                             enabled = isFirebaseLoggedIn,
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.testTag("btn_add_branch")
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                disabledContainerColor = Color.Transparent,
+                                disabledContentColor = Color.White.copy(alpha = 0.7f)
+                            ),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                            modifier = Modifier
+                                .heightIn(min = 36.dp)
+                                .liquidButtonGlass(cornerRadius = 10.dp, enabled = isFirebaseLoggedIn)
+                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                .testTag("btn_add_branch")
                         ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.White)
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Add Branch", fontSize = 12.sp)
+                            Text("Add Branch", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Manage company details, default mobile country code, facility location text, company logos, safety guidelines, emergency helplines & contact person, and evacuation plans for each branch.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
                 }
             }
         }
@@ -971,63 +1075,89 @@ fun AdminDashboardScreen(
             items = branches,
             key = { branch -> "branch_card_${branch.id}" }
         ) { branch ->
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            LiquidGlassCard(
+                cornerRadius = 18.dp,
+                elevated = false,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(branch.name, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = branch.name,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .liquidInnerGlass(
+                                            shape = RoundedCornerShape(5.dp),
+                                            cornerRadius = 5.dp,
+                                            accentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                        .padding(horizontal = 4.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
                                         text = branch.shortCode,
-                                        fontSize = 10.sp,
+                                        fontSize = 9.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        color = MaterialTheme.colorScheme.primary,
+                                        maxLines = 1
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = MaterialTheme.colorScheme.secondaryContainer
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .liquidInnerGlass(
+                                            shape = RoundedCornerShape(5.dp),
+                                            cornerRadius = 5.dp,
+                                            accentColor = MaterialTheme.colorScheme.secondary
+                                        )
+                                        .padding(horizontal = 4.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
                                         text = branch.countryCode,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        maxLines = 1
                                     )
                                 }
                             }
                             Text(
                                 text = "${branch.city} • ${branch.subtitle}",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontSize = 10.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = "Facility Location: ${branch.displayFacilityLocation}",
-                                fontSize = 11.sp,
+                                fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
+                        Spacer(modifier = Modifier.width(6.dp))
+
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Edit Branch Details button
@@ -1045,16 +1175,17 @@ fun AdminDashboardScreen(
                                 shape = RoundedCornerShape(8.dp),
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                                 modifier = Modifier
-                                    .height(30.dp)
+                                    .heightIn(min = 30.dp)
+                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                     .testTag("btn_edit_branch_${branch.shortCode}")
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = "Edit Branch Details",
-                                    modifier = Modifier.size(13.dp)
+                                    modifier = Modifier.size(12.dp)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Edit Branch", fontSize = 11.sp)
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text("Edit Branch", fontSize = 10.5.sp, maxLines = 1)
                             }
 
                             // Delete Branch button (if more than 1)
@@ -1062,23 +1193,25 @@ fun AdminDashboardScreen(
                                 IconButton(
                                     onClick = { branchToDelete = branch },
                                     enabled = isFirebaseLoggedIn,
-                                    modifier = Modifier.size(32.dp)
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Delete Branch",
-                                        tint = if (isFirebaseLoggedIn) StatusError else MaterialTheme.colorScheme.outline,
-                                        modifier = Modifier.size(18.dp)
+                                        tint = if (isFirebaseLoggedIn) StatusError else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Text("Departments (${branch.defaultDepartments.size}):", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Text("Departments (${branch.defaultDepartments.size}):", fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1086,62 +1219,73 @@ fun AdminDashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         branch.defaultDepartments.forEach { dept ->
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                tonalElevation = 1.dp
+                            Row(
+                                modifier = Modifier
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(8.dp),
+                                        cornerRadius = 8.dp
+                                    )
+                                    .padding(start = 7.dp, end = 4.dp, top = 3.dp, bottom = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = dept, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                                    if (branch.defaultDepartments.size > 1 && isFirebaseLoggedIn) {
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        IconButton(
-                                            onClick = { viewModel.removeDepartment(branch.id, dept) },
-                                            modifier = Modifier.size(18.dp)
-                                        ) {
-                                            Icon(imageVector = Icons.Default.Close, contentDescription = "Remove department", modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.outline)
-                                        }
+                                Text(
+                                    text = dept,
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (branch.defaultDepartments.size > 1 && isFirebaseLoggedIn) {
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    IconButton(
+                                        onClick = { viewModel.removeDepartment(branch.id, dept) },
+                                        modifier = Modifier.size(16.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove department",
+                                            modifier = Modifier.size(11.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
                         }
 
                         // Add department button chip
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier.clickable(enabled = isFirebaseLoggedIn) {
-                                branchToAddDept = branch
-                                newDeptNameInput = ""
-                            }
+                        Row(
+                            modifier = Modifier
+                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(8.dp),
+                                    cornerRadius = 8.dp,
+                                    accentColor = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else null
+                                )
+                                .clickable(enabled = isFirebaseLoggedIn) {
+                                    branchToAddDept = branch
+                                    newDeptNameInput = ""
+                                }
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "+ Dept",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "+ Dept",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Company Logo Management (Always Solid White Background)
                     Row(
@@ -1149,52 +1293,32 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = Color.White,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                            ) {
-                                if (!branch.logoUri.isNullOrBlank()) {
-                                    AsyncImage(
-                                        model = branch.logoUri,
-                                        contentDescription = "${branch.name} Logo",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.White)
-                                            .padding(2.dp),
-                                        contentScale = ContentScale.Fit
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.White),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Business,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f, fill = false)) {
+                            CompanyBrandLogoBadge(
+                                modifier = Modifier.size(32.dp),
+                                logoUri = branch.logoUri,
+                                branchName = branch.name,
+                                cornerRadius = 7.dp,
+                                horizontalPadding = 3.dp,
+                                verticalPadding = 2.dp,
+                                testTag = "branch_item_logo_${branch.id}"
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text("Company Logo", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
+                                Text("Company Logo", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
                                 Text(
-                                    text = if (branch.logoUri != null) "Custom Logo Active (PNG / WEBP / JPG)" else "Preferred: PNG (transparent) / WEBP / JPG",
-                                    fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = if (branch.logoUri != null) "Custom Logo Active" else "Preferred: PNG / WEBP / JPG",
+                                    fontSize = 9.5.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             OutlinedButton(
                                 onClick = {
                                     selectedBranchForLogo = branch
@@ -1204,12 +1328,15 @@ fun AdminDashboardScreen(
                                 },
                                 enabled = isFirebaseLoggedIn,
                                 shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                modifier = Modifier.height(32.dp).testTag("btn_upload_logo_${branch.shortCode}")
+                                contentPadding = PaddingValues(horizontal = 7.dp, vertical = 3.dp),
+                                modifier = Modifier
+                                    .heightIn(min = 30.dp)
+                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                    .testTag("btn_upload_logo_${branch.shortCode}")
                             ) {
-                                Icon(imageVector = Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(if (branch.logoUri != null) "Change" else "Upload Logo", fontSize = 11.sp)
+                                Icon(imageVector = Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(13.dp))
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(if (branch.logoUri != null) "Change" else "Upload Logo", fontSize = 10.5.sp, maxLines = 1)
                             }
 
                             if (branch.logoUri != null) {
@@ -1218,16 +1345,19 @@ fun AdminDashboardScreen(
                                     enabled = isFirebaseLoggedIn,
                                     shape = RoundedCornerShape(8.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                    modifier = Modifier.height(32.dp).testTag("btn_remove_logo_${branch.shortCode}")
+                                    contentPadding = PaddingValues(horizontal = 7.dp, vertical = 3.dp),
+                                    modifier = Modifier
+                                        .heightIn(min = 30.dp)
+                                        .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                        .testTag("btn_remove_logo_${branch.shortCode}")
                                 ) {
-                                    Text("Remove", fontSize = 11.sp)
+                                    Text("Remove", fontSize = 10.5.sp, maxLines = 1)
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Safety Information & Emergency Exit Evacuation Plan
                     Row(
@@ -1235,20 +1365,21 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.HealthAndSafety,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
+                                    modifier = Modifier.size(15.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(5.dp))
                                 Text(
                                     text = "Safety & Emergency Info",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
                                 )
                             }
                             Text(
@@ -1259,10 +1390,14 @@ fun AdminDashboardScreen(
                                         append(" • ${branch.safetyContactName}")
                                     }
                                 },
-                                fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontSize = 9.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(6.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             OutlinedButton(
@@ -1270,10 +1405,13 @@ fun AdminDashboardScreen(
                                     previewSafetyBranch = branch
                                 },
                                 shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                modifier = Modifier.height(32.dp).testTag("btn_preview_safety_${branch.shortCode}")
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
+                                modifier = Modifier
+                                    .heightIn(min = 30.dp)
+                                    .liquidPressEffect()
+                                    .testTag("btn_preview_safety_${branch.shortCode}")
                             ) {
-                                Text("Preview", fontSize = 11.sp)
+                                Text("Preview", fontSize = 10.5.sp, maxLines = 1)
                             }
 
                             Button(
@@ -1287,12 +1425,22 @@ fun AdminDashboardScreen(
                                 },
                                 enabled = isFirebaseLoggedIn,
                                 shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                modifier = Modifier.height(32.dp).testTag("btn_edit_safety_${branch.shortCode}")
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.White,
+                                    disabledContainerColor = Color.Transparent,
+                                    disabledContentColor = Color.White.copy(alpha = 0.7f)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
+                                modifier = Modifier
+                                    .heightIn(min = 30.dp)
+                                    .liquidButtonGlass(cornerRadius = 8.dp, enabled = isFirebaseLoggedIn)
+                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                    .testTag("btn_edit_safety_${branch.shortCode}")
                             ) {
-                                Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(13.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Edit Safety", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color.White)
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text("Edit Safety", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
                             }
                         }
                     }
@@ -1302,13 +1450,12 @@ fun AdminDashboardScreen(
 
         // Purpose of Visit Options Management Card
         item(key = "visit_purposes_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("card_visit_purposes"),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -1317,13 +1464,24 @@ fun AdminDashboardScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(12.dp),
+                                        cornerRadius = 12.dp,
+                                        accentColor = MaterialTheme.colorScheme.secondary
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = "Purpose of Visit Options",
@@ -1346,24 +1504,26 @@ fun AdminDashboardScreen(
                             },
                             enabled = isFirebaseLoggedIn,
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.testTag("btn_add_visit_purpose")
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                disabledContainerColor = Color.Transparent,
+                                disabledContentColor = Color.White.copy(alpha = 0.7f)
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier
+                                .height(38.dp)
+                                .liquidButtonGlass(cornerRadius = 10.dp, enabled = isFirebaseLoggedIn)
+                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                .testTag("btn_add_visit_purpose")
                         ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Add Purpose", fontSize = 12.sp)
+                            Text("Add Purpose", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Customize the Purpose of Visit options shown on the Visitor Registration screen. Changes are synced across all terminals via Cloud Firestore.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1371,70 +1531,71 @@ fun AdminDashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         visitPurposes.forEach { purpose ->
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
-                                tonalElevation = 1.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(start = 10.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = purpose,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                            Row(
+                                modifier = Modifier
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        accentColor = MaterialTheme.colorScheme.secondary
                                     )
-                                    if (visitPurposes.size > 1 && isFirebaseLoggedIn) {
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        IconButton(
-                                            onClick = { viewModel.removeVisitPurpose(purpose) },
-                                            modifier = Modifier
-                                                .size(20.dp)
-                                                .testTag("btn_remove_purpose_${purpose.replace(" ", "_")}")
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "Remove $purpose",
-                                                modifier = Modifier.size(13.dp),
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        }
+                                    .padding(start = 10.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = purpose,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (visitPurposes.size > 1 && isFirebaseLoggedIn) {
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    IconButton(
+                                        onClick = { viewModel.removeVisitPurpose(purpose) },
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .testTag("btn_remove_purpose_${purpose.replace(" ", "_")}")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove $purpose",
+                                            modifier = Modifier.size(13.dp),
+                                            tint = MaterialTheme.colorScheme.secondary
+                                        )
                                     }
                                 }
                             }
                         }
 
                         // Quick "+ Purpose" chip
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant,
+                        Row(
                             modifier = Modifier
+                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(10.dp),
+                                    cornerRadius = 10.dp,
+                                    accentColor = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else null
+                                )
                                 .clickable(enabled = isFirebaseLoggedIn) {
                                     newPurposeNameInput = ""
                                     showAddPurposeDialog = true
                                 }
-                                .testTag("chip_add_visit_purpose")
+                                .padding(horizontal = 10.dp, vertical = 7.dp)
+                                .testTag("chip_add_visit_purpose"),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "+ Add Option",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "+ Add Option",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFirebaseLoggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            )
                         }
                     }
                 }
@@ -1443,11 +1604,10 @@ fun AdminDashboardScreen(
 
         // Automated Department Email Notification Groups Card
         item(key = "email_alerts_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -1456,12 +1616,23 @@ fun AdminDashboardScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Email,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
@@ -1478,15 +1649,6 @@ fun AdminDashboardScreen(
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "When a visitor successfully checks in at any kiosk, an automated email notification is dispatched to the group of email addresses defined for that department.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
@@ -1505,10 +1667,7 @@ fun AdminDashboardScreen(
                                 onClick = { selectedEmailBranchId = branch.id },
                                 label = { Text(branch.shortCode, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                                 shape = RoundedCornerShape(8.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                colors = liquidFilterChipColors()
                             )
                         }
                     }
@@ -1530,10 +1689,14 @@ fun AdminDashboardScreen(
                             val key = "${currentSelectedBranch.id}::${dept}"
                             val customConfigured = departmentEmails[key]
 
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.fillMaxWidth()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(12.dp),
+                                        cornerRadius = 12.dp,
+                                        tint = if (customConfigured != null) StatusSuccess else null
+                                    )
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -1544,7 +1707,12 @@ fun AdminDashboardScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(text = dept, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                            Text(
+                                                text = dept,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
                                             if (customConfigured != null) {
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Surface(
@@ -1582,7 +1750,9 @@ fun AdminDashboardScreen(
                                         enabled = isFirebaseLoggedIn,
                                         shape = RoundedCornerShape(8.dp),
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                        modifier = Modifier.height(34.dp)
+                                        modifier = Modifier
+                                            .height(34.dp)
+                                            .liquidPressEffect()
                                     ) {
                                         Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -1598,13 +1768,12 @@ fun AdminDashboardScreen(
 
         // Outgoing Mail Server (SMTP) & Automated Delivery Engine Card
         item(key = "smtp_settings_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("card_smtp_settings"),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -1614,8 +1783,11 @@ fun AdminDashboardScreen(
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(12.dp),
+                                    cornerRadius = 12.dp,
+                                    tint = MaterialTheme.colorScheme.primary
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -1641,56 +1813,17 @@ fun AdminDashboardScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Configure automated email dispatch when visitors register. You can deliver automatically via Google Firebase Trigger Email extension or configure a custom corporate SMTP outgoing mail server.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Educational Callout: What is Firebase Trigger Email vs Direct SMTP
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Understanding Email Delivery Options",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "• Firebase Trigger Email requires installing the 'firestore-send-email' extension in your Google Firebase Console (requires Blaze billing). Without that extension, documents in 'mail' are logged in Firestore but not emailed.\n• Direct Outgoing SMTP Server (Recommended): Connects directly to Gmail, Office 365, or company SMTP to deliver emails automatically in the background.\n• If SMTP is not yet configured, the app will automatically open your device email app pre-filled so no alerts are missed.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                lineHeight = 16.sp
-                            )
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Option A: Firebase Cloud Email Delivery
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(14.dp),
+                                cornerRadius = 14.dp,
+                                tint = if (smtpFirebaseEnabled) StatusSuccess else null
+                            )
                     ) {
                         Row(
                             modifier = Modifier
@@ -1738,6 +1871,7 @@ fun AdminDashboardScreen(
                                     val updated = smtpConfig.copy(firebaseTriggerEnabled = it)
                                     viewModel.updateSmtpConfig(updated)
                                 },
+                                colors = liquidSwitchColors(),
                                 modifier = Modifier.testTag("switch_firebase_email")
                             )
                         }
@@ -1746,10 +1880,14 @@ fun AdminDashboardScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Option B: Outgoing Mail Server (SMTP) Custom Configuration
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(14.dp),
+                                cornerRadius = 14.dp,
+                                tint = if (smtpEnabled) MaterialTheme.colorScheme.primary else null
+                            )
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Row(
@@ -1781,6 +1919,7 @@ fun AdminDashboardScreen(
                                         val updated = smtpConfig.copy(enabled = it)
                                         viewModel.updateSmtpConfig(updated)
                                     },
+                                    colors = liquidSwitchColors(),
                                     modifier = Modifier.testTag("switch_smtp_enabled")
                                 )
                             }
@@ -1813,7 +1952,8 @@ fun AdminDashboardScreen(
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
                                             label = { Text("Gmail", fontSize = 11.sp) },
-                                            shape = RoundedCornerShape(8.dp)
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = liquidFilterChipColors()
                                         )
                                         FilterChip(
                                             selected = smtpHost == "smtp.office365.com",
@@ -1824,7 +1964,8 @@ fun AdminDashboardScreen(
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
                                             label = { Text("Office 365", fontSize = 11.sp) },
-                                            shape = RoundedCornerShape(8.dp)
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = liquidFilterChipColors()
                                         )
                                         FilterChip(
                                             selected = smtpHost == "mail.saitgroup.com",
@@ -1835,7 +1976,8 @@ fun AdminDashboardScreen(
                                                 if (smtpSenderName.isBlank()) smtpSenderName = "SAIT Group Visitor Alert"
                                             },
                                             label = { Text("Corporate SMTP", fontSize = 11.sp) },
-                                            shape = RoundedCornerShape(8.dp)
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = liquidFilterChipColors()
                                         )
                                     }
 
@@ -1854,6 +1996,7 @@ fun AdminDashboardScreen(
                                             placeholder = { Text("smtp.gmail.com", fontSize = 12.sp) },
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = liquidTextFieldColors(),
                                             modifier = Modifier
                                                 .weight(2.2f)
                                                 .testTag("input_smtp_host")
@@ -1867,6 +2010,7 @@ fun AdminDashboardScreen(
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = liquidTextFieldColors(),
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .testTag("input_smtp_port")
@@ -1895,10 +2039,7 @@ fun AdminDashboardScreen(
                                                     },
                                                     label = { Text(enc, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
                                                     shape = RoundedCornerShape(8.dp),
-                                                    colors = FilterChipDefaults.filterChipColors(
-                                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                                    )
+                                                    colors = liquidFilterChipColors(useSecondaryAccent = true)
                                                 )
                                             }
                                         }
@@ -1912,6 +2053,7 @@ fun AdminDashboardScreen(
                                         placeholder = { Text("kiosk-alerts@saitgroup.com", fontSize = 12.sp) },
                                         singleLine = true,
                                         shape = RoundedCornerShape(10.dp),
+                                        colors = liquidTextFieldColors(),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("input_smtp_username")
@@ -1935,6 +2077,7 @@ fun AdminDashboardScreen(
                                         },
                                         singleLine = true,
                                         shape = RoundedCornerShape(10.dp),
+                                        colors = liquidTextFieldColors(),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("input_smtp_password")
@@ -1949,6 +2092,7 @@ fun AdminDashboardScreen(
                                             placeholder = { Text("no-reply@saitgroup.com", fontSize = 12.sp) },
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = liquidTextFieldColors(),
                                             modifier = Modifier
                                                 .weight(1.5f)
                                                 .testTag("input_smtp_sender_email")
@@ -1961,6 +2105,7 @@ fun AdminDashboardScreen(
                                             placeholder = { Text("SAIT Visitor Pass", fontSize = 12.sp) },
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = liquidTextFieldColors(),
                                             modifier = Modifier
                                                 .weight(1.3f)
                                                 .testTag("input_smtp_sender_name")
@@ -1984,11 +2129,20 @@ fun AdminDashboardScreen(
                                             )
                                             viewModel.updateSmtpConfig(newConfig)
                                         },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.White
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(44.dp)
+                                            .height(46.dp)
+                                            .liquidButtonGlass(
+                                                shape = RoundedCornerShape(12.dp),
+                                                cornerRadius = 12.dp,
+                                                baseColor = MaterialTheme.colorScheme.primary
+                                            )
+                                            .liquidPressEffect()
                                             .testTag("btn_save_smtp_config")
                                     ) {
                                         Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -2007,20 +2161,21 @@ fun AdminDashboardScreen(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
 
-                                    Row(
+                                    Column(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         OutlinedTextField(
                                             value = testRecipientEmail,
                                             onValueChange = { testRecipientEmail = it },
+                                            textStyle = LocalTextStyle.current.copy(fontSize = 13.sp),
                                             label = { Text("Test Recipient Email", fontSize = 12.sp) },
                                             placeholder = { Text("admin@saitgroup.com", fontSize = 12.sp) },
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = liquidTextFieldColors(),
                                             modifier = Modifier
-                                                .weight(1f)
+                                                .fillMaxWidth()
                                                 .testTag("input_test_recipient_email")
                                         )
 
@@ -2055,27 +2210,44 @@ fun AdminDashboardScreen(
                                             },
                                             enabled = !isTestingSmtp && testRecipientEmail.isNotBlank(),
                                             shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Transparent,
+                                                contentColor = Color.White,
+                                                disabledContainerColor = Color.Transparent,
+                                                disabledContentColor = Color.White.copy(alpha = 0.6f)
+                                            ),
                                             modifier = Modifier
-                                                .height(52.dp)
+                                                .fillMaxWidth()
+                                                .height(42.dp)
+                                                .liquidButtonGlass(
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    cornerRadius = 10.dp,
+                                                    baseColor = MaterialTheme.colorScheme.secondary,
+                                                    enabled = !isTestingSmtp && testRecipientEmail.isNotBlank()
+                                                )
+                                                .liquidPressEffect()
                                                 .testTag("btn_test_smtp_connection")
                                         ) {
                                             if (isTestingSmtp) {
                                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
                                             } else {
                                                 Icon(imageVector = Icons.Default.Send, contentDescription = null, modifier = Modifier.size(14.dp))
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text("Send Test", fontSize = 12.sp)
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text("Send Test Email", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                             }
                                         }
                                     }
 
                                     // Test Result Banner
                                     smtpTestResult?.let { (success, message) ->
-                                        Surface(
-                                            shape = RoundedCornerShape(10.dp),
-                                            color = if (success) StatusSuccess.copy(alpha = 0.15f) else StatusError.copy(alpha = 0.15f),
+                                        Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .liquidInnerGlass(
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    cornerRadius = 10.dp,
+                                                    tint = if (success) StatusSuccess else StatusError
+                                                )
                                                 .testTag("smtp_test_result_banner")
                                         ) {
                                             Row(
@@ -2108,38 +2280,45 @@ fun AdminDashboardScreen(
 
         // Google Drive Storage & Cloud Backup Card
         item(key = "google_drive_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.FolderShared,
-                            contentDescription = null,
-                            tint = Color(0xFF0F9D58),
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .liquidInnerGlass(
+                                    shape = RoundedCornerShape(10.dp),
+                                    cornerRadius = 10.dp,
+                                    tint = MaterialTheme.colorScheme.secondary
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FolderShared,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "Save Data to Google Drive",
-                            fontSize = 16.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "Store all visitor log entries directly in your Google Drive as a structured CSV document. Creates an instant, cost-free backup accessible from Google Sheets on any device.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Button(
                         onClick = {
@@ -2148,14 +2327,31 @@ fun AdminDashboardScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp)
+                            .padding(horizontal = 2.dp)
+                            .heightIn(min = 40.dp)
+                            .liquidButtonGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                cornerRadius = 12.dp,
+                                baseColor = MaterialTheme.colorScheme.secondary
+                            )
+                            .liquidPressEffect()
                             .testTag("btn_save_to_google_drive"),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F9D58))
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White
+                        )
                     ) {
-                        Icon(imageVector = Icons.Default.FolderShared, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save Logbook to Google Drive", fontWeight = FontWeight.Bold)
+                        Icon(imageVector = Icons.Default.FolderShared, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Save Logbook to Google Drive",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -2190,48 +2386,54 @@ fun AdminDashboardScreen(
                 )
             }
 
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(36.dp)
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f, fill = false)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.Sensors,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.Sensors,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = "Touchless Mobile Check-In (QR)",
-                                    fontSize = 16.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "Allow visitors to register from their smartphone",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -2245,17 +2447,14 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Start Kiosk in Touchless Mode", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                            Text(
-                                "When enabled, the Kiosk displays the large camera-scannable QR code by default.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Text("Start Kiosk in Touchless Mode", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = isTouchlessMode,
-                            onCheckedChange = { viewModel.setTouchlessKioskMode(it) }
+                            onCheckedChange = { viewModel.setTouchlessKioskMode(it) },
+                            colors = liquidSwitchColors()
                         )
                     }
 
@@ -2267,23 +2466,22 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Sequential Pass Numbering", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                            Text(
-                                "Passes increment sequentially (e.g., ${activeBranch.shortCode}-260001, 0002). Tap to reset counter.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Text("Sequential Pass Numbering", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedButton(
                             onClick = { viewModel.resetPassSequenceCounter() },
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.testTag("btn_reset_pass_sequence")
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .heightIn(min = 34.dp)
+                                .liquidPressEffect()
+                                .testTag("btn_reset_pass_sequence")
                         ) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Reset to 0001", fontSize = 12.sp)
+                            Text("Reset to 0001", fontSize = 11.sp, maxLines = 1)
                         }
                     }
 
@@ -2293,15 +2491,11 @@ fun AdminDashboardScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             text = "GitHub Pages Hosted Web Portal URL",
-                            fontSize = 14.sp,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "The QR code points directly to this live URL with branch & session parameters. When visitors submit the form on their phone, Cloud Firestore syncs in real-time to this tablet.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            lineHeight = 16.sp
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
 
                         OutlinedTextField(
@@ -2310,19 +2504,36 @@ fun AdminDashboardScreen(
                             label = { Text("GitHub Pages URL") },
                             placeholder = { Text("https://<username>.github.io/<repo>/") },
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = liquidTextFieldColors(),
                             singleLine = true
                         )
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Button(
                                 onClick = { viewModel.updateTouchlessGithubUrl(editingGithubUrl) },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(10.dp)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 38.dp)
+                                    .liquidButtonGlass(
+                                        shape = RoundedCornerShape(10.dp),
+                                        cornerRadius = 10.dp,
+                                        baseColor = MaterialTheme.colorScheme.primary
+                                    )
+                                    .liquidPressEffect(),
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.White
+                                )
                             ) {
-                                Text("Save GitHub URL", fontSize = 12.sp)
+                                Text("Save URL", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             }
 
                             OutlinedButton(
@@ -2330,101 +2541,78 @@ fun AdminDashboardScreen(
                                     editingGithubUrl = KioskPreferences.DEFAULT_GITHUB_PAGES_URL
                                     viewModel.updateTouchlessGithubUrl(editingGithubUrl)
                                 },
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 38.dp)
+                                    .liquidPressEffect()
                             ) {
-                                Text("Reset Default", fontSize = 12.sp)
+                                Text("Reset Default", fontSize = 11.5.sp, maxLines = 1)
                             }
+                        }
 
-                            FilledTonalButton(
-                                onClick = { showAdminWebPortalPreview = true },
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.OpenInBrowser,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Preview Form", fontSize = 12.sp)
-                            }
+                        FilledTonalButton(
+                            onClick = { showAdminWebPortalPreview = true },
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp)
+                                .heightIn(min = 38.dp)
+                                .liquidPressEffect()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.OpenInBrowser,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Preview Mobile Registration Web Portal", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
 
                     // Live QR Preview
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(14.dp),
+                                cornerRadius = 14.dp,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                     ) {
                         Column(
-                            modifier = Modifier.padding(14.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 text = "Live Dynamic QR Code Preview (${activeBranch.shortCode})",
-                                fontSize = 12.sp,
+                                fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             com.example.util.QrCodeView(
                                 content = touchlessUrl,
-                                size = 160.dp,
+                                size = 150.dp,
                                 centerLogoUri = activeBranch.logoUri,
                                 centerLabel = activeBranch.shortCode
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = touchlessUrl,
-                                fontSize = 10.sp,
-                                fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    // GitHub Pages 1-Minute Setup Guide
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Text(
-                                text = "🚀 Important: Syncing Form Changes to GitHub Pages",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "1. The updated web portal code (with Type of Visit & no Pass Number on confirmation) is saved in /docs/index.html and /index.html.\n" +
-                                        "2. Because GitHub Pages (mohamedrihsab.github.io) is hosted externally on GitHub, click 'Push to GitHub' in AI Studio (or tap 'Copy Updated HTML' below and paste into your GitHub repo's index.html) so your live GitHub Pages site updates.\n" +
-                                        "3. Tap 'Preview Form' above at any time to preview the updated form directly inside the app.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                lineHeight = 17.sp
+                                text = touchlessUrl,
+                                fontSize = 9.5.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            OutlinedButton(
-                                onClick = {
-                                    try {
-                                        val html = context.assets.open("mobile_portal.html").bufferedReader().use { it.readText() }
-                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        clipboard.setPrimaryClip(ClipData.newPlainText("index.html", html))
-                                        viewModel.showNotificationSnackbar("Updated docs/index.html copied to clipboard!")
-                                    } catch (e: Exception) {
-                                        viewModel.showNotificationSnackbar("Could not copy HTML: ${e.message}")
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Copy Updated index.html Code for GitHub", fontSize = 12.sp)
-                            }
                         }
                     }
                 }
@@ -2433,21 +2621,22 @@ fun AdminDashboardScreen(
 
         // Kiosk Configuration & Security Settings
         item(key = "kiosk_security_settings_card") {
-            Card(
+            LiquidGlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                cornerRadius = 22.dp,
+                elevated = false
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
                         text = "Kiosk Terminal & Security Settings",
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     // Admin PIN Setting - Masked, no default password displayed!
@@ -2456,10 +2645,12 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text("Admin PIN", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Security Status: Protected (••••)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Text("Admin PIN", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            Text("Security Status: Protected (••••)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                         }
+
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         OutlinedButton(
                             onClick = {
@@ -2468,11 +2659,14 @@ fun AdminDashboardScreen(
                             },
                             enabled = isFirebaseLoggedIn,
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.testTag("btn_change_pin")
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .heightIn(min = 34.dp)
+                                .testTag("btn_change_pin")
                         ) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Change PIN", fontSize = 12.sp)
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(13.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Change PIN", fontSize = 11.sp, maxLines = 1)
                         }
                     }
 
@@ -2484,10 +2678,12 @@ fun AdminDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text("Receptionist PIN", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Security Status: Protected (••••)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Text("Receptionist PIN", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            Text("Security Status: Protected (••••)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                         }
+
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         OutlinedButton(
                             onClick = {
@@ -2496,11 +2692,14 @@ fun AdminDashboardScreen(
                             },
                             enabled = isFirebaseLoggedIn,
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.testTag("btn_change_receptionist_pin")
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .heightIn(min = 34.dp)
+                                .testTag("btn_change_receptionist_pin")
                         ) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Change PIN", fontSize = 12.sp)
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(13.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Change PIN", fontSize = 11.sp, maxLines = 1)
                         }
                     }
 
@@ -2508,16 +2707,11 @@ fun AdminDashboardScreen(
 
                     // Auto-Reset Timer for Kiosk
                     Column {
-                        Text("Kiosk Auto-Reset Timer", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text(
-                            "Duration the visitor pass is shown on screen before resetting to a blank form for the next visitor.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text("Kiosk Auto-Reset Timer", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             listOf(5, 10, 15, 30).forEach { seconds ->
                                 val selected = autoResetSec == seconds
@@ -2527,6 +2721,55 @@ fun AdminDashboardScreen(
                                     enabled = isFirebaseLoggedIn,
                                     label = { Text("${seconds}s", fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
                                     shape = RoundedCornerShape(10.dp),
+                                    colors = liquidFilterChipColors(),
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                    // Screen & Display Timeout (All Devices)
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Screen & Display Timeout (All Devices)", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                when (screenTimeoutMin) {
+                                    KioskPreferences.TIMEOUT_ALWAYS_ON -> "Always On"
+                                    KioskPreferences.TIMEOUT_SYSTEM -> "System"
+                                    else -> "${screenTimeoutMin}m"
+                                },
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Text("Defines device sleep / keep awake policy across all kiosk terminals and reception tablets.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf(
+                                KioskPreferences.TIMEOUT_ALWAYS_ON to "Always On",
+                                KioskPreferences.TIMEOUT_1_MIN to "1 min",
+                                KioskPreferences.TIMEOUT_2_MIN to "2 min",
+                                KioskPreferences.TIMEOUT_5_MIN to "5 min",
+                                KioskPreferences.TIMEOUT_SYSTEM to "Default"
+                            ).forEach { (timeout, label) ->
+                                val selected = screenTimeoutMin == timeout
+                                FilterChip(
+                                    selected = selected,
+                                    onClick = { viewModel.updateScreenTimeoutMinutes(timeout) },
+                                    enabled = isFirebaseLoggedIn,
+                                    label = { Text(label, fontSize = 10.5.sp, maxLines = 1, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = liquidFilterChipColors(),
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -2542,6 +2785,9 @@ fun AdminDashboardScreen(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                            .height(42.dp)
+                            .liquidPressEffect()
                             .testTag("btn_clear_all_records"),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -3113,10 +3359,14 @@ fun AdminDashboardScreen(
                     )
 
                     // Evacuation Drawing Attachment Option
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                cornerRadius = 12.dp,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                     ) {
                         Row(
                             modifier = Modifier.padding(10.dp),
@@ -3140,7 +3390,10 @@ fun AdminDashboardScreen(
                                     },
                                     shape = RoundedCornerShape(8.dp),
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                    modifier = Modifier.height(32.dp).testTag("btn_upload_exit_plan")
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .liquidPressEffect()
+                                        .testTag("btn_upload_exit_plan")
                                 ) {
                                     Text(if (safetyExitDrawingUri != null) "Replace" else "Upload Drawing", fontSize = 11.sp)
                                 }
@@ -3150,7 +3403,9 @@ fun AdminDashboardScreen(
                                         shape = RoundedCornerShape(8.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusError),
                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                        modifier = Modifier.height(32.dp)
+                                        modifier = Modifier
+                                            .height(32.dp)
+                                            .liquidPressEffect()
                                     ) {
                                         Text("Reset", fontSize = 11.sp)
                                     }
@@ -3243,6 +3498,7 @@ fun BranchCountryDropdownField(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(10.dp),
+                colors = liquidTextFieldColors(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -3260,14 +3516,14 @@ fun BranchCountryDropdownField(
         }
 
         AnimatedVisibility(visible = expanded) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                tonalElevation = 4.dp,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                    .liquidInnerGlass(
+                        shape = RoundedCornerShape(12.dp),
+                        cornerRadius = 12.dp
+                    )
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     OutlinedTextField(
@@ -3297,6 +3553,7 @@ fun BranchCountryDropdownField(
                         },
                         singleLine = true,
                         shape = RoundedCornerShape(8.dp),
+                        colors = liquidTextFieldColors(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("${testTag}_search")
@@ -3318,7 +3575,7 @@ fun BranchCountryDropdownField(
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
                                 color = if (isSelected) {
-                                    MaterialTheme.colorScheme.primaryContainer
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
                                 } else {
                                     Color.Transparent
                                 },

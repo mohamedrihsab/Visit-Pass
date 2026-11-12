@@ -124,6 +124,10 @@ class VisitorViewModel(
     private val _autoResetSeconds = MutableStateFlow(kioskPrefs.kioskAutoResetSeconds)
     val autoResetSeconds: StateFlow<Int> = _autoResetSeconds.asStateFlow()
 
+    // Screen timeout setting for all terminals
+    private val _screenTimeoutMinutes = MutableStateFlow(kioskPrefs.screenTimeoutMinutes)
+    val screenTimeoutMinutes: StateFlow<Int> = _screenTimeoutMinutes.asStateFlow()
+
     // Theme Mode ("LIGHT", "DARK", "SYSTEM")
     private val _themeMode = MutableStateFlow(kioskPrefs.themeMode)
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
@@ -381,7 +385,7 @@ class VisitorViewModel(
                     syncAllSettingsToFirebase()
                 }
             },
-            onConfigUpdated = { remoteBranches, remoteEmails, remoteActiveBranch, remoteAdminPin, remoteReceptionistPin, remoteAutoReset, remoteTheme, remoteSmtp, remotePurposes ->
+            onConfigUpdated = { remoteBranches, remoteEmails, remoteActiveBranch, remoteAdminPin, remoteReceptionistPin, remoteAutoReset, remoteTheme, remoteSmtp, remotePurposes, remoteTimeout ->
                 if (remoteBranches.isNotEmpty()) {
                     _branches.value = remoteBranches
                     kioskPrefs.saveBranches(remoteBranches)
@@ -418,6 +422,10 @@ class VisitorViewModel(
                     _autoResetSeconds.value = remoteAutoReset
                     kioskPrefs.kioskAutoResetSeconds = remoteAutoReset
                 }
+                if (remoteTimeout != null) {
+                    _screenTimeoutMinutes.value = remoteTimeout
+                    kioskPrefs.screenTimeoutMinutes = remoteTimeout
+                }
                 if (!remoteTheme.isNullOrBlank()) {
                     _themeMode.value = remoteTheme
                     kioskPrefs.themeMode = remoteTheme
@@ -442,7 +450,8 @@ class VisitorViewModel(
                 autoResetSeconds = _autoResetSeconds.value,
                 themeMode = _themeMode.value,
                 smtpConfig = _smtpConfig.value,
-                visitPurposes = _visitPurposes.value
+                visitPurposes = _visitPurposes.value,
+                screenTimeoutMinutes = _screenTimeoutMinutes.value
             )
         }
     }
@@ -790,6 +799,21 @@ class VisitorViewModel(
         }
     }
 
+    fun updateScreenTimeoutMinutes(minutes: Int) {
+        if (!requireFirebaseLoginForAdminEdit()) return
+        kioskPrefs.screenTimeoutMinutes = minutes
+        _screenTimeoutMinutes.value = minutes
+        syncAllSettingsToFirebase()
+        viewModelScope.launch {
+            val label = when (minutes) {
+                KioskPreferences.TIMEOUT_ALWAYS_ON -> "Always On (Kiosk mode)"
+                KioskPreferences.TIMEOUT_SYSTEM -> "Device System Default"
+                else -> "${minutes} minute(s)"
+            }
+            _eventFlow.emit(UiEvent.ShowSnackbar("Screen timeout set to $label across all devices."))
+        }
+    }
+
     fun setTab(index: Int) {
         _currentTab.value = index
     }
@@ -1047,57 +1071,125 @@ class VisitorViewModel(
     ) {
         val currentSmtp = _smtpConfig.value
         val recipients = getEmailsForDepartment(branch, visitor.department)
-        val subject = "[SAIT Visitor Alert - ${branch.shortCode}] New Visitor: ${visitor.fullName} (${visitor.companyName})"
+        val subject = "[SAIT Visitor Alert - ${branch.shortCode}] Visitor Arrived: ${visitor.fullName} (${visitor.companyName})"
         val emailBody = buildString {
-            appendLine("=================================================")
-            appendLine("SAIT GROUP AUTOMATED VISITOR REGISTRATION ALERT")
-            appendLine("=================================================")
-            appendLine("Branch:        ${branch.name} (${branch.city})")
-            appendLine("Location:      ${branch.displayFacilityLocation}")
-            appendLine("Department:    ${visitor.department}")
-            appendLine("Pass Number:   ${visitor.passNumber}")
-            appendLine("Check-In Time: ${visitor.checkInFormattedTime}")
+            appendLine("=================================================================")
+            appendLine("SAIT GROUP — VISITOR ARRIVAL & CHECK-IN NOTIFICATION")
+            appendLine("=================================================================")
+            appendLine("Facility:       ${branch.name} (${branch.city})")
+            appendLine("Address:        ${branch.displayFacilityLocation}")
+            appendLine("Department:     ${visitor.department}")
+            appendLine("Pass Number:    ${visitor.passNumber}")
+            appendLine("Check-In Time:  ${visitor.checkInFormattedTime}")
+            appendLine("Status:         ${visitor.status}")
             appendLine()
-            appendLine("VISITOR DETAILS:")
-            appendLine("-------------------------------------------------")
-            appendLine("• Visitor Name:     ${visitor.fullName}")
-            appendLine("• Company Name:     ${visitor.companyName}")
-            appendLine("• Mobile Number:    ${visitor.mobileNumber}")
+            appendLine("VISITOR INFORMATION:")
+            appendLine("-----------------------------------------------------------------")
+            appendLine("• Full Name:        ${visitor.fullName}")
+            appendLine("• Company:          ${visitor.companyName}")
+            appendLine("• Contact Number:   ${visitor.mobileNumber}")
             if (visitor.email.isNotBlank()) {
-                appendLine("• Visitor Email:    ${visitor.email}")
+                appendLine("• Email Address:    ${visitor.email}")
             }
-            appendLine("• Type of Visit:    ${visitor.visitType}")
+            appendLine("• Visit Type:       ${visitor.visitType}")
             appendLine("• Purpose of Visit: ${visitor.purpose}")
-            appendLine("• Person to Meet:   ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "N/A"}")
-            appendLine("• Current Status:   ${visitor.status}")
+            appendLine("• Host / To Meet:   ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception Desk"}")
             appendLine()
-            appendLine("Automated notification dispatched by SAIT Group Visitor Pass System.")
+            appendLine("HOST ACTION:")
+            appendLine("Please proceed to the Reception / Lobby to welcome your visitor,")
+            appendLine("or notify the front desk if you require them to be directed to a meeting room.")
+            appendLine()
+            appendLine("Automated notification generated by SAIT Group Visitor Pass System.")
         }
 
         val emailHtml = """
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-                <div style="background-color: #0F2942; padding: 16px 20px; border-radius: 8px 8px 0 0; color: #ffffff;">
-                    <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP VISITOR ALERT</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"/></head>
+            <body style="margin: 0; padding: 20px; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <div style="max-width: 620px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 41, 66, 0.08); border: 1px solid #e2e8f0;">
+                    <!-- Executive Header -->
+                    <div style="background: linear-gradient(135deg, #0F2942 0%, #173859 60%, #0284C7 100%); padding: 24px 28px; color: #ffffff;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td>
+                                    <div style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: rgba(16, 185, 129, 0.22); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; margin-bottom: 8px;">
+                                        🟢 VISITOR ARRIVED AT RECEPTION
+                                    </div>
+                                    <h1 style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: 0.3px; color: #ffffff;">SAIT GROUP VISITOR ALERT</h1>
+                                    <p style="margin: 6px 0 0 0; font-size: 13px; color: #bae6fd; font-weight: 500;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Pass ID Ribbon -->
+                    <div style="background-color: #f8fafc; padding: 14px 28px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px;">OFFICIAL PASS NUMBER</span><br/>
+                            <span style="font-size: 20px; font-weight: 800; color: #0f2942; font-family: 'SF Mono', Consolas, Monaco, monospace; letter-spacing: 1px;">${visitor.passNumber}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">CHECK-IN TIME</span><br/>
+                            <span style="font-size: 14px; font-weight: 700; color: #0284c7;">${visitor.checkInFormattedTime}</span>
+                        </div>
+                    </div>
+
+                    <!-- Visitor Details Table -->
+                    <div style="padding: 24px 28px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; width: 36%; border-bottom: 1px solid #f1f5f9;">Visitor Name:</td>
+                                <td style="padding: 10px 0; font-weight: 800; color: #0f172a; font-size: 15px; border-bottom: 1px solid #f1f5f9;">${visitor.fullName}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Company:</td>
+                                <td style="padding: 10px 0; font-weight: 700; color: #0f172a; font-size: 14px; border-bottom: 1px solid #f1f5f9;">${visitor.companyName}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Host / Meeting With:</td>
+                                <td style="padding: 10px 0; font-weight: 800; color: #0284c7; font-size: 14px; border-bottom: 1px solid #f1f5f9;">${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception Desk"}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Department:</td>
+                                <td style="padding: 10px 0; font-weight: 700; color: #0f172a; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${visitor.department}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Type &amp; Purpose:</td>
+                                <td style="padding: 10px 0; color: #0f172a; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${visitor.visitType} &bull; ${visitor.purpose}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600;">Contact Phone:</td>
+                                <td style="padding: 10px 0; font-weight: 700; color: #0f172a; font-size: 13px;">
+                                    <a href="tel:${visitor.mobileNumber.replace(" ", "")}" style="color: #0284c7; text-decoration: none; font-weight: 700;">📞 ${visitor.mobileNumber}</a>
+                                </td>
+                            </tr>
+                            ${if (visitor.email.isNotBlank()) """
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-size: 13px; font-weight: 600; border-top: 1px solid #f1f5f9;">Email Address:</td>
+                                <td style="padding: 10px 0; border-top: 1px solid #f1f5f9;">
+                                    <a href="mailto:${visitor.email}" style="color: #0284c7; text-decoration: none; font-size: 13px; font-weight: 600;">✉️ ${visitor.email}</a>
+                                </td>
+                            </tr>
+                            """ else ""}
+                        </table>
+
+                        <!-- Host Action Callout Box -->
+                        <div style="margin-top: 22px; padding: 14px 18px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-left: 4px solid #0284c7; border-radius: 8px;">
+                            <p style="margin: 0; font-size: 13px; font-weight: 700; color: #0f2942;">Host Action Recommended:</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #334155; line-height: 1.5;">
+                                Your visitor is waiting at the Reception / Main Lobby. Please receive your visitor promptly or inform the receptionist if you are in a meeting.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="padding: 16px 28px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; background-color: #f8fafc;">
+                        Dispatched automatically by SAIT Group Visitor Pass System &bull; Confidential
+                    </div>
                 </div>
-                <div style="padding: 20px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Pass Number:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 15px;">${visitor.passNumber}</td></tr>
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.fullName}</td></tr>
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 14px;">${visitor.companyName}</td></tr>
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 6px 0; font-weight: bold; color: #0284c7; font-size: 14px;">${visitor.department}</td></tr>
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Contact:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.mobileNumber}</td></tr>
-                        ${if (visitor.email.isNotBlank()) "<tr><td style=\"padding: 6px 0; color: #64748b; font-size: 13px;\">Email:</td><td style=\"padding: 6px 0; color: #0f172a; font-size: 13px;\">${visitor.email}</td></tr>" else ""}
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Visit Type:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.visitType}</td></tr>
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Purpose:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.purpose}</td></tr>
-                        ${if (visitor.personToMeet.isNotBlank()) "<tr><td style=\"padding: 6px 0; color: #64748b; font-size: 13px;\">Person to Meet:</td><td style=\"padding: 6px 0; color: #0f172a; font-size: 13px;\">${visitor.personToMeet}</td></tr>" else ""}
-                        <tr><td style="padding: 6px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 6px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
-                    </table>
-                </div>
-                <div style="padding: 14px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
-                    Automated notification dispatched by SAIT Group Visitor Pass System.
-                </div>
-            </div>
+            </body>
+            </html>
         """.trimIndent()
 
         // 1. Automatically send Official Pass & Safety Briefing to visitor's email
@@ -1105,74 +1197,145 @@ class VisitorViewModel(
         if (cleanVisitorEmail.isNotBlank() && cleanVisitorEmail.contains("@")) {
             val visitorSubject = "[SAIT Visitor Pass - ${visitor.passNumber}] Official Pass & Safety Briefing - ${branch.name}"
             val visitorBody = buildString {
-                appendLine("=================================================")
-                appendLine("SAIT GROUP - OFFICIAL VISITOR PASS & SAFETY BRIEFING")
-                appendLine("=================================================")
+                appendLine("=================================================================")
+                appendLine("SAIT GROUP — OFFICIAL VISITOR PASS & SAFETY INDUCTION")
+                appendLine("=================================================================")
                 appendLine("Dear ${visitor.fullName},")
                 appendLine("Welcome to ${branch.name} (${branch.displayFacilityLocation}).")
+                appendLine("Your visitor pass has been confirmed and registered in our central security system.")
                 appendLine()
-                appendLine("VISITOR PASS DETAILS:")
+                appendLine("OFFICIAL VISITOR PASS DETAILS:")
+                appendLine("-----------------------------------------------------------------")
                 appendLine("• Pass Number:       ${visitor.passNumber}")
-                appendLine("• Facility Location: ${branch.displayFacilityLocation}")
+                appendLine("• Visitor Name:      ${visitor.fullName}")
+                appendLine("• Company:           ${visitor.companyName}")
+                appendLine("• Facility Address:  ${branch.displayFacilityLocation}")
                 appendLine("• Check-In Time:     ${visitor.checkInFormattedTime}")
                 appendLine("• Department:        ${visitor.department}")
-                appendLine("• Host:              ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}")
-                appendLine("• Company:           ${visitor.companyName}")
+                appendLine("• Host / To Meet:    ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception Desk"}")
+                appendLine("• Purpose:           ${visitor.purpose}")
                 appendLine()
-                appendLine("MANDATORY SAFETY GUIDELINES & QHSE POLICY:")
-                appendLine("-------------------------------------------------")
+                appendLine("MANDATORY QHSE SAFETY GUIDELINES:")
+                appendLine("-----------------------------------------------------------------")
                 appendLine(branch.safetyGuidelines)
                 appendLine()
-                appendLine("EMERGENCY HELPLINE:")
-                appendLine("-------------------------------------------------")
+                appendLine("KEY SAFETY RULES FOR VISITORS:")
+                appendLine("1. Visitor Identification: Keep your visitor pass visible at all times.")
+                appendLine("2. Escort Requirement: Remain accompanied by your host in all operational areas.")
+                appendLine("3. Mandatory PPE: Wear safety shoes, high-vis vest, and eye protection in workshop zones.")
+                appendLine("4. Photography: Unauthorized photography or filming is strictly prohibited.")
+                appendLine("5. Emergency Evacuation: In case of alarm, follow green signs to Assembly Point 1.")
+                appendLine()
+                appendLine("EMERGENCY ASSISTANCE & HELPLINE:")
+                appendLine("-----------------------------------------------------------------")
                 if (branch.safetyContactName.isNotBlank()) {
-                    appendLine("Contact Person: ${branch.safetyContactName}")
+                    appendLine("Safety Officer: ${branch.safetyContactName}")
                 }
-                appendLine(branch.safetyHelpline)
+                appendLine("Emergency Hotline: ${branch.safetyHelpline}")
                 appendLine()
-                appendLine("EMERGENCY & EVACUATION:")
-                appendLine("In the event of a fire or emergency alarm, proceed calmly via green exit routes to the designated Assembly Point.")
-                appendLine()
-                appendLine("Thank you. Please keep this email accessible while on company premises.")
+                appendLine("Thank you for your cooperation and keeping our workplace safe.")
                 appendLine("SAIT Group Facility & Security Management")
             }
 
             val visitorHtml = """
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-                    <div style="background-color: #0F2942; padding: 18px 24px; border-radius: 8px 8px 0 0; color: #ffffff;">
-                        <h2 style="margin: 0; font-size: 20px; letter-spacing: 0.5px;">SAIT GROUP OFFICIAL VISITOR PASS</h2>
-                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #bae6fd;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
-                    </div>
-                    <div style="padding: 24px; background-color: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-                        <div style="background-color: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; text-align: center;">
-                            <span style="font-size: 11px; color: #0369a1; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">OFFICIAL PASS ID</span><br/>
-                            <span style="font-size: 22px; font-weight: bold; color: #0f172a; font-family: monospace;">${visitor.passNumber}</span>
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="utf-8"/></head>
+                <body style="margin: 0; padding: 20px; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                    <div style="max-width: 620px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 41, 66, 0.08); border: 1px solid #e2e8f0;">
+                        <!-- Header Banner -->
+                        <div style="background: linear-gradient(135deg, #0F2942 0%, #173859 60%, #0284C7 100%); padding: 24px 28px; color: #ffffff;">
+                            <div style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: rgba(56, 189, 248, 0.22); border: 1px solid rgba(125, 211, 252, 0.5); color: #bae6fd; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; margin-bottom: 8px;">
+                                OFFICIAL DIGITAL PASS &bull; VERIFIED
+                            </div>
+                            <h1 style="margin: 0; font-size: 21px; font-weight: 800; letter-spacing: 0.3px; color: #ffffff;">SAIT GROUP OFFICIAL VISITOR PASS</h1>
+                            <p style="margin: 6px 0 0 0; font-size: 13px; color: #bae6fd; font-weight: 500;">${branch.name} &bull; ${branch.displayFacilityLocation}</p>
                         </div>
-                        <p style="font-size: 14px; color: #334155; margin-top: 0;">Dear <strong>${visitor.fullName}</strong>,</p>
-                        <p style="font-size: 13px; color: #475569;">Your visitor registration is confirmed. Please keep this digital pass accessible during your visit.</p>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Visitor Name:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.fullName}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Company:</td><td style="padding: 5px 0; font-weight: bold; color: #0f172a; font-size: 13px;">${visitor.companyName}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Facility Location:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${branch.displayFacilityLocation}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Department:</td><td style="padding: 5px 0; font-weight: bold; color: #0284c7; font-size: 13px;">${visitor.department}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Host:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #64748b; font-size: 13px;">Time:</td><td style="padding: 5px 0; color: #0f172a; font-size: 13px;">${visitor.checkInFormattedTime}</td></tr>
-                        </table>
-                        <div style="margin-top: 18px; padding: 14px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px;">
-                            <h4 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px;">SAFETY GUIDELINES & QHSE POLICY</h4>
-                            <p style="margin: 0; font-size: 12px; color: #78350f; line-height: 1.5; white-space: pre-line;">${branch.safetyGuidelines}</p>
+
+                        <!-- Pass ID Card Showcase -->
+                        <div style="padding: 24px 28px 12px 28px;">
+                            <div style="background: linear-gradient(135deg, #0F2942 0%, #0284C7 100%); border-radius: 14px; padding: 18px 22px; color: #ffffff; text-align: center; box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25);">
+                                <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1.2px; color: #bae6fd;">AUTHORIZED VISITOR ACCESS</span>
+                                <div style="font-size: 26px; font-weight: 900; letter-spacing: 2px; font-family: 'SF Mono', Consolas, Monaco, monospace; margin: 6px 0;">
+                                    ${visitor.passNumber}
+                                </div>
+                                <span style="font-size: 12px; opacity: 0.9;">Please present this pass ID at security checkpoints</span>
+                            </div>
                         </div>
-                        <div style="margin-top: 12px; padding: 12px 14px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-                            <h4 style="margin: 0 0 4px 0; color: #166534; font-size: 12px;">EMERGENCY HELPLINE</h4>
-                            ${if (branch.safetyContactName.isNotBlank()) "<p style=\"margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #166534;\">Contact Person: ${branch.safetyContactName}</p>" else ""}
-                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #15803d;">${branch.safetyHelpline}</p>
-                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #166534;">In case of fire alarm, proceed calmly to designated Assembly Point 1.</p>
+
+                        <!-- Main Content -->
+                        <div style="padding: 12px 28px 24px 28px;">
+                            <p style="font-size: 14px; color: #334155; margin-top: 10px;">Dear <strong>${visitor.fullName}</strong>,</p>
+                            <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0 0 16px 0;">
+                                Your visitor pass for <strong>${branch.name}</strong> is active. Please keep this digital receipt accessible on your phone during your visit.
+                            </p>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 36%; border-bottom: 1px solid #f1f5f9;">Visitor Name:</td>
+                                    <td style="padding: 8px 0; font-weight: 800; color: #0f172a; font-size: 14px; border-bottom: 1px solid #f1f5f9;">${visitor.fullName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Company:</td>
+                                    <td style="padding: 8px 0; font-weight: 700; color: #0f172a; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${visitor.companyName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Department:</td>
+                                    <td style="padding: 8px 0; font-weight: 700; color: #0284c7; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${visitor.department}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Host / Meeting:</td>
+                                    <td style="padding: 8px 0; font-weight: 700; color: #0f172a; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception Desk"}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Check-In Time:</td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${visitor.checkInFormattedTime}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Facility Location:</td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px;">${branch.displayFacilityLocation}</td>
+                                </tr>
+                            </table>
+
+                            <!-- QHSE Safety Rules Card -->
+                            <div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-size: 18px;">🛡️</span>
+                                    <h3 style="margin: 0; color: #92400e; font-size: 14px; font-weight: 800;">MANDATORY QHSE SAFETY GUIDELINES</h3>
+                                </div>
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #78350f; line-height: 1.55; white-space: pre-line;">${branch.safetyGuidelines}</p>
+                                <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #78350f; line-height: 1.55;">
+                                    <li><b>Wear PPE:</b> Safety footwear, high-visibility vest &amp; eye protection required in workshop zones.</li>
+                                    <li><b>Badge Display:</b> Keep your badge visible at all times on company premises.</li>
+                                    <li><b>Stay Accompanied:</b> Do not enter unauthorized or restricted production areas unescorted.</li>
+                                    <li><b>No Filming:</b> Photography and recording are strictly prohibited on site.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Emergency Helpline Box -->
+                            <div style="background-color: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                                    <div>
+                                        <h4 style="margin: 0 0 4px 0; color: #166534; font-size: 13px; font-weight: 800;">🚨 EMERGENCY &amp; SAFETY HELPLINE</h4>
+                                        ${if (branch.safetyContactName.isNotBlank()) "<p style=\"margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #166534;\">Safety Officer: " + branch.safetyContactName + "</p>" else ""}
+                                        <p style="margin: 0; font-size: 12px; color: #15803d;">In event of fire alarm, proceed calmly to <b>Assembly Point 1</b>.</p>
+                                    </div>
+                                    <div style="margin-top: 8px;">
+                                        <a href="tel:${branch.safetyHelpline.replace(" ", "")}" style="display: inline-block; background-color: #16a34a; color: #ffffff; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700;">
+                                            📞 ${branch.safetyHelpline}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="padding: 16px 28px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; background-color: #f8fafc;">
+                            Issued by SAIT Group QHSE &bull; Security &amp; Facility Operations Management
                         </div>
                     </div>
-                    <div style="padding: 12px 20px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0;">
-                        Automated visitor pass issued by SAIT Group Security & Facility Management.
-                    </div>
-                </div>
+                </body>
+                </html>
             """.trimIndent()
 
             if (currentSmtp.enabled && currentSmtp.host.isNotBlank()) {

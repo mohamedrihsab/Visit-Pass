@@ -27,8 +27,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,7 +52,8 @@ import com.example.ui.theme.NotificationEmailColor
 import com.example.ui.theme.NotificationSyncColor
 import com.example.ui.theme.NotificationVisitorColor
 import com.example.ui.theme.StatusError
-import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidModalGlass
+import com.example.ui.theme.liquidPressEffect
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,17 +73,14 @@ fun NotificationCenterDialog(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
                 .heightIn(max = 640.dp)
-                .liquidGlass(
+                .liquidModalGlass(
                     shape = RoundedCornerShape(28.dp),
                     cornerRadius = 28.dp,
-                    elevated = true,
-                    strokeWidth = 1.5.dp,
-                    shadowElevation = 20.dp
+                    strokeWidth = 1.6.dp
                 )
                 .testTag("notification_center_dialog")
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                // Header Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -115,7 +110,7 @@ fun NotificationCenterDialog(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "${notifications.size} recent events logged",
+                                text = "${notifications.size} recent events",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -134,25 +129,28 @@ fun NotificationCenterDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Actions bar (Mark all read / Clear)
                 if (notifications.isNotEmpty()) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
                             onClick = onMarkAllRead,
-                            modifier = Modifier.testTag("btn_mark_all_read")
+                            modifier = Modifier
+                                .liquidPressEffect()
+                                .testTag("btn_mark_all_read")
                         ) {
                             Text(
                                 text = "Mark All Read",
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -160,44 +158,40 @@ fun NotificationCenterDialog(
                         TextButton(
                             onClick = onClearAll,
                             colors = ButtonDefaults.textButtonColors(contentColor = StatusError),
-                            modifier = Modifier.testTag("btn_clear_notifications")
+                            modifier = Modifier
+                                .liquidPressEffect()
+                                .testTag("btn_clear_notifications")
                         ) {
                             Text(
                                 text = "Clear History",
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
 
-                // Notification Items List
                 if (notifications.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
+                            .height(180.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = Icons.Default.NotificationsNone,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(48.dp)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(44.dp)
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "No active notifications",
                                 fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 14.sp
-                            )
-                            Text(
-                                text = "Check-ins and email alerts will appear here",
-                                color = MaterialTheme.colorScheme.outline,
-                                fontSize = 12.sp
                             )
                         }
                     }
@@ -223,32 +217,32 @@ private fun NotificationItemCard(notification: AppNotification) {
     val (iconColor, containerColor, iconVector) = when (notification.type) {
         NotificationType.EMAIL_SENT -> Triple(
             NotificationEmailColor,
-            NotificationEmailColor.copy(alpha = 0.15f),
+            NotificationEmailColor.copy(alpha = 0.16f),
             Icons.Default.Email
         )
         NotificationType.EMAIL_FAILED -> Triple(
             StatusError,
-            StatusError.copy(alpha = 0.15f),
+            StatusError.copy(alpha = 0.16f),
             Icons.Default.Error
         )
         NotificationType.VISITOR_CHECK_IN -> Triple(
             NotificationVisitorColor,
-            NotificationVisitorColor.copy(alpha = 0.15f),
+            NotificationVisitorColor.copy(alpha = 0.16f),
             Icons.Default.HowToReg
         )
         NotificationType.VISITOR_CHECK_OUT -> Triple(
             NotificationSyncColor,
-            NotificationSyncColor.copy(alpha = 0.15f),
+            NotificationSyncColor.copy(alpha = 0.16f),
             Icons.Default.CheckCircle
         )
         NotificationType.CLOUD_SYNC -> Triple(
             NotificationSyncColor,
-            NotificationSyncColor.copy(alpha = 0.15f),
+            NotificationSyncColor.copy(alpha = 0.16f),
             Icons.Default.CloudDone
         )
         NotificationType.SYSTEM_ALERT -> Triple(
             NotificationAlertColor,
-            NotificationAlertColor.copy(alpha = 0.15f),
+            NotificationAlertColor.copy(alpha = 0.16f),
             Icons.Default.Warning
         )
     }
@@ -266,7 +260,6 @@ private fun NotificationItemCard(notification: AppNotification) {
                 .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Icon container with high-contrast icon
             Box(
                 modifier = Modifier
                     .size(38.dp)
@@ -292,7 +285,7 @@ private fun NotificationItemCard(notification: AppNotification) {
                 ) {
                     Text(
                         text = notification.title,
-                        fontWeight = if (notification.isRead) FontWeight.Medium else FontWeight.Bold,
+                        fontWeight = if (notification.isRead) FontWeight.SemiBold else FontWeight.Bold,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -316,7 +309,7 @@ private fun NotificationItemCard(notification: AppNotification) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Surface(
                         shape = RoundedCornerShape(4.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                     ) {
                         Text(
                             text = pass,

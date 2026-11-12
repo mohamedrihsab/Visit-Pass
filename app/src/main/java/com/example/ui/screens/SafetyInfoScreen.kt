@@ -1,7 +1,5 @@
 package com.example.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,18 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Emergency
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SmokeFree
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,17 +46,17 @@ import coil.compose.AsyncImage
 import com.example.R
 import com.example.data.Branch
 import com.example.data.BranchRegistry
+import com.example.ui.components.CompanyBrandLogoBadge
 import com.example.ui.components.EmergencyEvacuationPlanCanvas
 import com.example.ui.theme.LiquidGlassCard
-import com.example.ui.theme.SaitPrimary
+import com.example.ui.theme.liquidAppearAnimation
+import com.example.ui.theme.liquidInnerGlass
 
 @Composable
 fun SafetyInfoScreen(
     contentPadding: PaddingValues,
     branch: Branch = BranchRegistry.INITIAL_BRANCHES[1]
 ) {
-    val context = LocalContext.current
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -74,44 +65,25 @@ fun SafetyInfoScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Company & Facility Header Card (iOS 26 Liquid Glass)
+        // Company & Facility Header Card
         item {
             LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 0),
                 cornerRadius = 24.dp,
                 elevated = true
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White,
+                        CompanyBrandLogoBadge(
                             modifier = Modifier
-                                .size(48.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                        ) {
-                            if (!branch.logoUri.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = branch.logoUri,
-                                    contentDescription = "${branch.name} Logo",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.White)
-                                        .padding(4.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                            } else {
-                                androidx.compose.foundation.Image(
-                                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.sait_logo),
-                                    contentDescription = "SAIT Group Logo",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.White)
-                                        .padding(4.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                            }
-                        }
+                                .width(88.dp)
+                                .height(38.dp),
+                            logoUri = branch.logoUri,
+                            branchName = branch.name,
+                            testTag = "company_logo_safety"
+                        )
 
                         Spacer(modifier = Modifier.width(12.dp))
 
@@ -143,7 +115,7 @@ fun SafetyInfoScreen(
                     FacilityInfoRow(
                         icon = Icons.Default.HealthAndSafety,
                         title = "QHSE Compliance",
-                        subtitle = "Quality, Health, Safety & Environment standards enforced"
+                        subtitle = "Quality, Health, Safety & Environment standards"
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     FacilityInfoRow(
@@ -159,10 +131,12 @@ fun SafetyInfoScreen(
             }
         }
 
-        // Emergency Helpline Card (Numbers & Contact Person Name — Liquid Glass)
+        // Emergency Helpline Card
         item {
             LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 50),
                 cornerRadius = 22.dp,
                 elevated = false
             ) {
@@ -182,7 +156,7 @@ fun SafetyInfoScreen(
                         Icon(
                             imageVector = Icons.Default.Call,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -218,7 +192,9 @@ fun SafetyInfoScreen(
         // Custom Branch Safety Guidelines Card
         item {
             LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 100),
                 cornerRadius = 24.dp,
                 elevated = true
             ) {
@@ -245,31 +221,31 @@ fun SafetyInfoScreen(
                     SafetyRuleItem(
                         icon = Icons.Default.VerifiedUser,
                         title = "Visitor Badge Must Be Visible",
-                        description = "Please wear your physical or digital visitor pass at all times on company premises."
+                        description = "Wear your visitor pass at all times on company premises."
                     )
 
                     SafetyRuleItem(
                         icon = Icons.Default.Construction,
-                        title = "Mandatory PPE in Factory & Projects",
-                        description = "Safety shoes, high-visibility vest, and hard hat are strictly required before entering operational areas."
+                        title = "Mandatory PPE in Operational Areas",
+                        description = "Safety shoes, high-visibility vest, and hard hat are required in factory & project zones."
                     )
 
                     SafetyRuleItem(
                         icon = Icons.Default.CameraAlt,
                         title = "Photography & Filming Restricted",
-                        description = "No photography or video recording in project fabrication or engineering zones without security authorization."
+                        description = "Authorization required before taking photos or videos in operational areas."
                     )
 
                     SafetyRuleItem(
                         icon = Icons.Default.SmokeFree,
                         title = "Designated Smoking Areas",
-                        description = "Smoking is strictly prohibited inside buildings and warehouses. Use only marked outdoor shelters."
+                        description = "Smoking is permitted only in marked outdoor shelters."
                     )
 
                     SafetyRuleItem(
                         icon = Icons.Default.Emergency,
                         title = "Emergency & Evacuation",
-                        description = "In case of fire or evacuation alarm, follow designated green exit routes to Assembly Point 1."
+                        description = "Follow green exit routes to Emergency Assembly Point 1."
                     )
                 }
             }
@@ -278,7 +254,9 @@ fun SafetyInfoScreen(
         // Emergency Exit Drawing Card
         item {
             LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidAppearAnimation(delayMillis = 150),
                 cornerRadius = 24.dp,
                 elevated = true
             ) {
@@ -289,12 +267,7 @@ fun SafetyInfoScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Text(
-                        text = "Follow green illuminated exit markers to designated Emergency Assembly Point 1.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-                    )
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     if (!branch.emergencyExitDrawingUri.isNullOrBlank()) {
                         AsyncImage(
@@ -313,42 +286,6 @@ fun SafetyInfoScreen(
                 }
             }
         }
-
-        // Cloud Security Card
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CloudDone,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Secure Cloud & Email Pass Delivery",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "Every registered visitor automatically receives their digital Visitor Pass and branch safety guidelines by email. All registration logs are synchronized with Cloud Firestore.",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -359,7 +296,9 @@ fun FacilityInfoRow(icon: ImageVector, title: String, subtitle: String) {
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp).padding(top = 2.dp)
+            modifier = Modifier
+                .size(18.dp)
+                .padding(top = 2.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column {
@@ -381,19 +320,22 @@ fun FacilityInfoRow(icon: ImageVector, title: String, subtitle: String) {
 @Composable
 fun SafetyRuleItem(icon: ImageVector, title: String, description: String) {
     Row(verticalAlignment = Alignment.Top) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(36.dp)
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .liquidInnerGlass(
+                    shape = RoundedCornerShape(10.dp),
+                    cornerRadius = 10.dp,
+                    tint = MaterialTheme.colorScheme.primary
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column {
@@ -412,4 +354,3 @@ fun SafetyRuleItem(icon: ImageVector, title: String, description: String) {
         }
     }
 }
-

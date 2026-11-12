@@ -1,286 +1,425 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SAIT Group — Visitor Registration Portal</title>
-  <meta name="description" content="Official touchless visitor registration portal for SAIT Group facilities.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230F2942'/><text x='50' y='62' font-family='sans-serif' font-size='38' font-weight='900' fill='%23FFFFFF' text-anchor='middle'>SAIT</text></svg>">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SAIT Group — Touchless Visitor Registration</title>
   <style>
-    :root {
+    :root, [data-theme="light"] {
+      --bg-start: #E8F1FC;
+      --bg-end: #F4F8FE;
+      --orb-1: rgba(56, 189, 248, 0.32);
+      --orb-2: rgba(99, 102, 241, 0.22);
+      --orb-3: rgba(20, 184, 166, 0.24);
+      --glass-bg: rgba(255, 255, 255, 0.74);
+      --glass-elevated: rgba(255, 255, 255, 0.88);
+      --glass-input: rgba(255, 255, 255, 0.82);
+      --glass-border-top: rgba(255, 255, 255, 0.96);
+      --glass-border-side: rgba(125, 211, 252, 0.45);
+      --glass-shadow: 0 16px 40px -8px rgba(15, 41, 66, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.95);
       --primary: #0F2942;
-      --primary-light: #1E3A5F;
       --primary-accent: #0284C7;
-      --bg: #F1F5F9;
-      --card-bg: #FFFFFF;
+      --pill-grad: linear-gradient(135deg, rgba(15, 41, 66, 0.95), rgba(2, 132, 199, 0.90));
       --text-main: #0F172A;
-      --text-muted: #64748B;
-      --border: #CBD5E1;
-      --border-focus: #0284C7;
+      --text-muted: #475569;
+      --border-subtle: rgba(148, 163, 184, 0.35);
       --success: #10B981;
-      --success-bg: #ECFDF5;
       --error: #EF4444;
-      --radius: 14px;
+      --warning: #F59E0B;
     }
+
+    [data-theme="dark"] {
+      --bg-start: #050914;
+      --bg-end: #0B1528;
+      --orb-1: rgba(14, 165, 233, 0.28);
+      --orb-2: rgba(79, 70, 229, 0.25);
+      --orb-3: rgba(16, 185, 129, 0.22);
+      --glass-bg: rgba(30, 41, 59, 0.65);
+      --glass-elevated: rgba(38, 53, 77, 0.76);
+      --glass-input: rgba(15, 23, 42, 0.72);
+      --glass-border-top: rgba(224, 242, 254, 0.38);
+      --glass-border-side: rgba(56, 189, 248, 0.28);
+      --glass-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(224, 242, 254, 0.24);
+      --primary: #38BDF8;
+      --primary-accent: #0284C7;
+      --pill-grad: linear-gradient(135deg, rgba(2, 132, 199, 0.92), rgba(3, 105, 161, 0.88));
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border-subtle: rgba(71, 85, 105, 0.48);
+      --success: #34D399;
+      --error: #F87171;
+      --warning: #FBBF24;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
+
     body {
-      background-color: var(--bg);
+      background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
       color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+      transition: background 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
     }
+
+    .aurora-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .aurora-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(55px);
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+    .aurora-orb.orb-1 {
+      width: 320px;
+      height: 320px;
+      background: var(--orb-1);
+      top: -60px;
+      left: -60px;
+    }
+    .aurora-orb.orb-2 {
+      width: 290px;
+      height: 290px;
+      background: var(--orb-2);
+      top: 38%;
+      right: -70px;
+      animation-delay: -5s;
+    }
+    .aurora-orb.orb-3 {
+      width: 280px;
+      height: 280px;
+      background: var(--orb-3);
+      bottom: -50px;
+      left: 10%;
+      animation-delay: -9s;
+    }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(0.95); }
+      100% { transform: translate(28px, 24px) scale(1.12); }
+    }
+
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 490px;
+      position: relative;
+      z-index: 1;
     }
+
     .header {
-      background: var(--primary);
-      color: #fff;
-      border-radius: var(--radius);
-      padding: 24px 20px;
+      background: linear-gradient(145deg, rgba(15, 41, 66, 0.90), rgba(2, 132, 199, 0.80));
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      color: #ffffff;
+      border-radius: 26px;
+      padding: 24px 20px 20px;
       text-align: center;
+      box-shadow: var(--glass-shadow);
+      border: 1.5px solid rgba(255, 255, 255, 0.38);
       margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(15, 41, 66, 0.18);
+      position: relative;
     }
-    .header-logo-box {
-      width: 64px;
-      height: 64px;
-      background: #FFFFFF;
-      border-radius: 12px;
-      margin: 0 auto 12px;
+
+    .theme-toggle-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      border: 1px solid rgba(255,255,255,0.8);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
     }
-    .header-logo-text {
-      font-weight: 900;
-      font-size: 20px;
-      color: var(--primary);
-      letter-spacing: 1.5px;
+    .theme-toggle-btn:active {
+      transform: scale(0.88);
     }
+
     .header h1 {
       font-size: 20px;
       font-weight: 800;
-      letter-spacing: -0.3px;
-      margin-bottom: 4px;
+      letter-spacing: 0.4px;
     }
     .header p {
       font-size: 13px;
       color: #BAE6FD;
+      margin-top: 4px;
+      font-weight: 500;
     }
     .session-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 4px 12px;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      padding: 6px 14px;
+      border-radius: 999px;
       font-size: 11px;
-      margin-top: 10px;
-      font-family: monospace;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 15px;
       font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 14px;
+      color: #E0F2FE;
+      margin-top: 12px;
+    }
+
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border-radius: 28px;
+      padding: 22px;
+      box-shadow: var(--glass-shadow);
+      border-top: 1.5px solid var(--glass-border-top);
+      border-left: 1.2px solid var(--glass-border-top);
+      border-right: 1px solid var(--glass-border-side);
+      border-bottom: 1px solid var(--glass-border-side);
+      margin-bottom: 18px;
+      transition: background 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 15px;
     }
     label {
       display: block;
       font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
+      font-weight: 700;
       color: var(--text-main);
+      margin-bottom: 6px;
     }
     .required {
       color: var(--error);
-      font-weight: bold;
     }
+
     input, select {
       width: 100%;
-      padding: 12px 14px;
-      font-size: 15px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      outline: none;
-      background: #fff;
+      padding: 13px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 15px;
+      font-size: 14.5px;
       color: var(--text-main);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--glass-input);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      outline: none;
     }
     input:focus, select:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
     }
+
     .phone-row {
       display: flex;
       gap: 8px;
     }
     .phone-row select {
-      width: 42%;
-      font-size: 13px;
-      font-weight: 600;
+      width: 138px;
+      flex-shrink: 0;
+      font-size: 13.5px;
+      padding: 13px 8px;
     }
-    .phone-row input {
-      width: 58%;
-    }
+
     .visit-type-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      display: flex;
+      gap: 8px;
+      padding: 5px;
+      border-radius: 18px;
+      background: var(--glass-input);
+      border: 1.2px solid var(--border-subtle);
     }
     .visit-chip {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1.2px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: #fff;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.18s ease;
-      user-select: none;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
+    }
+    .visit-chip:active {
+      transform: scale(0.96);
     }
     .visit-chip.active {
-      background: #E0F2FE;
-      border-color: var(--primary-accent);
-      color: var(--primary);
-      font-weight: 700;
-      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
+      background: var(--pill-grad);
+      color: #ffffff;
+      border-color: rgba(125, 211, 252, 0.75);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
-    . safety-box, .safety-box {
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin: 16px 0;
+
+    /* QHSE Interactive Card */
+    .qhse-card {
+      background: var(--glass-input);
+      border: 1.2px solid rgba(2, 132, 199, 0.28);
+      border-radius: 18px;
+      overflow: hidden;
+      margin: 16px 0 12px;
+      transition: border-color 0.2s;
+    }
+    .qhse-header {
+      padding: 12px 14px;
+      background: rgba(2, 132, 199, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .qhse-header:active {
+      background: rgba(2, 132, 199, 0.14);
+    }
+    .qhse-body {
+      padding: 14px;
+      font-size: 12px;
+      color: var(--text-main);
+      line-height: 1.55;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .qhse-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .qhse-list li {
+      padding: 4px 0;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 8px;
     }
-    .safety-box input {
-      width: 18px;
-      height: 18px;
+
+    .safety-box {
+      background: rgba(2, 132, 199, 0.08);
+      border: 1.2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 16px;
+      padding: 13px;
+      margin: 12px 0 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .safety-box input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
       margin-top: 2px;
+      accent-color: var(--primary-accent);
+      flex-shrink: 0;
       cursor: pointer;
     }
     .safety-box label {
       font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.45;
       font-weight: 500;
-      margin-bottom: 0;
+      color: var(--text-main);
+      line-height: 1.45;
+      margin: 0;
       cursor: pointer;
     }
+
     .btn-submit {
       width: 100%;
-      background: var(--primary);
-      color: #fff;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      border-radius: 12px;
+      padding: 16px;
+      background: var(--pill-grad);
+      color: #ffffff;
+      font-size: 15.5px;
+      font-weight: 800;
+      border: 1.2px solid rgba(125, 211, 252, 0.65);
+      border-radius: 18px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(15, 41, 66, 0.25);
-      transition: transform 0.1s, background-color 0.2s;
-    }
-    .btn-submit:hover {
-      background: var(--primary-light);
+      box-shadow: 0 10px 24px rgba(2, 132, 199, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
     }
     .btn-submit:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
     .btn-submit:disabled {
-      background: var(--text-muted);
+      opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
     }
+
     .status-alert {
       display: none;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      margin-bottom: 16px;
       font-size: 13px;
+      font-weight: 600;
       line-height: 1.4;
+      backdrop-filter: blur(16px);
     }
     .status-alert.error {
-      background: #FEF2F2;
-      color: #991B1B;
-      border: 1px solid #FCA5A5;
+      display: block;
+      background: rgba(239, 68, 68, 0.16);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
+
     .success-modal {
       display: none;
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 24px 20px;
+      background: var(--glass-elevated);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border-radius: 28px;
+      padding: 26px 22px;
       text-align: center;
-      border: 2px solid var(--success);
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.18);
+      border: 1.5px solid var(--success);
+      box-shadow: var(--glass-shadow);
+      animation: popSpring 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popSpring {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .badge-icon {
       font-size: 48px;
       margin-bottom: 8px;
     }
     .badge-pass {
-      background: #F8FAFC;
-      border: 2px dashed var(--primary-accent);
-      border-radius: 12px;
-      padding: 18px;
+      background: var(--glass-input);
+      border: 1.5px dashed var(--primary-accent);
+      border-radius: 16px;
+      padding: 16px;
       margin: 18px 0;
       text-align: left;
-    }
-    .badge-pass-header {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-muted);
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
-    }
-    .badge-number {
-      font-family: monospace;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--primary);
-      margin-bottom: 10px;
     }
     .badge-row {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
-      padding: 4px 0;
-      border-top: 1px solid #E2E8F0;
+      padding: 6px 0;
+      border-top: 1px solid var(--border-subtle);
     }
     .badge-row span {
       color: var(--text-muted);
@@ -299,11 +438,16 @@
 </head>
 <body>
 
+  <div class="aurora-canvas">
+    <div class="aurora-orb orb-1"></div>
+    <div class="aurora-orb orb-2"></div>
+    <div class="aurora-orb orb-3"></div>
+  </div>
+
   <div class="container">
+    <!-- Refined Header without company logo as requested -->
     <div class="header">
-      <div class="header-logo-box">
-        <span class="header-logo-text">SAIT</span>
-      </div>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleLiquidTheme()" title="Switch Light / Dark Mode">🌙</button>
       <h1 id="branchTitle">SAIT Group — Visitor Check-In</h1>
       <p id="branchLocation">Marine, Oil & Gas Engineering Services</p>
       <div class="session-pill" id="sessionPill">
@@ -334,36 +478,178 @@
           <label for="mobileNumber">Mobile Number <span class="required">*</span></label>
           <div class="phone-row">
             <select id="countryCode">
-              <option value="+971" selected>🇦🇪 +971 (UAE)</option>
-              <option value="+966">🇸🇦 +966 (KSA)</option>
-              <option value="+974">🇶🇦 +974 (Qatar)</option>
-              <option value="+965">🇰🇼 +965 (Kuwait)</option>
-              <option value="+968">🇴🇲 +968 (Oman)</option>
-              <option value="+973">🇧🇭 +973 (Bahrain)</option>
-              <option value="+91">🇮🇳 +91 (India)</option>
-              <option value="+32">🇧🇪 +32 (Belgium)</option>
-              <option value="+44">🇬🇧 +44 (UK)</option>
-              <option value="+213">🇩🇿 +213 (Algeria)</option>
-              <option value="+1">🇨🇦 +1 (Canada)</option>
-              <option value="+1">🇺🇸 +1 (USA)</option>
-              <option value="+33">🇫🇷 +33 (France)</option>
-              <option value="+49">🇩🇪 +49 (Germany)</option>
-              <option value="+39">🇮🇹 +39 (Italy)</option>
-              <option value="+31">🇳🇱 +31 (Netherlands)</option>
-              <option value="+65">🇸🇬 +65 (Singapore)</option>
-              <option value="+60">🇲🇾 +60 (Malaysia)</option>
-              <option value="+86">🇨🇳 +86 (China)</option>
-              <option value="+81">🇯🇵 +81 (Japan)</option>
-              <option value="+82">🇰🇷 +82 (South Korea)</option>
-              <option value="+61">🇦🇺 +61 (Australia)</option>
-              <option value="+20">🇪🇬 +20 (Egypt)</option>
-              <option value="+962">🇯🇴 +962 (Jordan)</option>
-              <option value="+961">🇱🇧 +961 (Lebanon)</option>
-              <option value="+92">🇵🇰 +92 (Pakistan)</option>
-              <option value="+880">🇧🇩 +880 (Bangladesh)</option>
-              <option value="+63">🇵🇭 +63 (Philippines)</option>
-              <option value="+234">🇳🇬 +234 (Nigeria)</option>
-              <option value="+27">🇿🇦 +27 (South Africa)</option>
+              <option value="+971" selected>🇦🇪 UAE (+971)</option>
+              <option value="+966">🇸🇦 KSA (+966)</option>
+              <option value="+974">🇶🇦 Qatar (+974)</option>
+              <option value="+965">🇰🇼 Kuwait (+965)</option>
+              <option value="+968">🇴🇲 Oman (+968)</option>
+              <option value="+973">🇧🇭 Bahrain (+973)</option>
+              <option value="+91">🇮🇳 India (+91)</option>
+              <option value="+32">🇧🇪 Belgium (+32)</option>
+              <option value="+44">🇬🇧 UK (+44)</option>
+              <option value="+213">🇩🇿 Algeria (+213)</option>
+              <option value="+1">🇨🇦 Canada (+1)</option>
+              <option value="+1">🇺🇸 USA (+1)</option>
+              <option value="+93">🇦🇫 Afghanistan (+93)</option>
+              <option value="+355">🇦🇱 Albania (+355)</option>
+              <option value="+376">🇦🇩 Andorra (+376)</option>
+              <option value="+244">🇦🇴 Angola (+244)</option>
+              <option value="+54">🇦🇷 Argentina (+54)</option>
+              <option value="+374">🇦🇲 Armenia (+374)</option>
+              <option value="+61">🇦🇺 Australia (+61)</option>
+              <option value="+43">🇦🇹 Austria (+43)</option>
+              <option value="+994">🇦🇿 Azerbaijan (+994)</option>
+              <option value="+1-242">🇧🇸 Bahamas (+1-242)</option>
+              <option value="+880">🇧🇩 Bangladesh (+880)</option>
+              <option value="+375">🇧🇾 Belarus (+375)</option>
+              <option value="+501">🇧🇿 Belize (+501)</option>
+              <option value="+229">🇧🇯 Benin (+229)</option>
+              <option value="+975">🇧🇹 Bhutan (+975)</option>
+              <option value="+591">🇧🇴 Bolivia (+591)</option>
+              <option value="+387">🇧🇦 Bosnia (+387)</option>
+              <option value="+267">🇧🇼 Botswana (+267)</option>
+              <option value="+55">🇧🇷 Brazil (+55)</option>
+              <option value="+673">🇧🇳 Brunei (+673)</option>
+              <option value="+359">🇧🇬 Bulgaria (+359)</option>
+              <option value="+226">🇧🇫 Burkina Faso (+226)</option>
+              <option value="+257">🇧🇮 Burundi (+257)</option>
+              <option value="+855">🇰🇭 Cambodia (+855)</option>
+              <option value="+237">🇨🇲 Cameroon (+237)</option>
+              <option value="+238">🇨🇻 Cape Verde (+238)</option>
+              <option value="+236">🇨🇫 Central African Rep. (+236)</option>
+              <option value="+235">🇹🇩 Chad (+235)</option>
+              <option value="+56">🇨🇱 Chile (+56)</option>
+              <option value="+86">🇨🇳 China (+86)</option>
+              <option value="+57">🇨🇴 Colombia (+57)</option>
+              <option value="+269">🇰🇲 Comoros (+269)</option>
+              <option value="+242">🇨🇬 Congo (+242)</option>
+              <option value="+506">🇨🇷 Costa Rica (+506)</option>
+              <option value="+385">🇭🇷 Croatia (+385)</option>
+              <option value="+53">🇨🇺 Cuba (+53)</option>
+              <option value="+357">🇨🇾 Cyprus (+357)</option>
+              <option value="+420">🇨🇿 Czechia (+420)</option>
+              <option value="+45">🇩🇰 Denmark (+45)</option>
+              <option value="+253">🇩🇯 Djibouti (+253)</option>
+              <option value="+1-809">🇩🇴 Dominican Rep. (+1-809)</option>
+              <option value="+593">🇪🇨 Ecuador (+593)</option>
+              <option value="+20">🇪🇬 Egypt (+20)</option>
+              <option value="+503">🇸🇻 El Salvador (+503)</option>
+              <option value="+240">🇬🇶 Equatorial Guinea (+240)</option>
+              <option value="+291">🇪🇷 Eritrea (+291)</option>
+              <option value="+372">🇪🇪 Estonia (+372)</option>
+              <option value="+251">🇪🇹 Ethiopia (+251)</option>
+              <option value="+679">🇫🇯 Fiji (+679)</option>
+              <option value="+358">🇫🇮 Finland (+358)</option>
+              <option value="+33">🇫🇷 France (+33)</option>
+              <option value="+241">🇬🇦 Gabon (+241)</option>
+              <option value="+220">🇬🇲 Gambia (+220)</option>
+              <option value="+995">🇬🇪 Georgia (+995)</option>
+              <option value="+49">🇩🇪 Germany (+49)</option>
+              <option value="+233">🇬🇭 Ghana (+233)</option>
+              <option value="+30">🇬🇷 Greece (+30)</option>
+              <option value="+502">🇬🇹 Guatemala (+502)</option>
+              <option value="+224">🇬🇳 Guinea (+224)</option>
+              <option value="+592">🇬🇾 Guyana (+592)</option>
+              <option value="+509">🇭🇹 Haiti (+509)</option>
+              <option value="+504">🇭🇳 Honduras (+504)</option>
+              <option value="+852">🇭🇰 Hong Kong (+852)</option>
+              <option value="+36">🇭🇺 Hungary (+36)</option>
+              <option value="+354">🇮🇸 Iceland (+354)</option>
+              <option value="+62">🇮🇩 Indonesia (+62)</option>
+              <option value="+98">🇮🇷 Iran (+98)</option>
+              <option value="+964">🇮🇶 Iraq (+964)</option>
+              <option value="+353">🇮🇪 Ireland (+353)</option>
+              <option value="+39">🇮🇹 Italy (+39)</option>
+              <option value="+225">🇨🇮 Ivory Coast (+225)</option>
+              <option value="+1-876">🇯🇲 Jamaica (+1-876)</option>
+              <option value="+81">🇯🇵 Japan (+81)</option>
+              <option value="+962">🇯🇴 Jordan (+962)</option>
+              <option value="+7">🇰🇿 Kazakhstan (+7)</option>
+              <option value="+254">🇰🇪 Kenya (+254)</option>
+              <option value="+82">🇰🇷 South Korea (+82)</option>
+              <option value="+996">🇰🇬 Kyrgyzstan (+996)</option>
+              <option value="+856">🇱🇦 Laos (+856)</option>
+              <option value="+371">🇱🇻 Latvia (+371)</option>
+              <option value="+961">🇱🇧 Lebanon (+961)</option>
+              <option value="+266">🇱🇸 Lesotho (+266)</option>
+              <option value="+231">🇱🇷 Liberia (+231)</option>
+              <option value="+218">🇱🇾 Libya (+218)</option>
+              <option value="+423">🇱🇮 Liechtenstein (+423)</option>
+              <option value="+370">🇱🇹 Lithuania (+370)</option>
+              <option value="+352">🇱🇺 Luxembourg (+352)</option>
+              <option value="+853">🇲🇴 Macau (+853)</option>
+              <option value="+261">🇲🇬 Madagascar (+261)</option>
+              <option value="+265">🇲🇼 Malawi (+265)</option>
+              <option value="+60">🇲🇾 Malaysia (+60)</option>
+              <option value="+960">🇲🇻 Maldives (+960)</option>
+              <option value="+223">🇲🇱 Mali (+223)</option>
+              <option value="+356">🇲🇹 Malta (+356)</option>
+              <option value="+222">🇲🇷 Mauritania (+222)</option>
+              <option value="+230">🇲🇺 Mauritius (+230)</option>
+              <option value="+52">🇲🇽 Mexico (+52)</option>
+              <option value="+373">🇲🇩 Moldova (+373)</option>
+              <option value="+377">🇲🇨 Monaco (+377)</option>
+              <option value="+976">🇲🇳 Mongolia (+976)</option>
+              <option value="+382">🇲🇪 Montenegro (+382)</option>
+              <option value="+212">🇲🇦 Morocco (+212)</option>
+              <option value="+258">🇲🇿 Mozambique (+258)</option>
+              <option value="+95">🇲🇲 Myanmar (+95)</option>
+              <option value="+264">🇳🇦 Namibia (+264)</option>
+              <option value="+977">🇳🇵 Nepal (+977)</option>
+              <option value="+31">🇳🇱 Netherlands (+31)</option>
+              <option value="+64">🇳🇿 New Zealand (+64)</option>
+              <option value="+505">🇳🇮 Nicaragua (+505)</option>
+              <option value="+227">🇳🇪 Niger (+227)</option>
+              <option value="+234">🇳🇬 Nigeria (+234)</option>
+              <option value="+389">🇲🇰 North Macedonia (+389)</option>
+              <option value="+47">🇳🇴 Norway (+47)</option>
+              <option value="+92">🇵🇰 Pakistan (+92)</option>
+              <option value="+970">🇵🇸 Palestine (+970)</option>
+              <option value="+507">🇵🇦 Panama (+507)</option>
+              <option value="+675">🇵🇬 Papua New Guinea (+675)</option>
+              <option value="+595">🇵🇾 Paraguay (+595)</option>
+              <option value="+51">🇵🇪 Peru (+51)</option>
+              <option value="+63">🇵🇭 Philippines (+63)</option>
+              <option value="+48">🇵🇱 Poland (+48)</option>
+              <option value="+351">🇵🇹 Portugal (+351)</option>
+              <option value="+40">🇷🇴 Romania (+40)</option>
+              <option value="+7">🇷🇺 Russia (+7)</option>
+              <option value="+250">🇷🇼 Rwanda (+250)</option>
+              <option value="+221">🇸🇳 Senegal (+221)</option>
+              <option value="+381">🇷🇸 Serbia (+381)</option>
+              <option value="+248">🇸🇨 Seychelles (+248)</option>
+              <option value="+232">🇸🇱 Sierra Leone (+232)</option>
+              <option value="+65">🇸🇬 Singapore (+65)</option>
+              <option value="+421">🇸🇰 Slovakia (+421)</option>
+              <option value="+386">🇸🇮 Slovenia (+386)</option>
+              <option value="+252">🇸🇴 Somalia (+252)</option>
+              <option value="+27">🇿🇦 South Africa (+27)</option>
+              <option value="+211">🇸🇸 South Sudan (+211)</option>
+              <option value="+34">🇪🇸 Spain (+34)</option>
+              <option value="+94">🇱🇰 Sri Lanka (+94)</option>
+              <option value="+249">🇸🇩 Sudan (+249)</option>
+              <option value="+597">🇸🇷 Suriname (+597)</option>
+              <option value="+46">🇸🇪 Sweden (+46)</option>
+              <option value="+41">🇨🇭 Switzerland (+41)</option>
+              <option value="+963">🇸🇾 Syria (+963)</option>
+              <option value="+886">🇹🇼 Taiwan (+886)</option>
+              <option value="+992">🇹🇯 Tajikistan (+992)</option>
+              <option value="+255">🇹🇿 Tanzania (+255)</option>
+              <option value="+66">🇹🇭 Thailand (+66)</option>
+              <option value="+228">🇹🇬 Togo (+228)</option>
+              <option value="+1-868">🇹🇹 Trinidad & Tobago (+1-868)</option>
+              <option value="+216">🇹🇳 Tunisia (+216)</option>
+              <option value="+90">🇹🇷 Turkey (+90)</option>
+              <option value="+993">🇹🇲 Turkmenistan (+993)</option>
+              <option value="+256">🇺🇬 Uganda (+256)</option>
+              <option value="+380">🇺🇦 Ukraine (+380)</option>
+              <option value="+598">🇺🇾 Uruguay (+598)</option>
+              <option value="+998">🇺🇿 Uzbekistan (+998)</option>
+              <option value="+58">🇻🇪 Venezuela (+58)</option>
+              <option value="+84">🇻🇳 Vietnam (+84)</option>
+              <option value="+967">🇾🇪 Yemen (+967)</option>
+              <option value="+260">🇿🇲 Zambia (+260)</option>
+              <option value="+263">🇿🇼 Zimbabwe (+263)</option>
             </select>
             <input type="tel" id="mobileNumber" placeholder="50 123 4567" autocomplete="tel-national" required>
           </div>
@@ -374,9 +660,11 @@
           <input type="text" id="companyName" placeholder="e.g. PetroTech International" autocomplete="organization" required>
         </div>
 
+        <!-- Type of Visit selection ONLY buttons (dropdown removed as requested) -->
         <div class="form-group">
-          <label for="visitType">Type of Visit <span class="required">*</span></label>
-          <div class="visit-type-row" style="margin-bottom: 8px;">
+          <label>Type of Visit <span class="required">*</span></label>
+          <input type="hidden" id="visitType" value="Walk-In" required>
+          <div class="visit-type-row">
             <button type="button" class="visit-chip active" id="chipWalkIn" onclick="selectVisitType('Walk-In')">
               <span id="iconWalkIn">✓</span>
               <span>Walk-In</span>
@@ -386,10 +674,6 @@
               <span>Appointment</span>
             </button>
           </div>
-          <select id="visitType" onchange="selectVisitType(this.value)" required>
-            <option value="Walk-In" selected>Walk-In</option>
-            <option value="Appointment">Appointment</option>
-          </select>
         </div>
 
         <div class="form-group">
@@ -431,15 +715,39 @@
           <input type="text" id="personToMeet" placeholder="Host name or employee to see">
         </div>
 
+        <!-- Safety & QHSE Section in Web Form (as requested) -->
+        <div class="qhse-card">
+          <div class="qhse-header" onclick="toggleQhseGuidelines()">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">🛡️</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">Safety &amp; QHSE Guidelines</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Review mandatory facility rules &amp; PPE policy</div>
+              </div>
+            </div>
+            <span id="qhseArrow" style="font-size: 12px; color: var(--primary-accent); font-weight: bold;">▲</span>
+          </div>
+          <div id="qhseBody" class="qhse-body" style="display: block;">
+            <ul class="qhse-list">
+              <li><span>🦺</span> <span><b>Mandatory PPE:</b> Safety footwear, high-vis vest and eye protection required in workshop and yard areas.</span></li>
+              <li><span>🪪</span> <span><b>Badge Display:</b> Keep your issued visitor pass visible on company premises at all times.</span></li>
+              <li><span>🚶</span> <span><b>Accompanied Access:</b> Visitors must remain accompanied by their host in operational zones.</span></li>
+              <li><span>📵</span> <span><b>Photography:</b> Unauthorized photography or recording is strictly prohibited.</span></li>
+              <li><span>🚨</span> <span><b>Emergency &amp; Evacuation:</b> In case of fire alarm, proceed calmly via green exit signage to <b>Assembly Point 1</b>.</span></li>
+              <li><span>📞</span> <span><b>Emergency Hotline:</b> <a href="tel:+97148807777" style="color: var(--primary-accent); text-decoration: none; font-weight: 700;">+971 4 880 7777</a> / Safety Dept.</span></li>
+            </ul>
+          </div>
+        </div>
+
         <div class="safety-box">
           <input type="checkbox" id="safetyAgree" required checked>
           <label for="safetyAgree">
-            I acknowledge that I have read and agree to comply with <b>SAIT Group QHSE Safety Guidelines</b>, wear required personal protective equipment (PPE), and remain accompanied in designated zones.
+            I confirm that I have read and agree to comply with <b>SAIT Group QHSE Safety Guidelines</b>, wear required PPE, and follow safety protocols.
           </label>
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn">
-          Check In & Sync Pass to Kiosk
+          Complete Check-In &amp; Sync to Kiosk
         </button>
       </form>
     </div>
@@ -453,17 +761,17 @@
 
       <div class="badge-pass">
         <div class="badge-row" style="border-top: none;"><span>Visitor Name:</span> <b id="displayVisitorName">David Miller</b></div>
-        <div class="badge-row"><span>Company:</span> <span id="displayCompany">PetroTech International</span></div>
+        <div class="badge-row"><span>Company:</span> <b id="displayCompany">PetroTech International</b></div>
         <div class="badge-row"><span>Type of Visit:</span> <b id="displayVisitType">Walk-In</b></div>
-        <div class="badge-row"><span>Department:</span> <span id="displayDept">PROJECTS</span></div>
-        <div class="badge-row"><span>Purpose:</span> <span id="displayPurpose">Meeting</span></div>
-        <div class="badge-row"><span>Host Person:</span> <span id="displayHost">Reception Desk</span></div>
+        <div class="badge-row"><span>Department:</span> <b id="displayDept">PROJECTS</b></div>
+        <div class="badge-row"><span>Purpose:</span> <b id="displayPurpose">Meeting</b></div>
+        <div class="badge-row"><span>Host Person:</span> <b id="displayHost">Reception Desk</b></div>
         <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
 
       <p style="font-size: 13px; color: var(--text-main); line-height: 1.5; margin-bottom: 14px;">
-        Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and sent to your email!
+        Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and emailed to your address!
       </p>
 
       <button type="button" class="btn-submit" onclick="resetFormForNextVisitor()" style="background: var(--text-muted); font-size: 14px; padding: 12px;">
@@ -472,15 +780,39 @@
     </div>
 
     <div class="footer">
-      <p>© 2026 SAIT Group • Marine & Industrial Engineering Systems</p>
-      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Zero-Touch Mobile Registration • Cloud Synchronized</p>
+      <p>© 2026 SAIT Group • Marine &amp; Industrial Engineering Systems</p>
+      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Touchless Mobile Portal • iOS 26 Liquid Glass UI</p>
     </div>
   </div>
 
-  <!-- Firebase Web SDK v10 (Modular via ESM) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('sait_liquid_theme') || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    window.toggleLiquidTheme = function() {
+      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('sait_liquid_theme', next);
+      document.getElementById('themeToggleBtn').innerText = next === 'dark' ? '☀️' : '🌙';
+    };
+
+    window.toggleQhseGuidelines = function() {
+      const body = document.getElementById('qhseBody');
+      const arrow = document.getElementById('qhseArrow');
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        arrow.innerText = '▲';
+      } else {
+        body.style.display = 'none';
+        arrow.innerText = '▼';
+      }
+    };
 
     const firebaseConfig = {
       apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
@@ -494,13 +826,11 @@
     let db = null;
     try {
       const app = initializeApp(firebaseConfig);
-      // Explicitly bind to our Firestore database ID
       db = getFirestore(app, "ai-studio-android-saitvisi-226bc4de-7e87-4603-a3f9-5c674f11f3ca");
     } catch (err) {
       console.warn("Firebase initialization notice:", err);
     }
 
-    // Official SAIT Group Branch Registry for accurate fallback & matching
     const BRANCH_REGISTRY = {
       'BSST-DXB': { name: 'BSS Tech / BSMC - Dubai', city: 'Dubai', location: 'Engineering & Corrosion Control, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'OPERATIONS'] },
       'SAIT-DXB': { name: 'Sait FZCO - Dubai', city: 'Dubai', location: 'Industrial Free Zone Facility, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'MAINTENANCE'] },
@@ -510,7 +840,6 @@
       '3E-RAK':   { name: '3E - RAK', city: 'Ras Al Khaimah', location: 'Northern Emirates Engineering Branch, Ras Al Khaimah', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'TECHNICAL SERVICES', 'FINANCE', 'MANAGEMENT', 'WORKSHOP'] }
     };
 
-    // Extract parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
     const matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
@@ -523,12 +852,10 @@
     const countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
     const deptsParam = urlParams.get('depts');
 
-    // Populate UI with exact company branch name, location, and code
     document.getElementById('branchTitle').innerText = branchName;
     document.getElementById('branchLocation').innerText = branchLocation + ' • Code: ' + branchCode;
     document.getElementById('sessionText').innerText = 'TERMINAL: ' + sessionId;
 
-    // Populate branch-specific departments if provided in QR or registry
     const deptList = deptsParam ? deptsParam.split(',').map(d => d.trim()).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
     if (deptList && deptList.length > 0) {
       const deptSelect = document.getElementById('department');
@@ -590,7 +917,7 @@
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12 || 12;
-      return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+      return ;
     }
 
     window.handleRegistrationSubmit = async function(e) {
@@ -606,7 +933,7 @@
       const email = document.getElementById('email').value.trim();
       const countryCode = document.getElementById('countryCode').value;
       const rawMobile = document.getElementById('mobileNumber').value.trim();
-      const fullMobile = `${countryCode} ${rawMobile}`.trim();
+      const fullMobile = .trim();
       const companyName = document.getElementById('companyName').value.trim();
       const visitType = document.getElementById('visitType').value || 'Walk-In';
       const department = document.getElementById('department').value;
@@ -619,9 +946,8 @@
       const codeParts = branchCode.split('-');
       const companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
       const cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
-      const expectedPrefix = `${companyPrefix}-${cityShort}-${yearCode}`;
+      const expectedPrefix = ;
 
-      // Calculate next sequential pass number (ignoring any legacy random test numbers >= 1000)
       let maxSeq = 0;
       try {
         if (db) {
@@ -644,7 +970,7 @@
 
       const nextSeq = maxSeq + 1;
       const formattedSeq = String(nextSeq).padStart(4, '0');
-      const passNumber = `${expectedPrefix}${formattedSeq}`;
+      const passNumber = ;
       const nowTs = Date.now();
       const formattedTime = formatTimeNow();
 
@@ -668,7 +994,6 @@
 
       try {
         if (db) {
-          // Write to central visitors collection (triggers real-time Kiosk display + official pass generation + SMTP email dispatch)
           await setDoc(doc(db, "visitors", passNumber), visitorPayload);
           console.log("Visitor record synced to Firestore:", passNumber);
         }
@@ -676,7 +1001,6 @@
         console.warn("Cloud Firestore write note:", err);
       }
 
-      // Display check-in confirmation summary without pass number on visitor's browser
       document.getElementById('formCard').style.display = 'none';
       document.getElementById('displayVisitorName').innerText = fullName;
       document.getElementById('displayCompany').innerText = companyName;
@@ -696,7 +1020,7 @@
       document.getElementById('formCard').style.display = 'block';
       document.getElementById('successCard').style.display = 'none';
       const btn = document.getElementById('submitBtn');
-      btn.innerText = 'Check In & Sync Pass to Kiosk';
+      btn.innerText = 'Complete Check-In & Sync to Kiosk';
       btn.disabled = false;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };

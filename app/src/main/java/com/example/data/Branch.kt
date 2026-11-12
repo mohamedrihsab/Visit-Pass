@@ -1,5 +1,8 @@
 package com.example.data
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -422,10 +425,22 @@ object BranchRegistry {
             ?: INITIAL_BRANCHES[1]
     }
 
+    private val moshiBranchListAdapter by lazy {
+        val type = Types.newParameterizedType(List::class.java, Branch::class.java)
+        Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+            .adapter<List<Branch>>(type)
+    }
+
     fun branchesToJson(branches: List<Branch>): String {
-        val array = JSONArray()
-        branches.forEach { array.put(it.toJsonObject()) }
-        return array.toString()
+        return try {
+            val array = JSONArray()
+            branches.forEach { array.put(it.toJsonObject()) }
+            array.toString()
+        } catch (_: Throwable) {
+            moshiBranchListAdapter.toJson(branches)
+        }
     }
 
     fun branchesFromJson(jsonStr: String): List<Branch> {
@@ -438,8 +453,12 @@ object BranchRegistry {
                 list.add(Branch.fromJsonObject(obj))
             }
             if (list.isEmpty()) INITIAL_BRANCHES else list
-        } catch (e: Exception) {
-            INITIAL_BRANCHES
+        } catch (_: Throwable) {
+            try {
+                moshiBranchListAdapter.fromJson(jsonStr)?.takeIf { it.isNotEmpty() } ?: INITIAL_BRANCHES
+            } catch (_: Throwable) {
+                INITIAL_BRANCHES
+            }
         }
     }
 }

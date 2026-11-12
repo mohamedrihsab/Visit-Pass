@@ -6,15 +6,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,20 +24,15 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -44,16 +41,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -61,9 +57,11 @@ import coil.compose.AsyncImage
 import com.example.data.VisitorEntity
 import com.example.ui.theme.LiquidGlassCard
 import com.example.ui.theme.SaitDarkBackground
-import com.example.ui.theme.SaitPrimary
 import com.example.ui.theme.StatusSuccess
-import com.example.ui.theme.liquidGlass
+import com.example.ui.theme.liquidButtonGlass
+import com.example.ui.theme.liquidHeroGlass
+import com.example.ui.theme.liquidInnerGlass
+import com.example.ui.theme.liquidModalGlass
 import com.example.ui.theme.liquidPressEffect
 
 @Composable
@@ -86,13 +84,11 @@ fun VisitorPassDialog(
         Box(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(0.95f)
-                .liquidGlass(
+                .fillMaxWidth(0.94f)
+                .liquidModalGlass(
                     shape = RoundedCornerShape(28.dp),
                     cornerRadius = 28.dp,
-                    elevated = true,
-                    strokeWidth = 1.6.dp,
-                    shadowElevation = 20.dp
+                    strokeWidth = 1.6.dp
                 )
                 .testTag("visitor_pass_dialog")
         ) {
@@ -102,7 +98,6 @@ fun VisitorPassDialog(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Top close bar & Lanyard Clip Slot
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -110,7 +105,6 @@ fun VisitorPassDialog(
                 ) {
                     Spacer(modifier = Modifier.width(36.dp))
 
-                    // Lanyard Punch Hole
                     Box(
                         modifier = Modifier
                             .width(60.dp)
@@ -131,9 +125,8 @@ fun VisitorPassDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-                // Official Pass Badge Card (Liquid Glass Inner Lens)
                 LiquidGlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     cornerRadius = 22.dp,
@@ -143,47 +136,25 @@ fun VisitorPassDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Header Banner with Solid White Logo Container
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(SaitPrimary, Color(0xFF0369A1))
-                                    )
+                                .liquidHeroGlass(
+                                    shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp),
+                                    cornerRadius = 22.dp
                                 )
                                 .padding(vertical = 16.dp, horizontal = 20.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = Color.White,
-                                    shadowElevation = 2.dp,
-                                    modifier = Modifier.size(44.dp)
-                                ) {
-                                    if (!branchLogoUri.isNullOrBlank()) {
-                                        AsyncImage(
-                                            model = branchLogoUri,
-                                            contentDescription = "${visitor.branchName} Logo",
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.White)
-                                                .padding(4.dp),
-                                            contentScale = ContentScale.Fit
-                                        )
-                                    } else {
-                                        androidx.compose.foundation.Image(
-                                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.sait_logo),
-                                            contentDescription = "SAIT Group Logo",
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.White)
-                                                .padding(4.dp),
-                                            contentScale = ContentScale.Fit
-                                        )
-                                    }
-                                }
+                                CompanyBrandLogoBadge(
+                                    modifier = Modifier
+                                        .width(96.dp)
+                                        .height(40.dp),
+                                    logoUri = branchLogoUri,
+                                    branchName = visitor.branchName,
+                                    testTag = "company_logo_pass"
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = "SAIT GROUP",
@@ -194,7 +165,7 @@ fun VisitorPassDialog(
                                 )
                                 Text(
                                     text = visitor.branchName.uppercase(),
-                                    color = Color(0xFFBAE6FD),
+                                    color = Color(0xFFE0F2FE),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
@@ -202,7 +173,7 @@ fun VisitorPassDialog(
                                 )
                                 Text(
                                     text = "OFFICIAL VISITOR PASS",
-                                    color = Color(0xFFE0F2FE),
+                                    color = Color.White.copy(alpha = 0.90f),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
                                     letterSpacing = 1.sp
@@ -216,11 +187,10 @@ fun VisitorPassDialog(
                                 .padding(20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Status Pill (High-contrast in both Light & Dark modes)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = if (isCheckedIn) {
-                                    StatusSuccess.copy(alpha = 0.16f)
+                                    StatusSuccess.copy(alpha = 0.18f)
                                 } else {
                                     MaterialTheme.colorScheme.surfaceVariant
                                 },
@@ -246,7 +216,6 @@ fun VisitorPassDialog(
                                 }
                             }
 
-                            // Visitor Name
                             Text(
                                 text = visitor.fullName,
                                 fontSize = 22.sp,
@@ -255,7 +224,6 @@ fun VisitorPassDialog(
                                 textAlign = TextAlign.Center
                             )
 
-                            // Company Name
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -275,11 +243,10 @@ fun VisitorPassDialog(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                            // Grid Info Details
                             PassDetailRow(label = "Branch", value = visitor.branchName)
                             PassDetailRow(label = "Pass ID", value = visitor.passNumber, isMono = true)
                             if (visitor.email.isNotBlank()) {
@@ -293,9 +260,8 @@ fun VisitorPassDialog(
                             }
                             PassDetailRow(label = "Registered At", value = visitor.checkInFormattedTime)
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                            // Simulated Digital QR & Security Barcode
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -310,7 +276,7 @@ fun VisitorPassDialog(
                                         imageVector = Icons.Default.QrCode2,
                                         contentDescription = "Pass QR Code",
                                         tint = SaitDarkBackground,
-                                        modifier = Modifier.size(80.dp)
+                                        modifier = Modifier.size(76.dp)
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
@@ -318,45 +284,30 @@ fun VisitorPassDialog(
                                         fontFamily = FontFamily.Monospace,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.DarkGray
+                                        color = Color(0xFF0F172A)
                                     )
                                 }
-                            }
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // Confirmation Text
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = if (visitor.email.isNotBlank())
-                                        "Thank you! Your visit has been logged. An official pass & safety briefing have been sent to ${visitor.email}."
-                                    else
-                                        "Thank you! Your visit has been logged. Please proceed to the reception desk.",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(10.dp)
-                                )
                             }
                         }
                     }
                 }
 
-                // If Kiosk Mode is on, show Auto-Reset countdown notice
                 if (isKioskMode && countdownSeconds > 0) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 6.dp)
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                cornerRadius = 12.dp,
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -368,10 +319,10 @@ fun VisitorPassDialog(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Kiosk resets for next visitor in ${countdownSeconds}s",
+                                text = "Kiosk resets in ${countdownSeconds}s",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -379,26 +330,35 @@ fun VisitorPassDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Action Buttons
                 if (isKioskMode) {
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
-                            .liquidPressEffect()
+                            .padding(horizontal = 8.dp)
+                            .height(44.dp)
+                            .liquidButtonGlass(
+                                shape = RoundedCornerShape(14.dp),
+                                cornerRadius = 14.dp,
+                                baseColor = MaterialTheme.colorScheme.primary
+                            )
                             .testTag("btn_kiosk_next_visitor"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White
+                        )
                     ) {
                         Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Next Visitor Registration", fontWeight = FontWeight.Bold)
+                        Text("Next Visitor Registration", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 } else {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -423,22 +383,38 @@ fun VisitorPassDialog(
                                 }
                                 context.startActivity(Intent.createChooser(shareIntent, "Share Pass Details"))
                             },
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                             modifier = Modifier
                                 .weight(1f)
+                                .heightIn(min = 40.dp)
+                                .liquidPressEffect()
                                 .testTag("share_pass_button")
                         ) {
-                            Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Share")
+                            Text("Share", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, maxLines = 1)
                         }
 
                         Button(
                             onClick = onDismiss,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            ),
                             modifier = Modifier
                                 .weight(1f)
+                                .heightIn(min = 40.dp)
+                                .liquidButtonGlass(
+                                    shape = RoundedCornerShape(12.dp),
+                                    cornerRadius = 12.dp,
+                                    baseColor = MaterialTheme.colorScheme.primary
+                                )
                                 .testTag("done_pass_button")
                         ) {
-                            Text("Done", fontWeight = FontWeight.Bold)
+                            Text("Done", fontWeight = FontWeight.Bold, fontSize = 12.5.sp, maxLines = 1)
                         }
                     }
                 }
@@ -452,21 +428,26 @@ fun PassDetailRow(label: String, value: String, isMono: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 3.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            fontSize = 12.5.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 8.dp)
         )
         Text(
             text = value,
-            fontSize = 13.sp,
+            fontSize = 12.5.sp,
             fontWeight = FontWeight.SemiBold,
             fontFamily = if (isMono) FontFamily.Monospace else FontFamily.Default,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
         )
     }
 }

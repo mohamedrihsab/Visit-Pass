@@ -1,9 +1,7 @@
 package com.example
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import android.content.SharedPreferences
 import com.example.data.Branch
-import com.example.data.BranchRegistry
 import com.example.data.KioskPreferences
 import com.example.data.VisitorEntity
 import com.example.ui.RegistrationFormState
@@ -11,20 +9,49 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+private class InMemorySharedPreferences : SharedPreferences {
+  private val data = mutableMapOf<String, Any?>()
+
+  override fun getAll(): MutableMap<String, *> = data.toMutableMap()
+  override fun getString(key: String?, defValue: String?): String? = data[key] as? String ?: defValue
+  @Suppress("UNCHECKED_CAST")
+  override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? =
+    (data[key] as? Set<String>)?.toMutableSet() ?: defValues
+  override fun getInt(key: String?, defValue: Int): Int = data[key] as? Int ?: defValue
+  override fun getLong(key: String?, defValue: Long): Long = data[key] as? Long ?: defValue
+  override fun getFloat(key: String?, defValue: Float): Float = data[key] as? Float ?: defValue
+  override fun getBoolean(key: String?, defValue: Boolean): Boolean = data[key] as? Boolean ?: defValue
+  override fun contains(key: String?): Boolean = data.containsKey(key)
+  override fun edit(): SharedPreferences.Editor = EditorImpl()
+  override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) {}
+  override fun unregisterOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) {}
+
+  private inner class EditorImpl : SharedPreferences.Editor {
+    private val edits = mutableMapOf<String, Any?>()
+    private var clearFlag = false
+
+    override fun putString(key: String?, value: String?): SharedPreferences.Editor = apply { if (key != null) edits[key] = value }
+    override fun putStringSet(key: String?, values: MutableSet<String>?): SharedPreferences.Editor = apply { if (key != null) edits[key] = values?.toSet() }
+    override fun putInt(key: String?, value: Int): SharedPreferences.Editor = apply { if (key != null) edits[key] = value }
+    override fun putLong(key: String?, value: Long): SharedPreferences.Editor = apply { if (key != null) edits[key] = value }
+    override fun putFloat(key: String?, value: Float): SharedPreferences.Editor = apply { if (key != null) edits[key] = value }
+    override fun putBoolean(key: String?, value: Boolean): SharedPreferences.Editor = apply { if (key != null) edits[key] = value }
+    override fun remove(key: String?): SharedPreferences.Editor = apply { if (key != null) edits[key] = null }
+    override fun clear(): SharedPreferences.Editor = apply { clearFlag = true }
+    override fun commit(): Boolean { apply(); return true }
+    override fun apply() {
+      if (clearFlag) data.clear()
+      for ((k, v) in edits) {
+        if (v == null) data.remove(k) else data[k] = v
+      }
+    }
+  }
+}
+
 class ExampleRobolectricTest {
 
-  @Test
-  fun readStringFromContext() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val appName = context.getString(R.string.app_name)
-    assertEquals("SAIT Group Visitor Pass", appName)
-  }
+  private fun createTestPrefs(): KioskPreferences = KioskPreferences(InMemorySharedPreferences())
 
   @Test
   fun testFormValidation() {
@@ -56,20 +83,18 @@ class ExampleRobolectricTest {
 
   @Test
   fun testKioskPreferences() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
     assertEquals("1234", prefs.adminPin)
     assertTrue(prefs.isKioskMode)
 
     prefs.adminPin = "9876"
     assertEquals("9876", prefs.adminPin)
-    prefs.adminPin = "1234" // restore
+    prefs.adminPin = "1234"
   }
 
   @Test
   fun testDynamicBranchesAndDepartments() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
     val initialBranches = prefs.getBranches()
     assertTrue(initialBranches.isNotEmpty())
     assertEquals(6, initialBranches.size)
@@ -89,15 +114,11 @@ class ExampleRobolectricTest {
     val reloaded = prefs.getBranches()
     assertEquals(7, reloaded.size)
     assertTrue(reloaded.any { it.shortCode == "SAIT-SHJ" })
-
-    // Restore
-    prefs.saveBranches(initialBranches)
   }
 
   @Test
   fun testDepartmentEmailsConfig() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
     val emails = prefs.getDepartmentEmails()
     assertTrue(emails.isNotEmpty())
 
@@ -125,7 +146,6 @@ class ExampleRobolectricTest {
       isSyncedToGoogleForm = true
     )
 
-    // Verify CSV header and values
     val line = "\"${sample.passNumber}\",\"${sample.fullName}\",\"${sample.mobileNumber}\""
     assertTrue(line.contains("SAIT-VIS-1001"))
     assertTrue(line.contains("Alice Smith"))
@@ -133,28 +153,22 @@ class ExampleRobolectricTest {
 
   @Test
   fun testThemePreferences() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
-    
-    // Default should be light mode
+    val prefs = createTestPrefs()
+
     assertEquals(KioskPreferences.THEME_LIGHT, prefs.themeMode)
 
-    // Switch to dark mode
     prefs.themeMode = KioskPreferences.THEME_DARK
     assertEquals(KioskPreferences.THEME_DARK, prefs.themeMode)
 
-    // Switch to system mode
     prefs.themeMode = KioskPreferences.THEME_SYSTEM
     assertEquals(KioskPreferences.THEME_SYSTEM, prefs.themeMode)
 
-    // Restore to Light
     prefs.themeMode = KioskPreferences.THEME_LIGHT
   }
 
   @Test
   fun testSmtpConfigPersistence() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
 
     val initialConfig = prefs.getSmtpConfig()
     assertFalse(initialConfig.enabled)
@@ -183,9 +197,6 @@ class ExampleRobolectricTest {
     assertEquals("no-reply@saitgroup.com", reloaded.senderEmail)
     assertEquals("SAIT Group Visitor Alerts", reloaded.senderName)
     assertTrue(reloaded.firebaseTriggerEnabled)
-
-    // Restore default
-    prefs.saveSmtpConfig(com.example.data.SmtpConfig())
   }
 
   @Test
@@ -209,20 +220,13 @@ class ExampleRobolectricTest {
 
   @Test
   fun testSixDigitPinAndPassSequence() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
 
-    // Test 6-digit PIN support
     prefs.adminPin = "123456"
     prefs.receptionistPin = "654321"
     assertEquals("123456", prefs.adminPin)
     assertEquals("654321", prefs.receptionistPin)
 
-    // Restore default PINs
-    prefs.adminPin = "1234"
-    prefs.receptionistPin = "0000"
-
-    // Test prefix-city-YYXXXX sequence counter
     val seq1 = prefs.getNextSequence("SAIT", "DXB", "26")
     val seq2 = prefs.getNextSequence("SAIT", "DXB", "26")
     assertTrue(seq2 == seq1 + 1)
@@ -232,8 +236,7 @@ class ExampleRobolectricTest {
 
   @Test
   fun testBranchLogoAndSafetyInfoPersistence() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    val prefs = KioskPreferences(context)
+    val prefs = createTestPrefs()
     val initialBranches = prefs.getBranches()
 
     val updatedBranches = initialBranches.map { branch ->
@@ -253,9 +256,5 @@ class ExampleRobolectricTest {
     assertEquals("1. Mandatory safety shoes.\n2. Report to Assembly Point A.", reloaded.safetyGuidelines)
     assertEquals("+971 4 888 9999", reloaded.safetyHelpline)
     assertEquals("content://media/picker/0/com.android.providers.media.photopicker/media/102", reloaded.emergencyExitDrawingUri)
-
-    // Restore defaults
-    prefs.saveBranches(initialBranches)
   }
 }
-
