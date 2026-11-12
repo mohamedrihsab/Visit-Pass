@@ -76,6 +76,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -180,6 +181,7 @@ fun AdminDashboardScreen(
     val autoResetSec by viewModel.autoResetSeconds.collectAsState()
     val screenTimeoutMin by viewModel.screenTimeoutMinutes.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
+    val liquidPaletteStyle by viewModel.liquidPaletteStyle.collectAsState()
     val smtpConfig by viewModel.smtpConfig.collectAsState()
     val isFirebaseLoggedIn = currentUser != null
 
@@ -662,13 +664,13 @@ fun AdminDashboardScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
+                                    .liquidPressEffect(enabled = true)
                                     .liquidInnerGlass(
                                         shape = RoundedCornerShape(12.dp),
                                         cornerRadius = 12.dp,
                                         selected = isSelected
                                     )
-                                    .clickable(enabled = isFirebaseLoggedIn) { viewModel.setThemeMode(mode) }
+                                    .clickable { viewModel.setThemeMode(mode) }
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                                     .testTag("theme_option_$mode"),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -682,6 +684,84 @@ fun AdminDashboardScreen(
                                         imageVector = icon,
                                         contentDescription = null,
                                         tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = label,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                Icon(
+                                    imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                                    contentDescription = null,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Liquid Glass Wallpaper / Ambient Theme Color Combination
+                    Text(
+                        text = "Liquid Glass Ambient Palette",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Select refraction wallpaper: Default Oceanic Glass or SAIT Blue + Red combo (matching the official logo).",
+                        fontSize = 11.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 15.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val paletteOptions = listOf(
+                        Triple(KioskPreferences.PALETTE_OCEANIC, "Default Oceanic (Sapphire & Cyan Glass)", Icons.Default.WaterDrop),
+                        Triple(KioskPreferences.PALETTE_SAIT_BLUE_RED, "SAIT Heritage (Navy Blue + Crimson Red Logo Combo)", Icons.Default.Palette)
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        paletteOptions.forEach { (style, label, icon) ->
+                            val isSelected = liquidPaletteStyle == style
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .liquidPressEffect(enabled = true)
+                                    .liquidInnerGlass(
+                                        shape = RoundedCornerShape(12.dp),
+                                        cornerRadius = 12.dp,
+                                        selected = isSelected
+                                    )
+                                    .clickable { viewModel.setLiquidPaletteStyle(style) }
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                                    .testTag("palette_option_$style"),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = if (isSelected) {
+                                            if (style == KioskPreferences.PALETTE_SAIT_BLUE_RED) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))

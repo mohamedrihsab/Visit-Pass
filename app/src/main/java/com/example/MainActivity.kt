@@ -147,6 +147,7 @@ class MainActivity : ComponentActivity() {
             )
 
             val themeMode by viewModel.themeMode.collectAsState()
+            val paletteStyle by viewModel.liquidPaletteStyle.collectAsState()
             val screenTimeoutMinutes by viewModel.screenTimeoutMinutes.collectAsState()
 
             LaunchedEffect(screenTimeoutMinutes) {
@@ -166,6 +167,7 @@ class MainActivity : ComponentActivity() {
 
             MyApplicationTheme(
                 darkTheme = useDarkTheme,
+                paletteStyle = paletteStyle,
                 dynamicColor = false
             ) {
                 Surface(
@@ -667,12 +669,12 @@ private fun TopBarGlassIconButton(
     onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier.wrapContentSize(),
-        contentAlignment = Alignment.TopEnd
+        modifier = Modifier.size(32.dp),
+        contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .fillMaxSize()
                 .liquidPressEffect(pressedScale = 0.90f)
                 .liquidInnerGlass(
                     shape = CircleShape,
@@ -696,19 +698,20 @@ private fun TopBarGlassIconButton(
         if (badgeCount > 0) {
             Box(
                 modifier = Modifier
-                    .offset(x = 5.dp, y = (-4).dp)
-                    .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
-                    .background(NotificationAlertColor, RoundedCornerShape(8.dp))
-                    .border(0.9.dp, Color.White, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 3.5.dp, vertical = 0.5.dp),
+                    .align(Alignment.TopEnd)
+                    .offset(x = 3.dp, y = (-2).dp)
+                    .size(13.dp)
+                    .background(NotificationAlertColor, CircleShape)
+                    .border(0.7.dp, Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (badgeCount > 99) "99+" else badgeCount.toString(),
+                    text = if (badgeCount > 99) "99" else badgeCount.toString(),
                     color = Color(0xFF051020),
-                    fontSize = 8.5.sp,
+                    fontSize = 7.5.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    lineHeight = 7.5.sp
                 )
             }
         }

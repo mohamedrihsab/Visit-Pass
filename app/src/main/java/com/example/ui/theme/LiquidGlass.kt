@@ -378,6 +378,105 @@ val DarkLiquidGlassPalette = LiquidGlassPalette(
     chipUnselectedContainer = Color(0xFF12264A).copy(alpha = 0.78f)
 )
 
+// SAIT Heritage Blue + Red Color Combo Palettes (from Official SAIT Logo)
+val SaitBlueRedLightLiquidGlassPalette = LiquidGlassPalette(
+    isDark = false,
+    meshBgTopLeft = Color(0xFF8BA5D6),
+    meshBgCenter = Color(0xFFD6E2F7),
+    meshBgBottomRight = Color(0xFFFCDCDC),
+    waveSpherePrimary = Color(0xFF001B69).copy(alpha = 0.42f),
+    waveSphereSecondary = Color(0xFF1E3A8A).copy(alpha = 0.22f),
+    waveEmeraldStart = Color(0xFFDC2626).copy(alpha = 0.48f), // SAIT Crimson Red arc
+    waveEmeraldEnd = Color(0xFFEA580C).copy(alpha = 0.32f),
+    waveEmeraldRim = Color(0xFFFFFFFF).copy(alpha = 0.90f),
+    waveIndigoStart = Color(0xFF001B69).copy(alpha = 0.35f),
+    waveIndigoEnd = Color(0xFF1D4ED8).copy(alpha = 0.20f),
+    waveIndigoRim = Color(0xFFFCA5A5).copy(alpha = 0.85f),
+    orbCyan = Color(0xFF1D4ED8).copy(alpha = 0.32f),
+    orbViolet = Color(0xFFDC2626).copy(alpha = 0.28f), // Crimson ambient orb
+    orbEmerald = Color(0xFF001B69).copy(alpha = 0.25f),
+    orbRose = Color(0xFFEF4444).copy(alpha = 0.22f),
+    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.68f),
+    ambientShadowColor = Color(0xFF00113D),
+    outerContrastRim = Color(0xFF001B69).copy(alpha = 0.40f),
+    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.86f),
+    glassSurfaceBottom = Color(0xFFF5F8FF).copy(alpha = 0.76f),
+    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.92f),
+    glassElevatedBottom = Color(0xFFFFF1F2).copy(alpha = 0.82f),
+    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.84f),
+    innerTileBottom = Color(0xFFDBEAFE).copy(alpha = 0.70f),
+    innerTileSelectedTop = Color(0xFFBFDBFE).copy(alpha = 0.88f),
+    innerTileSelectedBottom = Color(0xFFFECDD3).copy(alpha = 0.78f),
+    sdfRefractionRingTop = Color(0xFFFFFFFF).copy(alpha = 0.95f),
+    sdfRefractionRingBottom = Color(0xFFDC2626).copy(alpha = 0.42f),
+    dispersionCoralRose = Color(0xFFDC2626).copy(alpha = 0.65f),
+    dispersionGold = Color(0xFFFFB347).copy(alpha = 0.50f),
+    dispersionCyan = Color(0xFF001B69).copy(alpha = 0.68f),
+    dispersionEmerald = Color(0xFF0284C7).copy(alpha = 0.54f),
+    dispersionMagenta = Color(0xFFB91C1C).copy(alpha = 0.52f),
+    specularRimBright = Color(0xFFFFFFFF).copy(alpha = 0.98f),
+    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.75f),
+    specularRimEnd = Color(0xFFFCA5A5).copy(alpha = 0.88f),
+    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.88f),
+    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.45f),
+    pressFlareColor = Color(0xFFDC2626).copy(alpha = 0.35f),
+    pillActiveTop = Color(0xFF001B69),
+    pillActiveBottom = Color(0xFFDC2626), // Blue to Red gradient pill
+    pillActiveBorder = Color(0xFFFECACA),
+    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.88f),
+    inputFieldBorderUnfocused = Color(0xFF001B69).copy(alpha = 0.45f),
+    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.84f)
+)
+
+val SaitBlueRedDarkLiquidGlassPalette = LiquidGlassPalette(
+    isDark = true,
+    meshBgTopLeft = Color(0xFF03091B),
+    meshBgCenter = Color(0xFF081433),
+    meshBgBottomRight = Color(0xFF1A050B),
+    waveSpherePrimary = Color(0xFF1E40AF).copy(alpha = 0.58f),
+    waveSphereSecondary = Color(0xFF001B69).copy(alpha = 0.42f),
+    waveEmeraldStart = Color(0xFFDC2626).copy(alpha = 0.72f), // Glowing Crimson Arc
+    waveEmeraldEnd = Color(0xFFB91C1C).copy(alpha = 0.52f),
+    waveEmeraldRim = Color(0xFFFCA5A5).copy(alpha = 0.88f),
+    waveIndigoStart = Color(0xFF001B69).copy(alpha = 0.85f),
+    waveIndigoEnd = Color(0xFF1E3A8A).copy(alpha = 0.68f),
+    waveIndigoRim = Color(0xFF60A5FA).copy(alpha = 0.88f),
+    orbCyan = Color(0xFF2563EB).copy(alpha = 0.35f),
+    orbViolet = Color(0xFFEF4444).copy(alpha = 0.32f),
+    orbEmerald = Color(0xFF001B69).copy(alpha = 0.28f),
+    orbRose = Color(0xFFDC2626).copy(alpha = 0.26f),
+    causticBeamColor = Color(0xFF60A5FA).copy(alpha = 0.22f),
+    ambientShadowColor = Color(0xFF000000),
+    outerContrastRim = Color(0xFFDC2626).copy(alpha = 0.42f),
+    glassSurfaceTop = Color(0xFF0E1A38).copy(alpha = 0.80f),
+    glassSurfaceBottom = Color(0xFF060D20).copy(alpha = 0.72f),
+    glassElevatedTop = Color(0xFF14244D).copy(alpha = 0.86f),
+    glassElevatedBottom = Color(0xFF1A0812).copy(alpha = 0.78f),
+    innerTileTop = Color(0xFF16254E).copy(alpha = 0.76f),
+    innerTileBottom = Color(0xFF0A122B).copy(alpha = 0.66f),
+    innerTileSelectedTop = Color(0xFF1E40AF).copy(alpha = 0.78f),
+    innerTileSelectedBottom = Color(0xFFDC2626).copy(alpha = 0.68f),
+    sdfRefractionRingTop = Color(0xFFDBEAFE).copy(alpha = 0.48f),
+    sdfRefractionRingBottom = Color(0xFFF87171).copy(alpha = 0.38f),
+    dispersionCoralRose = Color(0xFFDC2626).copy(alpha = 0.78f),
+    dispersionGold = Color(0xFFFFB74D).copy(alpha = 0.60f),
+    dispersionCyan = Color(0xFF60A5FA).copy(alpha = 0.75f),
+    dispersionEmerald = Color(0xFF38BDF8).copy(alpha = 0.65f),
+    dispersionMagenta = Color(0xFFEF4444).copy(alpha = 0.64f),
+    specularRimBright = Color(0xFFFEE2E2).copy(alpha = 0.94f),
+    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.74f),
+    specularRimEnd = Color(0xFFF87171).copy(alpha = 0.82f),
+    innerMeniscusGlow = Color(0xFFDBEAFE).copy(alpha = 0.38f),
+    diagonalSheenColor = Color(0xFFF87171).copy(alpha = 0.18f),
+    pressFlareColor = Color(0xFFDC2626).copy(alpha = 0.40f),
+    pillActiveTop = Color(0xFF1E40AF),
+    pillActiveBottom = Color(0xFFDC2626), // Blue to Red gradient
+    pillActiveBorder = Color(0xFFFCA5A5),
+    inputFieldContainer = Color(0xFF0A142D).copy(alpha = 0.84f),
+    inputFieldBorderUnfocused = Color(0xFF60A5FA).copy(alpha = 0.48f),
+    chipUnselectedContainer = Color(0xFF101E3E).copy(alpha = 0.80f)
+)
+
 val LocalLiquidGlassPalette = staticCompositionLocalOf { LightLiquidGlassPalette }
 
 /**
@@ -1656,43 +1755,45 @@ fun LiquidGlassBottomDock(
                             scaleY = tabScale
                         }
                         .liquidPressEffect(pressedScale = 0.93f)
-                        .clip(RoundedCornerShape(22.dp))
                         .testTag(item.testTag)
-                        .then(
-                            if (selected) {
-                                Modifier
-                                    .background(
-                                        Brush.linearGradient(
-                                            colors = listOf(palette.pillActiveTop, palette.pillActiveBottom)
-                                        )
-                                    )
-                                    .drawWithCache {
-                                        val r = 22.dp.toPx()
-                                        val topGloss = Brush.verticalGradient(
-                                            colors = listOf(Color.White.copy(alpha = 0.30f), Color.Transparent),
-                                            startY = 0f,
-                                            endY = size.height * 0.5f
-                                        )
-                                        onDrawWithContent {
-                                            drawContent()
-                                            drawRoundRect(
-                                                brush = topGloss,
-                                                cornerRadius = CornerRadius(r, r)
-                                            )
-                                            drawRoundRect(
-                                                color = palette.pillActiveBorder,
-                                                cornerRadius = CornerRadius(r, r),
-                                                style = Stroke(width = 1.2.dp.toPx())
-                                            )
-                                        }
-                                    }
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .clickable { onSelectTab(item.index) },
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onSelectTab(item.index) },
                     contentAlignment = Alignment.Center
                 ) {
+                    if (selected) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(palette.pillActiveTop, palette.pillActiveBottom)
+                                    )
+                                )
+                                .drawWithCache {
+                                    val r = 22.dp.toPx()
+                                    val topGloss = Brush.verticalGradient(
+                                        colors = listOf(Color.White.copy(alpha = 0.30f), Color.Transparent),
+                                        startY = 0f,
+                                        endY = size.height * 0.5f
+                                    )
+                                    onDrawWithContent {
+                                        drawContent()
+                                        drawRoundRect(
+                                            brush = topGloss,
+                                            cornerRadius = CornerRadius(r, r)
+                                        )
+                                        drawRoundRect(
+                                            color = palette.pillActiveBorder,
+                                            cornerRadius = CornerRadius(r, r),
+                                            style = Stroke(width = 1.2.dp.toPx())
+                                        )
+                                    }
+                                }
+                        )
+                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -1714,22 +1815,22 @@ fun LiquidGlassBottomDock(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .offset(x = 10.dp, y = (-6).dp)
-                                        .defaultMinSize(minWidth = 15.dp, minHeight = 15.dp)
+                                        .offset(x = 6.dp, y = (-3).dp)
+                                        .size(13.dp)
                                         .background(
                                             color = badgeBg,
-                                            shape = RoundedCornerShape(8.dp)
+                                            shape = CircleShape
                                         )
-                                        .border(0.9.dp, Color.White, RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 4.dp, vertical = 0.5.dp),
+                                        .border(0.7.dp, Color.White, CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = if (item.badgeCount > 99) "99+" else item.badgeCount.toString(),
+                                        text = if (item.badgeCount > 99) "99" else item.badgeCount.toString(),
                                         color = badgeFg,
-                                        fontSize = 8.sp,
+                                        fontSize = 7.5.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 7.5.sp
                                     )
                                 }
                             }

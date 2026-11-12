@@ -212,6 +212,7 @@ class KioskPreferences(
         private const val KEY_VISIT_PURPOSES_JSON = "key_visit_purposes_json"
         private const val KEY_DEPT_EMAILS_JSON = "key_dept_emails_json"
         private const val KEY_THEME_MODE = "key_theme_mode"
+        private const val KEY_LIQUID_PALETTE_STYLE = "key_liquid_palette_style"
         private const val KEY_SMTP_CONFIG = "key_smtp_config"
 
         const val TIMEOUT_ALWAYS_ON = -1
@@ -225,6 +226,9 @@ class KioskPreferences(
         const val THEME_DARK = "DARK"
         const val THEME_SYSTEM = "SYSTEM"
 
+        const val PALETTE_OCEANIC = "OCEANIC"
+        const val PALETTE_SAIT_BLUE_RED = "SAIT_BLUE_RED"
+
         const val DEFAULT_ADMIN_PIN = "1234"
         const val DEFAULT_RECEPTIONIST_PIN = "0000"
         private const val KEY_TOUCHLESS_GITHUB_URL = "key_touchless_github_url"
@@ -235,6 +239,10 @@ class KioskPreferences(
         // Default GitHub Pages URL for the live visitor registration portal
         const val DEFAULT_GITHUB_PAGES_URL = "https://mohamedrihsab.github.io/Visit-Pass/"
     }
+
+    var liquidPaletteStyle: String
+        get() = prefs.getString(KEY_LIQUID_PALETTE_STYLE, PALETTE_OCEANIC) ?: PALETTE_OCEANIC
+        set(value) = prefs.edit().putString(KEY_LIQUID_PALETTE_STYLE, value).apply()
 
     fun isRemoteVisitorProcessed(key: String): Boolean {
         val cleanKey = key.trim().uppercase()

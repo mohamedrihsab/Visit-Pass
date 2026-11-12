@@ -516,61 +516,23 @@ private fun AdminComprehensiveDashboard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f, fill = false)
-                ) {
-                    Surface(
-                        color = Color.White,
-                        shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        if (!activeBranch.logoUri.isNullOrBlank()) {
-                            AsyncImage(
-                                model = activeBranch.logoUri,
-                                contentDescription = "${activeBranch.name} Logo",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.White)
-                                    .padding(3.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.White),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Analytics,
-                                    contentDescription = "Executive Analytics",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Executive Visitor Intelligence",
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            lineHeight = 16.sp
-                        )
-                        Text(
-                            text = "Scope: $scopeLabel",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 2,
-                            lineHeight = 14.sp
-                        )
-                    }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Executive Visitor Intelligence",
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        lineHeight = 16.sp
+                    )
+                    Text(
+                        text = "Scope: $scopeLabel",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        lineHeight = 14.sp
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(6.dp))
@@ -605,19 +567,20 @@ private fun AdminComprehensiveDashboard(
                         )
                     }
 
-                    IconButton(
-                        onClick = onToggleExpanded,
+                    Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(26.dp)
                             .liquidPressEffect(pressedScale = 0.90f)
-                            .liquidInnerGlass(shape = CircleShape, cornerRadius = 16.dp)
-                            .testTag("toggle_admin_analytics_btn")
+                            .liquidInnerGlass(shape = CircleShape, cornerRadius = 13.dp)
+                            .clickable(onClick = onToggleExpanded)
+                            .testTag("toggle_admin_analytics_btn"),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = if (isExpanded) "Collapse Detailed Charts" else "Expand Detailed Charts",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                     }
                 }
@@ -1860,40 +1823,6 @@ private fun VisitorLogCard(
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
                         )
-                    }
-
-                    // Branch / Company Code Pill (shown in Admin mode)
-                    val displayBranchCode = remember(visitor.branchCode, visitor.branchName) {
-                        visitor.branchCode.ifBlank {
-                            visitor.branchName.split(" ").firstOrNull()?.take(5)?.uppercase() ?: "SAIT"
-                        }
-                    }
-                    if (showBranchBadge && (visitor.branchCode.isNotBlank() || visitor.branchName.isNotBlank())) {
-                        Row(
-                            modifier = Modifier
-                                .liquidInnerGlass(
-                                    shape = RoundedCornerShape(7.dp),
-                                    cornerRadius = 7.dp,
-                                    accentColor = MaterialTheme.colorScheme.secondary
-                                )
-                                .padding(horizontal = 5.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Apartment,
-                                contentDescription = "Branch",
-                                modifier = Modifier.size(10.dp),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = displayBranchCode,
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.secondary,
-                                maxLines = 1
-                            )
-                        }
                     }
                 }
 

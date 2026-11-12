@@ -128,9 +128,13 @@ class VisitorViewModel(
     private val _screenTimeoutMinutes = MutableStateFlow(kioskPrefs.screenTimeoutMinutes)
     val screenTimeoutMinutes: StateFlow<Int> = _screenTimeoutMinutes.asStateFlow()
 
-    // Theme Mode ("LIGHT", "DARK", "SYSTEM")
+    // Theme Mode ("LIGHT", "DARK", "SYSTEM") - strictly local per device
     private val _themeMode = MutableStateFlow(kioskPrefs.themeMode)
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
+
+    // Liquid Glass Background Palette Style ("OCEANIC" vs "SAIT_BLUE_RED") - strictly local
+    private val _liquidPaletteStyle = MutableStateFlow(kioskPrefs.liquidPaletteStyle)
+    val liquidPaletteStyle: StateFlow<String> = _liquidPaletteStyle.asStateFlow()
 
     // SMTP Outgoing Mail Server Configuration
     private val _smtpConfig = MutableStateFlow(kioskPrefs.getSmtpConfig())
@@ -426,10 +430,7 @@ class VisitorViewModel(
                     _screenTimeoutMinutes.value = remoteTimeout
                     kioskPrefs.screenTimeoutMinutes = remoteTimeout
                 }
-                if (!remoteTheme.isNullOrBlank()) {
-                    _themeMode.value = remoteTheme
-                    kioskPrefs.themeMode = remoteTheme
-                }
+                // Dark/Light theme mode is strictly device-local; do not overwrite from remote sync
                 if (remoteSmtp != null) {
                     _smtpConfig.value = remoteSmtp
                     kioskPrefs.saveSmtpConfig(remoteSmtp)
@@ -448,7 +449,7 @@ class VisitorViewModel(
                 adminPin = _adminPin.value,
                 receptionistPin = _receptionistPin.value,
                 autoResetSeconds = _autoResetSeconds.value,
-                themeMode = _themeMode.value,
+                themeMode = null, // Theme remains local to each terminal, not synced across devices
                 smtpConfig = _smtpConfig.value,
                 visitPurposes = _visitPurposes.value,
                 screenTimeoutMinutes = _screenTimeoutMinutes.value
@@ -1545,22 +1546,34 @@ class VisitorViewModel(
         }
     }
 
-    // Theme Management
+    // Theme Management - Strictly Local to this Device (not synced across terminals)
     fun setThemeMode(mode: String) {
-        if (_userRole.value == UserRole.ADMIN && !requireFirebaseLoginForAdminEdit()) return
         _themeMode.value = mode
         kioskPrefs.themeMode = mode
-        syncAllSettingsToFirebase()
     }
 
     fun toggleTheme() {
-        if (_userRole.value == UserRole.ADMIN && !requireFirebaseLoginForAdminEdit()) return
         val nextMode = when (_themeMode.value) {
             KioskPreferences.THEME_LIGHT -> KioskPreferences.THEME_DARK
             KioskPreferences.THEME_DARK -> KioskPreferences.THEME_LIGHT
             else -> KioskPreferences.THEME_DARK
         }
         setThemeMode(nextMode)
+    }
+
+    // Liquid Glass Background Palette Style Management - Local to this Device
+    fun setLiquidPaletteStyle(style: String) {
+        _liquidPaletteStyle.value = style
+        kioskPrefs.liquidPaletteStyle = style
+    }
+
+    fun toggleLiquidPaletteStyle() {
+        val next = if (_liquidPaletteStyle.value == KioskPreferences.PALETTE_SAIT_BLUE_RED) {
+            KioskPreferences.PALETTE_OCEANIC
+        } else {
+            KioskPreferences.PALETTE_SAIT_BLUE_RED
+        }
+        setLiquidPaletteStyle(next)
     }
 
     // SMTP Configuration Management - Saves locally immediately and syncs to Firebase if signed in

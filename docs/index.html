@@ -837,13 +837,18 @@
         <div class="badge-row"><span>Purpose:</span> <b id="displayPurpose">Meeting</b></div>
         <div class="badge-row"><span>Host Person:</span> <b id="displayHost">Reception Desk</b></div>
         <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
-        <div class="badge-row"><span>Pass Number:</span> <b id="displayPass" style="color: var(--primary-accent); font-family: monospace; font-size: 14px;">PASS-0001</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
 
-      <p style="font-size: 13px; color: var(--text-main); line-height: 1.5; margin-bottom: 14px;">
-        Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and emailed to your address!
-      </p>
+      <div style="background: rgba(30, 90, 180, 0.08); border: 1px solid var(--border-glass); border-radius: 12px; padding: 12px 14px; margin: 14px 0; text-align: left;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+          <span style="font-size: 16px;">🎟️</span>
+          <b style="font-size: 13px; color: var(--primary-accent);">Official Pass Series &amp; Email Confirmation</b>
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-main); line-height: 1.45; margin: 0;">
+          Your official Visitor Pass number is generated in sequence by the <b>Kiosk Terminal</b> and dispatched to your email address. Please proceed to the kiosk screen or reception desk!
+        </p>
+      </div>
 
       <button type="button" class="btn-submit" id="resetBtn" style="background: var(--text-muted); font-size: 14px; min-height: 44px;">
         Register Another Visitor
@@ -852,7 +857,7 @@
 
     <div class="footer">
       <p>© 2026 SAIT Group • VISIT+</p>
-      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">• Visitor Registration Portal •</p>
+      <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">• Online Visitor Registration Portal •</p>
     </div>
   </div>
 
@@ -1070,37 +1075,9 @@
       var purpose = (selectedPurpose === 'Other' && customPurpose) ? customPurpose : selectedPurpose;
       var personToMeet = (document.getElementById('personToMeet') ? document.getElementById('personToMeet').value : '').trim() || 'Reception Desk';
 
-      var yearCode = new Date().getFullYear().toString().slice(-2);
-      var codeParts = branchCode.split('-');
-      var companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
-      var cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
-      var expectedPrefix = companyPrefix + '-' + cityShort + '-' + yearCode + '-';
-
-      var maxSeq = 0;
-      try {
-        if (db) {
-          var snapshot = await getDocs(collection(db, "visitors"));
-          snapshot.forEach(function(docSnap) {
-            var data = docSnap.data();
-            var p = data.passNumber || "";
-            if (p.toUpperCase().startsWith(expectedPrefix)) {
-              var seqStr = p.slice(-4);
-              var num = parseInt(seqStr, 10);
-              if (!isNaN(num) && num >= 1 && num <= 999 && num > maxSeq) {
-                maxSeq = num;
-              }
-            }
-          });
-        }
-      } catch (err) {
-        console.warn("Could not query existing pass sequences:", err);
-      }
-
-      var nextSeq = maxSeq + 1;
-      var formattedSeq = String(nextSeq).padStart(4, '0');
-      var passNumber = expectedPrefix + formattedSeq;
       var nowTs = Date.now();
       var formattedTime = formatTimeNow();
+      var passNumber = "WEB-REG-" + nowTs + "-" + Math.floor(1000 + Math.random() * 9000);
 
       var visitorPayload = {
         passNumber: passNumber,
@@ -1147,7 +1124,6 @@
       if (document.getElementById('displayPurpose')) document.getElementById('displayPurpose').innerText = purpose;
       if (document.getElementById('displayHost')) document.getElementById('displayHost').innerText = personToMeet;
       if (document.getElementById('displayTime')) document.getElementById('displayTime').innerText = formattedTime;
-      if (document.getElementById('displayPass')) document.getElementById('displayPass').innerText = passNumber;
 
       var successCard = document.getElementById('successCard');
       if (successCard) successCard.style.display = 'block';

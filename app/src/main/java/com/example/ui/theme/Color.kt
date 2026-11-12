@@ -64,3 +64,19 @@ val NotificationEmailColor = Color(0xFF0EA5E9)
 val NotificationVisitorColor = Color(0xFF10B981)
 val NotificationSyncColor = Color(0xFF6366F1)
 val NotificationAlertColor = Color(0xFFF59E0B)
+
+// SAIT Heritage Blue + Red Theme Combo (from official SAIT logo)
+val SaitLogoBlue = Color(0xFF001B69)          // Official SAIT Deep Navy Blue
+val SaitLogoRed = Color(0xFFD91B24)           // Official SAIT Dynamic Crimson Curve
+val SaitLogoRedHover = Color(0xFFEF4444)
+val SaitLogoRedContainer = Color(0xFFFFE4E6)
+val SaitLogoOnRedContainer = Color(0xFF881337)
+val SaitLogoBlueContainer = Color(0xFFDBEAFE)
+val SaitLogoOnBlueContainer = Color(0xFF001B69)
+
+val SaitDarkLogoBlue = Color(0xFF60A5FA)      // Electric Royal Blue for Dark Mode
+val SaitDarkLogoRed = Color(0xFFF87171)       // Luminous Crimson for Dark Mode
+val SaitDarkLogoRedContainer = Color(0xFF7F1D1D)
+val SaitDarkLogoOnRedContainer = Color(0xFFFECDD3)
+val SaitDarkLogoBlueContainer = Color(0xFF1E3A8A)
+val SaitDarkLogoOnBlueContainer = Color(0xFFDBEAFE)
