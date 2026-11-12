@@ -132,7 +132,7 @@ class VisitorViewModel(
     private val _themeMode = MutableStateFlow(kioskPrefs.themeMode)
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
 
-    // Liquid Glass Background Palette Style ("OCEANIC" vs "SAIT_BLUE_RED") - strictly local
+    // Liquid Glass Background Palette Style ("OCEANIC") - strictly local
     private val _liquidPaletteStyle = MutableStateFlow(kioskPrefs.liquidPaletteStyle)
     val liquidPaletteStyle: StateFlow<String> = _liquidPaletteStyle.asStateFlow()
 
@@ -1562,18 +1562,13 @@ class VisitorViewModel(
     }
 
     // Liquid Glass Background Palette Style Management - Local to this Device
-    fun setLiquidPaletteStyle(style: String) {
-        _liquidPaletteStyle.value = style
-        kioskPrefs.liquidPaletteStyle = style
+    fun setLiquidPaletteStyle(style: String = KioskPreferences.PALETTE_OCEANIC) {
+        _liquidPaletteStyle.value = KioskPreferences.PALETTE_OCEANIC
+        kioskPrefs.liquidPaletteStyle = KioskPreferences.PALETTE_OCEANIC
     }
 
     fun toggleLiquidPaletteStyle() {
-        val next = if (_liquidPaletteStyle.value == KioskPreferences.PALETTE_SAIT_BLUE_RED) {
-            KioskPreferences.PALETTE_OCEANIC
-        } else {
-            KioskPreferences.PALETTE_SAIT_BLUE_RED
-        }
-        setLiquidPaletteStyle(next)
+        setLiquidPaletteStyle(KioskPreferences.PALETTE_OCEANIC)
     }
 
     // SMTP Configuration Management - Saves locally immediately and syncs to Firebase if signed in

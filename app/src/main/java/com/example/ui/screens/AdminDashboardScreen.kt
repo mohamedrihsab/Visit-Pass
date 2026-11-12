@@ -711,15 +711,15 @@ fun AdminDashboardScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Liquid Glass Wallpaper / Ambient Theme Color Combination
+                    // Refined Liquid Glass Optics Display
                     Text(
-                        text = "Liquid Glass Ambient Palette",
+                        text = "Liquid Glass Optics & Refraction",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Select refraction wallpaper: Default Oceanic Glass or SAIT Blue + Red combo (matching the official logo).",
+                        text = "Pristine sapphire & ice-cyan lens pipeline with harmonic fluid ambient wave motion and specular caustics.",
                         fontSize = 11.5.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 15.sp
@@ -727,62 +727,54 @@ fun AdminDashboardScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    val paletteOptions = listOf(
-                        Triple(KioskPreferences.PALETTE_OCEANIC, "Default Oceanic (Sapphire & Cyan Glass)", Icons.Default.WaterDrop),
-                        Triple(KioskPreferences.PALETTE_SAIT_BLUE_RED, "SAIT Heritage (Navy Blue + Crimson Red Logo Combo)", Icons.Default.Palette)
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        paletteOptions.forEach { (style, label, icon) ->
-                            val isSelected = liquidPaletteStyle == style
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .liquidPressEffect(enabled = true)
-                                    .liquidInnerGlass(
-                                        shape = RoundedCornerShape(12.dp),
-                                        cornerRadius = 12.dp,
-                                        selected = isSelected
-                                    )
-                                    .clickable { viewModel.setLiquidPaletteStyle(style) }
-                                    .padding(horizontal = 12.dp, vertical = 10.dp)
-                                    .testTag("palette_option_$style"),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = if (isSelected) {
-                                            if (style == KioskPreferences.PALETTE_SAIT_BLUE_RED) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        },
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = label,
-                                        fontSize = 13.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-
-                                Icon(
-                                    imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                                    contentDescription = null,
-                                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidPressEffect(enabled = true)
+                            .liquidInnerGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                cornerRadius = 12.dp,
+                                selected = true
+                            )
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                            .testTag("palette_option_oceanic"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.WaterDrop,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Oceanic Liquid Glass (Sapphire & Cyan Lens)",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "Harmonic fluid caustics • Zero chromatic distortion",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
+
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }

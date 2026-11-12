@@ -227,7 +227,6 @@ class KioskPreferences(
         const val THEME_SYSTEM = "SYSTEM"
 
         const val PALETTE_OCEANIC = "OCEANIC"
-        const val PALETTE_SAIT_BLUE_RED = "SAIT_BLUE_RED"
 
         const val DEFAULT_ADMIN_PIN = "1234"
         const val DEFAULT_RECEPTIONIST_PIN = "0000"
@@ -241,8 +240,8 @@ class KioskPreferences(
     }
 
     var liquidPaletteStyle: String
-        get() = prefs.getString(KEY_LIQUID_PALETTE_STYLE, PALETTE_OCEANIC) ?: PALETTE_OCEANIC
-        set(value) = prefs.edit().putString(KEY_LIQUID_PALETTE_STYLE, value).apply()
+        get() = PALETTE_OCEANIC
+        set(value) = prefs.edit().putString(KEY_LIQUID_PALETTE_STYLE, PALETTE_OCEANIC).apply()
 
     fun isRemoteVisitorProcessed(key: String): Boolean {
         val cleanKey = key.trim().uppercase()

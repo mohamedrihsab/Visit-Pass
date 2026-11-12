@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -159,32 +160,32 @@ object LiquidGlassShaderEngine {
             float specBottomRight = pow(max(dot(normal, rimLightDir), 0.0), 7.0);
             float fresnel = 0.08 + 0.92 * pow(clamp(1.0 - normal.z, 0.0, 1.0), 3.2);
 
-            // 5. QWEA0 Physical RGB Chromatic Dispersion Fringe along curved SDF bevel
+            // 5. Crystalline Sapphire-Cyan Refractive Caustic Fringe along curved SDF bevel
             float prismBand = exp(-pow((insideDist - 2.8) / 2.5, 2.0));
             float angleFactor = clamp((grad.x + grad.y) * 0.5 + 0.5, 0.0, 1.0);
-            float3 coralGold = mix(float3(1.0, 0.38, 0.55), float3(1.0, 0.78, 0.30), clamp(uv.x, 0.0, 1.0));
-            float3 cyanEmerald = mix(float3(0.0, 0.95, 1.0), float3(0.0, 0.95, 0.52), clamp(uv.y, 0.0, 1.0));
-            float3 prismColor = mix(coralGold, cyanEmerald, angleFactor);
+            float3 causticCyan = mix(float3(0.85, 0.96, 1.0), float3(0.18, 0.72, 1.0), angleFactor);
+            float3 causticWhite = mix(float3(1.0, 1.0, 1.0), float3(0.40, 0.85, 1.0), clamp(uv.x, 0.0, 1.0));
+            float3 prismColor = mix(causticWhite, causticCyan, angleFactor);
 
             // 6. Curved Water-Droplet Crescent Meniscus Ring
-            float crescentRing = exp(-pow((insideDist - 6.0) / 2.4, 2.0)) * smoothstep(0.12, 0.95, abs(grad.x));
-            float3 crescentColor = mix(float3(1.0, 0.98, 1.0), float3(0.70, 0.96, 1.0), angleFactor);
+            float crescentRing = exp(-pow((insideDist - 5.5) / 2.2, 2.0)) * smoothstep(0.10, 0.95, abs(grad.x));
+            float3 crescentColor = mix(float3(1.0, 1.0, 1.0), float3(0.72, 0.92, 1.0), angleFactor);
 
-            // Combine optical layers with ultra-prominent radiance
+            // Combine optical layers with crystalline radiance
             float3 color = baseColor;
-            color += float3(0.92, 0.98, 1.0) * (specTopLeft * 0.34 + fresnel * 0.28);
-            color += float3(0.26, 0.82, 1.0) * (specBottomRight * 0.24);
-            color = mix(color, prismColor, prismBand * mix(0.48, 0.62, uIsDark));
-            color += crescentColor * (crescentRing * mix(0.42, 0.36, uIsDark));
+            color += float3(0.96, 0.98, 1.0) * (specTopLeft * 0.38 + fresnel * 0.28);
+            color += float3(0.20, 0.76, 1.0) * (specBottomRight * 0.22);
+            color = mix(color, prismColor, prismBand * mix(0.42, 0.52, uIsDark));
+            color += crescentColor * (crescentRing * mix(0.38, 0.32, uIsDark));
 
             // 7. API 36+ (Android 16) AGSL Color Filter / Harmonic Vibrance Blend Enhancement
             if (uApi36Enhance > 0.5) {
                 float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
                 float3 chroma = color - float3(luma, luma, luma);
-                color = float3(luma, luma, luma) + chroma * 1.25 + float3(0.02, 0.04, 0.08) * fresnel;
+                color = float3(luma, luma, luma) + chroma * 1.25 + float3(0.01, 0.04, 0.08) * fresnel;
             }
 
-            float finalAlpha = clamp(baseAlpha + fresnel * 0.22 + prismBand * 0.26 + crescentRing * 0.18, 0.0, 0.98);
+            float finalAlpha = clamp(baseAlpha + fresnel * 0.20 + prismBand * 0.22 + crescentRing * 0.16, 0.0, 0.98);
             return half4(half3(clamp(color, 0.0, 1.0)), half(finalAlpha));
         }
     """
@@ -280,201 +281,102 @@ data class LiquidGlassPalette(
 
 val LightLiquidGlassPalette = LiquidGlassPalette(
     isDark = false,
-    meshBgTopLeft = Color(0xFF93C5FD),
-    meshBgCenter = Color(0xFFDbeafe),
-    meshBgBottomRight = Color(0xFFA5F3FC),
-    waveSpherePrimary = Color(0xFF3B82F6).copy(alpha = 0.36f),
-    waveSphereSecondary = Color(0xFF1D4ED8).copy(alpha = 0.20f),
-    waveEmeraldStart = Color(0xFF10B981).copy(alpha = 0.45f),
-    waveEmeraldEnd = Color(0xFF06B6D4).copy(alpha = 0.32f),
-    waveEmeraldRim = Color(0xFFFFFFFF).copy(alpha = 0.85f),
-    waveIndigoStart = Color(0xFF2563EB).copy(alpha = 0.28f),
-    waveIndigoEnd = Color(0xFF4F46E5).copy(alpha = 0.18f),
-    waveIndigoRim = Color(0xFFBAE6FD).copy(alpha = 0.88f),
-    orbCyan = Color(0xFF0284C7).copy(alpha = 0.34f),
-    orbViolet = Color(0xFF4F46E5).copy(alpha = 0.26f),
-    orbEmerald = Color(0xFF0D9488).copy(alpha = 0.28f),
-    orbRose = Color(0xFFEC4899).copy(alpha = 0.18f),
-    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.65f),
-    ambientShadowColor = Color(0xFF03396C),
-    outerContrastRim = Color(0xFF0284C7).copy(alpha = 0.36f),
+    meshBgTopLeft = Color(0xFFE0F2FE),
+    meshBgCenter = Color(0xFFF0F9FF),
+    meshBgBottomRight = Color(0xFFE0F7FA),
+    waveSpherePrimary = Color(0xFF0284C7).copy(alpha = 0.32f),
+    waveSphereSecondary = Color(0xFF0369A1).copy(alpha = 0.18f),
+    waveEmeraldStart = Color(0xFF0EA5E9).copy(alpha = 0.38f),
+    waveEmeraldEnd = Color(0xFF06B6D4).copy(alpha = 0.28f),
+    waveEmeraldRim = Color(0xFFFFFFFF).copy(alpha = 0.90f),
+    waveIndigoStart = Color(0xFF0284C7).copy(alpha = 0.25f),
+    waveIndigoEnd = Color(0xFF2563EB).copy(alpha = 0.16f),
+    waveIndigoRim = Color(0xFFBAE6FD).copy(alpha = 0.90f),
+    orbCyan = Color(0xFF0284C7).copy(alpha = 0.28f),
+    orbViolet = Color(0xFF38BDF8).copy(alpha = 0.22f),
+    orbEmerald = Color(0xFF0284C7).copy(alpha = 0.22f),
+    orbRose = Color(0xFF7DD3FC).copy(alpha = 0.16f),
+    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.70f),
+    ambientShadowColor = Color(0xFF082647),
+    outerContrastRim = Color(0xFF0284C7).copy(alpha = 0.30f),
     // High-contrast frosted glass surfaces so dark ink text is 100% legible in Light Mode
-    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.84f),
-    glassSurfaceBottom = Color(0xFFF0F9FF).copy(alpha = 0.74f),
-    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.90f),
-    glassElevatedBottom = Color(0xFFF0FDFA).copy(alpha = 0.80f),
-    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.82f),
-    innerTileBottom = Color(0xFFE0F2FE).copy(alpha = 0.68f),
-    innerTileSelectedTop = Color(0xFFBAE6FD).copy(alpha = 0.86f),
-    innerTileSelectedBottom = Color(0xFFC7D2FE).copy(alpha = 0.76f),
-    sdfRefractionRingTop = Color(0xFFFFFFFF).copy(alpha = 0.94f),
-    sdfRefractionRingBottom = Color(0xFF0284C7).copy(alpha = 0.45f),
-    dispersionCoralRose = Color(0xFFFF5E7E).copy(alpha = 0.58f),
-    dispersionGold = Color(0xFFFFB347).copy(alpha = 0.52f),
-    dispersionCyan = Color(0xFF00B8D4).copy(alpha = 0.65f),
-    dispersionEmerald = Color(0xFF00C853).copy(alpha = 0.54f),
-    dispersionMagenta = Color(0xFF7C3AED).copy(alpha = 0.48f),
+    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.88f),
+    glassSurfaceBottom = Color(0xFFF8FAFC).copy(alpha = 0.78f),
+    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.94f),
+    glassElevatedBottom = Color(0xFFF1F5F9).copy(alpha = 0.84f),
+    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.86f),
+    innerTileBottom = Color(0xFFF0F9FF).copy(alpha = 0.72f),
+    innerTileSelectedTop = Color(0xFFBAE6FD).copy(alpha = 0.88f),
+    innerTileSelectedBottom = Color(0xFFC7D2FE).copy(alpha = 0.78f),
+    sdfRefractionRingTop = Color(0xFFFFFFFF).copy(alpha = 0.95f),
+    sdfRefractionRingBottom = Color(0xFF0284C7).copy(alpha = 0.40f),
+    dispersionCoralRose = Color(0xFF38BDF8).copy(alpha = 0.48f),
+    dispersionGold = Color(0xFFBAE6FD).copy(alpha = 0.42f),
+    dispersionCyan = Color(0xFF00B8D4).copy(alpha = 0.60f),
+    dispersionEmerald = Color(0xFF0284C7).copy(alpha = 0.50f),
+    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.42f),
     specularRimBright = Color(0xFFFFFFFF).copy(alpha = 0.98f),
-    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.78f),
-    specularRimEnd = Color(0xFFFFFFFF).copy(alpha = 0.94f),
-    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.88f),
-    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.42f),
-    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.34f),
+    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.76f),
+    specularRimEnd = Color(0xFFFFFFFF).copy(alpha = 0.92f),
+    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.90f),
+    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.45f),
+    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.35f),
     pillActiveTop = Color(0xFF00558F),
-    pillActiveBottom = Color(0xFF1D4ED8),
+    pillActiveBottom = Color(0xFF0284C7),
     pillActiveBorder = Color(0xFFBAE6FD),
-    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.86f),
-    inputFieldBorderUnfocused = Color(0xFF026AA7).copy(alpha = 0.48f),
-    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.82f)
+    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.90f),
+    inputFieldBorderUnfocused = Color(0xFF026AA7).copy(alpha = 0.42f),
+    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.84f)
 )
 
 val DarkLiquidGlassPalette = LiquidGlassPalette(
     isDark = true,
-    meshBgTopLeft = Color(0xFF020B24),
-    meshBgCenter = Color(0xFF061B48),
-    meshBgBottomRight = Color(0xFF02081A),
-    waveSpherePrimary = Color(0xFF155EEF).copy(alpha = 0.60f),
-    waveSphereSecondary = Color(0xFF062366).copy(alpha = 0.42f),
-    waveEmeraldStart = Color(0xFF00D492).copy(alpha = 0.68f),
-    waveEmeraldEnd = Color(0xFF0D9488).copy(alpha = 0.48f),
-    waveEmeraldRim = Color(0xFF6EE7B7).copy(alpha = 0.85f),
-    waveIndigoStart = Color(0xFF041446).copy(alpha = 0.88f),
-    waveIndigoEnd = Color(0xFF0D2E8A).copy(alpha = 0.72f),
-    waveIndigoRim = Color(0xFF2563EB).copy(alpha = 0.90f),
-    orbCyan = Color(0xFF00E5FF).copy(alpha = 0.30f),
-    orbViolet = Color(0xFF6366F1).copy(alpha = 0.28f),
-    orbEmerald = Color(0xFF10B981).copy(alpha = 0.26f),
-    orbRose = Color(0xFFFF5E7E).copy(alpha = 0.18f),
-    causticBeamColor = Color(0xFF38BDF8).copy(alpha = 0.18f),
+    meshBgTopLeft = Color(0xFF02091A),
+    meshBgCenter = Color(0xFF061430),
+    meshBgBottomRight = Color(0xFF020712),
+    waveSpherePrimary = Color(0xFF0369A1).copy(alpha = 0.56f),
+    waveSphereSecondary = Color(0xFF024370).copy(alpha = 0.38f),
+    waveEmeraldStart = Color(0xFF0284C7).copy(alpha = 0.60f),
+    waveEmeraldEnd = Color(0xFF0369A1).copy(alpha = 0.44f),
+    waveEmeraldRim = Color(0xFF7DD3FC).copy(alpha = 0.88f),
+    waveIndigoStart = Color(0xFF031636).copy(alpha = 0.85f),
+    waveIndigoEnd = Color(0xFF09295C).copy(alpha = 0.68f),
+    waveIndigoRim = Color(0xFF0284C7).copy(alpha = 0.88f),
+    orbCyan = Color(0xFF00E5FF).copy(alpha = 0.28f),
+    orbViolet = Color(0xFF38BDF8).copy(alpha = 0.25f),
+    orbEmerald = Color(0xFF0284C7).copy(alpha = 0.24f),
+    orbRose = Color(0xFF7DD3FC).copy(alpha = 0.16f),
+    causticBeamColor = Color(0xFF38BDF8).copy(alpha = 0.20f),
     ambientShadowColor = Color(0xFF000000),
-    outerContrastRim = Color(0xFF38BDF8).copy(alpha = 0.40f),
+    outerContrastRim = Color(0xFF38BDF8).copy(alpha = 0.38f),
     // High-contrast deep sapphire glass surfaces so ice-white text pops with 100% clarity
-    glassSurfaceTop = Color(0xFF0E2248).copy(alpha = 0.78f),
-    glassSurfaceBottom = Color(0xFF061229).copy(alpha = 0.70f),
-    glassElevatedTop = Color(0xFF132C5C).copy(alpha = 0.84f),
-    glassElevatedBottom = Color(0xFF081736).copy(alpha = 0.76f),
-    innerTileTop = Color(0xFF152D5A).copy(alpha = 0.74f),
-    innerTileBottom = Color(0xFF0A1834).copy(alpha = 0.64f),
-    innerTileSelectedTop = Color(0xFF155EEF).copy(alpha = 0.74f),
-    innerTileSelectedBottom = Color(0xFF0284C7).copy(alpha = 0.64f),
-    sdfRefractionRingTop = Color(0xFFBAE6FD).copy(alpha = 0.46f),
-    sdfRefractionRingBottom = Color(0xFF38BDF8).copy(alpha = 0.34f),
-    dispersionCoralRose = Color(0xFFFF5E7E).copy(alpha = 0.76f),
-    dispersionGold = Color(0xFFFFB74D).copy(alpha = 0.64f),
-    dispersionCyan = Color(0xFF00E5FF).copy(alpha = 0.78f),
-    dispersionEmerald = Color(0xFF00E676).copy(alpha = 0.70f),
-    dispersionMagenta = Color(0xFFC084FC).copy(alpha = 0.60f),
-    specularRimBright = Color(0xFFE0F2FE).copy(alpha = 0.92f),
-    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.72f),
-    specularRimEnd = Color(0xFF6EE7B7).copy(alpha = 0.80f),
-    innerMeniscusGlow = Color(0xFFBAE6FD).copy(alpha = 0.36f),
-    diagonalSheenColor = Color(0xFF60A5FA).copy(alpha = 0.16f),
-    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.38f),
-    pillActiveTop = Color(0xFF155EEF),
-    pillActiveBottom = Color(0xFF0284C7),
-    pillActiveBorder = Color(0xFF7DD3FC),
-    inputFieldContainer = Color(0xFF0A1936).copy(alpha = 0.80f),
-    inputFieldBorderUnfocused = Color(0xFF38BDF8).copy(alpha = 0.48f),
-    chipUnselectedContainer = Color(0xFF12264A).copy(alpha = 0.78f)
-)
-
-// SAIT Heritage Blue + Red Color Combo Palettes (from Official SAIT Logo)
-val SaitBlueRedLightLiquidGlassPalette = LiquidGlassPalette(
-    isDark = false,
-    meshBgTopLeft = Color(0xFF8BA5D6),
-    meshBgCenter = Color(0xFFD6E2F7),
-    meshBgBottomRight = Color(0xFFFCDCDC),
-    waveSpherePrimary = Color(0xFF001B69).copy(alpha = 0.42f),
-    waveSphereSecondary = Color(0xFF1E3A8A).copy(alpha = 0.22f),
-    waveEmeraldStart = Color(0xFFDC2626).copy(alpha = 0.48f), // SAIT Crimson Red arc
-    waveEmeraldEnd = Color(0xFFEA580C).copy(alpha = 0.32f),
-    waveEmeraldRim = Color(0xFFFFFFFF).copy(alpha = 0.90f),
-    waveIndigoStart = Color(0xFF001B69).copy(alpha = 0.35f),
-    waveIndigoEnd = Color(0xFF1D4ED8).copy(alpha = 0.20f),
-    waveIndigoRim = Color(0xFFFCA5A5).copy(alpha = 0.85f),
-    orbCyan = Color(0xFF1D4ED8).copy(alpha = 0.32f),
-    orbViolet = Color(0xFFDC2626).copy(alpha = 0.28f), // Crimson ambient orb
-    orbEmerald = Color(0xFF001B69).copy(alpha = 0.25f),
-    orbRose = Color(0xFFEF4444).copy(alpha = 0.22f),
-    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.68f),
-    ambientShadowColor = Color(0xFF00113D),
-    outerContrastRim = Color(0xFF001B69).copy(alpha = 0.40f),
-    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.86f),
-    glassSurfaceBottom = Color(0xFFF5F8FF).copy(alpha = 0.76f),
-    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.92f),
-    glassElevatedBottom = Color(0xFFFFF1F2).copy(alpha = 0.82f),
-    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.84f),
-    innerTileBottom = Color(0xFFDBEAFE).copy(alpha = 0.70f),
-    innerTileSelectedTop = Color(0xFFBFDBFE).copy(alpha = 0.88f),
-    innerTileSelectedBottom = Color(0xFFFECDD3).copy(alpha = 0.78f),
-    sdfRefractionRingTop = Color(0xFFFFFFFF).copy(alpha = 0.95f),
-    sdfRefractionRingBottom = Color(0xFFDC2626).copy(alpha = 0.42f),
-    dispersionCoralRose = Color(0xFFDC2626).copy(alpha = 0.65f),
-    dispersionGold = Color(0xFFFFB347).copy(alpha = 0.50f),
-    dispersionCyan = Color(0xFF001B69).copy(alpha = 0.68f),
-    dispersionEmerald = Color(0xFF0284C7).copy(alpha = 0.54f),
-    dispersionMagenta = Color(0xFFB91C1C).copy(alpha = 0.52f),
-    specularRimBright = Color(0xFFFFFFFF).copy(alpha = 0.98f),
-    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.75f),
-    specularRimEnd = Color(0xFFFCA5A5).copy(alpha = 0.88f),
-    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.88f),
-    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.45f),
-    pressFlareColor = Color(0xFFDC2626).copy(alpha = 0.35f),
-    pillActiveTop = Color(0xFF001B69),
-    pillActiveBottom = Color(0xFFDC2626), // Blue to Red gradient pill
-    pillActiveBorder = Color(0xFFFECACA),
-    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.88f),
-    inputFieldBorderUnfocused = Color(0xFF001B69).copy(alpha = 0.45f),
-    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.84f)
-)
-
-val SaitBlueRedDarkLiquidGlassPalette = LiquidGlassPalette(
-    isDark = true,
-    meshBgTopLeft = Color(0xFF03091B),
-    meshBgCenter = Color(0xFF081433),
-    meshBgBottomRight = Color(0xFF1A050B),
-    waveSpherePrimary = Color(0xFF1E40AF).copy(alpha = 0.58f),
-    waveSphereSecondary = Color(0xFF001B69).copy(alpha = 0.42f),
-    waveEmeraldStart = Color(0xFFDC2626).copy(alpha = 0.72f), // Glowing Crimson Arc
-    waveEmeraldEnd = Color(0xFFB91C1C).copy(alpha = 0.52f),
-    waveEmeraldRim = Color(0xFFFCA5A5).copy(alpha = 0.88f),
-    waveIndigoStart = Color(0xFF001B69).copy(alpha = 0.85f),
-    waveIndigoEnd = Color(0xFF1E3A8A).copy(alpha = 0.68f),
-    waveIndigoRim = Color(0xFF60A5FA).copy(alpha = 0.88f),
-    orbCyan = Color(0xFF2563EB).copy(alpha = 0.35f),
-    orbViolet = Color(0xFFEF4444).copy(alpha = 0.32f),
-    orbEmerald = Color(0xFF001B69).copy(alpha = 0.28f),
-    orbRose = Color(0xFFDC2626).copy(alpha = 0.26f),
-    causticBeamColor = Color(0xFF60A5FA).copy(alpha = 0.22f),
-    ambientShadowColor = Color(0xFF000000),
-    outerContrastRim = Color(0xFFDC2626).copy(alpha = 0.42f),
-    glassSurfaceTop = Color(0xFF0E1A38).copy(alpha = 0.80f),
-    glassSurfaceBottom = Color(0xFF060D20).copy(alpha = 0.72f),
-    glassElevatedTop = Color(0xFF14244D).copy(alpha = 0.86f),
-    glassElevatedBottom = Color(0xFF1A0812).copy(alpha = 0.78f),
-    innerTileTop = Color(0xFF16254E).copy(alpha = 0.76f),
-    innerTileBottom = Color(0xFF0A122B).copy(alpha = 0.66f),
-    innerTileSelectedTop = Color(0xFF1E40AF).copy(alpha = 0.78f),
-    innerTileSelectedBottom = Color(0xFFDC2626).copy(alpha = 0.68f),
-    sdfRefractionRingTop = Color(0xFFDBEAFE).copy(alpha = 0.48f),
-    sdfRefractionRingBottom = Color(0xFFF87171).copy(alpha = 0.38f),
-    dispersionCoralRose = Color(0xFFDC2626).copy(alpha = 0.78f),
-    dispersionGold = Color(0xFFFFB74D).copy(alpha = 0.60f),
-    dispersionCyan = Color(0xFF60A5FA).copy(alpha = 0.75f),
+    glassSurfaceTop = Color(0xFF0F1E3A).copy(alpha = 0.82f),
+    glassSurfaceBottom = Color(0xFF071022).copy(alpha = 0.74f),
+    glassElevatedTop = Color(0xFF14274B).copy(alpha = 0.88f),
+    glassElevatedBottom = Color(0xFF09142A).copy(alpha = 0.80f),
+    innerTileTop = Color(0xFF16294E).copy(alpha = 0.76f),
+    innerTileBottom = Color(0xFF0A152C).copy(alpha = 0.66f),
+    innerTileSelectedTop = Color(0xFF0284C7).copy(alpha = 0.78f),
+    innerTileSelectedBottom = Color(0xFF0369A1).copy(alpha = 0.68f),
+    sdfRefractionRingTop = Color(0xFFBAE6FD).copy(alpha = 0.48f),
+    sdfRefractionRingBottom = Color(0xFF38BDF8).copy(alpha = 0.35f),
+    dispersionCoralRose = Color(0xFF7DD3FC).copy(alpha = 0.65f),
+    dispersionGold = Color(0xFFBAE6FD).copy(alpha = 0.55f),
+    dispersionCyan = Color(0xFF00E5FF).copy(alpha = 0.75f),
     dispersionEmerald = Color(0xFF38BDF8).copy(alpha = 0.65f),
-    dispersionMagenta = Color(0xFFEF4444).copy(alpha = 0.64f),
-    specularRimBright = Color(0xFFFEE2E2).copy(alpha = 0.94f),
-    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.74f),
-    specularRimEnd = Color(0xFFF87171).copy(alpha = 0.82f),
-    innerMeniscusGlow = Color(0xFFDBEAFE).copy(alpha = 0.38f),
-    diagonalSheenColor = Color(0xFFF87171).copy(alpha = 0.18f),
-    pressFlareColor = Color(0xFFDC2626).copy(alpha = 0.40f),
-    pillActiveTop = Color(0xFF1E40AF),
-    pillActiveBottom = Color(0xFFDC2626), // Blue to Red gradient
-    pillActiveBorder = Color(0xFFFCA5A5),
-    inputFieldContainer = Color(0xFF0A142D).copy(alpha = 0.84f),
-    inputFieldBorderUnfocused = Color(0xFF60A5FA).copy(alpha = 0.48f),
-    chipUnselectedContainer = Color(0xFF101E3E).copy(alpha = 0.80f)
+    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.55f),
+    specularRimBright = Color(0xFFE0F2FE).copy(alpha = 0.94f),
+    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.75f),
+    specularRimEnd = Color(0xFF7DD3FC).copy(alpha = 0.82f),
+    innerMeniscusGlow = Color(0xFFBAE6FD).copy(alpha = 0.38f),
+    diagonalSheenColor = Color(0xFF38BDF8).copy(alpha = 0.20f),
+    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.40f),
+    pillActiveTop = Color(0xFF0284C7),
+    pillActiveBottom = Color(0xFF0369A1),
+    pillActiveBorder = Color(0xFF7DD3FC),
+    inputFieldContainer = Color(0xFF0A1833).copy(alpha = 0.84f),
+    inputFieldBorderUnfocused = Color(0xFF38BDF8).copy(alpha = 0.45f),
+    chipUnselectedContainer = Color(0xFF112242).copy(alpha = 0.80f)
 )
 
 val LocalLiquidGlassPalette = staticCompositionLocalOf { LightLiquidGlassPalette }
@@ -493,24 +395,24 @@ fun LiquidGlassBackground(
     val palette = LocalLiquidGlassPalette.current
     val infiniteTransition = rememberInfiniteTransition(label = "liquidGlassAmbientWave")
 
-    val waveDrift by infiniteTransition.animateFloat(
-        initialValue = -1f,
-        targetValue = 1f,
+    val phaseAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 8500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = tween(durationMillis = 18000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         ),
-        label = "waveDrift"
+        label = "phaseAngle"
     )
 
-    val orbBreath by infiniteTransition.animateFloat(
-        initialValue = 0.94f,
-        targetValue = 1.06f,
+    val secondaryPhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 6400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = tween(durationMillis = 26000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         ),
-        label = "orbBreath"
+        label = "secondaryPhase"
     )
 
     Box(
@@ -561,8 +463,11 @@ fun LiquidGlassBackground(
                 )
 
                 onDrawBehind {
-                    val driftX = waveDrift * (w * 0.032f)
-                    val driftY = waveDrift * (h * 0.024f)
+                    val rad = Math.toRadians(phaseAngle.toDouble()).toFloat()
+                    val rad2 = Math.toRadians(secondaryPhase.toDouble()).toFloat()
+                    val driftX = (kotlin.math.sin(rad) * 0.65f + kotlin.math.cos(rad2) * 0.35f) * (w * 0.038f)
+                    val driftY = (kotlin.math.cos(rad * 0.8f) * 0.60f + kotlin.math.sin(rad2 * 0.7f) * 0.40f) * (h * 0.026f)
+                    val orbBreath = 1.0f + (kotlin.math.sin(rad * 1.4f) * 0.045f)
 
                     // 1. Base Sky/Midnight Canvas
                     drawRect(brush = baseBrush)
@@ -674,22 +579,22 @@ fun Modifier.liquidAppearAnimation(
 
     val alpha by animateFloatAsState(
         targetValue = if (appeared) 1f else 0f,
-        animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
         label = "liquidAppearAlpha"
     )
     val scale by animateFloatAsState(
         targetValue = if (appeared) 1f else initialScale,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = 0.80f,
+            stiffness = 280f
         ),
         label = "liquidAppearScale"
     )
     val offsetY by animateFloatAsState(
         targetValue = if (appeared) 0f else initialOffsetYDp,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = 0.82f,
+            stiffness = 260f
         ),
         label = "liquidAppearOffsetY"
     )
@@ -729,30 +634,33 @@ fun Modifier.liquidGlass(
     return this
         .drawWithCache {
             val radiusPx = cornerRadius.toPx()
-            val elevPx = if (elevated) shadowElevation.toPx() else (shadowElevation * 0.70f).toPx()
+            val elevPx = if (elevated) shadowElevation.toPx() else (shadowElevation * 0.65f).toPx()
             val shadowBaseAlpha = if (palette.isDark) {
-                if (elevated) 0.42f else 0.28f
+                if (elevated) 0.36f else 0.22f
             } else {
-                if (elevated) 0.16f else 0.11f
+                if (elevated) 0.14f else 0.08f
             }
 
             onDrawBehind {
                 if (elevPx > 0.5f) {
+                    // Deep ambient diffusion
                     drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.38f),
-                        topLeft = Offset(-2.5.dp.toPx(), elevPx * 0.70f),
-                        size = Size(size.width + 5.dp.toPx(), size.height + 4.dp.toPx()),
-                        cornerRadius = CornerRadius(radiusPx + 3.dp.toPx(), radiusPx + 3.dp.toPx())
+                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.22f),
+                        topLeft = Offset(0f, elevPx * 0.85f),
+                        size = Size(size.width, size.height + elevPx * 0.30f),
+                        cornerRadius = CornerRadius(radiusPx + 4.dp.toPx(), radiusPx + 4.dp.toPx())
                     )
+                    // Mid-field soft shadow
                     drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.60f),
-                        topLeft = Offset(-1.dp.toPx(), elevPx * 0.45f),
-                        size = Size(size.width + 2.dp.toPx(), size.height + 2.dp.toPx()),
-                        cornerRadius = CornerRadius(radiusPx + 1.5.dp.toPx(), radiusPx + 1.5.dp.toPx())
+                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.45f),
+                        topLeft = Offset(0f, elevPx * 0.48f),
+                        size = Size(size.width, size.height + elevPx * 0.12f),
+                        cornerRadius = CornerRadius(radiusPx + 2.dp.toPx(), radiusPx + 2.dp.toPx())
                     )
+                    // Contact occlusion shadow
                     drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.85f),
-                        topLeft = Offset(0f, elevPx * 0.22f),
+                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.75f),
+                        topLeft = Offset(0f, elevPx * 0.20f),
                         size = size,
                         cornerRadius = CornerRadius(radiusPx, radiusPx)
                     )
@@ -797,49 +705,45 @@ fun Modifier.liquidGlass(
             val meniscusBrush = Brush.verticalGradient(
                 colors = listOf(
                     palette.innerMeniscusGlow,
-                    palette.innerMeniscusGlow.copy(alpha = palette.innerMeniscusGlow.alpha * 0.28f),
+                    palette.innerMeniscusGlow.copy(alpha = palette.innerMeniscusGlow.alpha * 0.35f),
                     Color.Transparent
                 ),
                 startY = 0f,
-                endY = (h * 0.36f).coerceAtLeast(18f)
+                endY = (h * 0.38f).coerceAtLeast(18f)
             )
 
-            val sdfInset = 3.8.dp.toPx()
-            val sdfStroke = 3.0.dp.toPx()
+            val cornerGlintBrush = Brush.radialGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = if (palette.isDark) 0.48f else 0.75f),
+                    Color(0xFF38BDF8).copy(alpha = if (palette.isDark) 0.20f else 0.35f),
+                    Color.Transparent
+                ),
+                center = Offset(radiusPx * 0.65f, radiusPx * 0.65f),
+                radius = (radiusPx * 1.8f).coerceAtLeast(24.dp.toPx())
+            )
+
+            val sdfInset = 3.2.dp.toPx()
+            val sdfStroke = 2.4.dp.toPx()
             val sdfBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.sdfRefractionRingTop,
-                    palette.dispersionCyan.copy(alpha = 0.20f),
+                    palette.dispersionCyan.copy(alpha = 0.25f),
                     Color.Transparent,
-                    palette.dispersionEmerald.copy(alpha = 0.22f),
+                    palette.dispersionCyan.copy(alpha = 0.15f),
                     palette.sdfRefractionRingBottom
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
             )
 
-            val dispInset = 1.8.dp.toPx()
-            val dispStroke = 1.6.dp.toPx()
-            val dispersionBrush = Brush.linearGradient(
-                colors = listOf(
-                    palette.dispersionCoralRose,
-                    palette.dispersionGold,
-                    palette.dispersionMagenta,
-                    palette.dispersionCyan,
-                    palette.dispersionEmerald
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
-            )
-
-            val crescentInset = 5.5.dp.toPx()
+            val crescentInset = 5.0.dp.toPx()
             val crescentStroke = 1.3.dp.toPx()
             val crescentBrush = Brush.linearGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = if (palette.isDark) 0.48f else 0.74f),
+                    Color.White.copy(alpha = if (palette.isDark) 0.42f else 0.65f),
                     Color.Transparent,
                     Color.Transparent,
-                    palette.dispersionCyan.copy(alpha = if (palette.isDark) 0.38f else 0.50f)
+                    palette.dispersionCyan.copy(alpha = if (palette.isDark) 0.25f else 0.40f)
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
@@ -849,7 +753,7 @@ fun Modifier.liquidGlass(
                 colors = listOf(
                     palette.specularRimBright,
                     palette.specularRimMid,
-                    palette.specularRimBright.copy(alpha = 0.55f),
+                    palette.specularRimBright.copy(alpha = 0.60f),
                     palette.specularRimMid,
                     palette.specularRimEnd
                 ),
@@ -858,18 +762,27 @@ fun Modifier.liquidGlass(
             )
 
             onDrawWithContent {
+                // 1. Base Refractive Lens Body
                 drawRoundRect(
                     brush = bodyBrush,
                     cornerRadius = CornerRadius(radiusPx, radiusPx)
                 )
+                // 2. Diagonal Caustic Sheen
                 drawRoundRect(
                     brush = sheenBrush,
                     cornerRadius = CornerRadius(radiusPx, radiusPx)
                 )
+                // 3. Top Curved Liquid Meniscus Glow
                 drawRoundRect(
                     brush = meniscusBrush,
                     cornerRadius = CornerRadius(radiusPx, radiusPx)
                 )
+                // 4. Corner Specular Focal Glint
+                drawRoundRect(
+                    brush = cornerGlintBrush,
+                    cornerRadius = CornerRadius(radiusPx, radiusPx)
+                )
+                // 5. Inset SDF Refractive Bevel
                 if (w > sdfInset * 4 && h > sdfInset * 4) {
                     val innerR = (radiusPx - sdfInset).coerceAtLeast(2f)
                     drawRoundRect(
@@ -880,6 +793,7 @@ fun Modifier.liquidGlass(
                         style = Stroke(width = sdfStroke)
                     )
                 }
+                // 6. Inset Crescent Reflection
                 if (w > crescentInset * 4 && h > crescentInset * 4) {
                     val crescR = (radiusPx - crescentInset).coerceAtLeast(2f)
                     drawRoundRect(
@@ -891,26 +805,17 @@ fun Modifier.liquidGlass(
                     )
                 }
 
-                // Draw child composable content cleanly over the glass base
+                // 7. Draw Composable UI Content Cleanly
                 drawContent()
 
-                if (w > dispInset * 2 && h > dispInset * 2) {
-                    val dispR = (radiusPx - dispInset).coerceAtLeast(2f)
-                    drawRoundRect(
-                        brush = dispersionBrush,
-                        topLeft = Offset(dispInset, dispInset),
-                        size = Size(w - dispInset * 2, h - dispInset * 2),
-                        cornerRadius = CornerRadius(dispR, dispR),
-                        style = Stroke(width = dispStroke)
-                    )
-                }
-
+                // 8. Outer Contrast Perimeter
                 drawRoundRect(
                     color = palette.outerContrastRim,
                     cornerRadius = CornerRadius(radiusPx, radiusPx),
-                    style = Stroke(width = (strokePx + 0.8.dp.toPx()))
+                    style = Stroke(width = (strokePx + 0.6.dp.toPx()))
                 )
 
+                // 9. Pristine Specular Rim Highlight
                 drawRoundRect(
                     brush = rimBrush,
                     cornerRadius = CornerRadius(radiusPx, radiusPx),
@@ -965,8 +870,8 @@ fun Modifier.liquidInnerGlass(
         else -> palette.dispersionCyan.copy(alpha = 0.35f)
     }
     val borderBottom = when {
-        effectiveAccent != null -> palette.dispersionEmerald.copy(alpha = 0.40f)
-        selected -> palette.dispersionEmerald.copy(alpha = 0.70f)
+        effectiveAccent != null -> effectiveAccent.copy(alpha = 0.32f)
+        selected -> palette.dispersionCyan.copy(alpha = 0.65f)
         else -> palette.outerContrastRim
     }
 
@@ -1107,10 +1012,10 @@ fun Modifier.liquidButtonGlass(
             val innerInset = 2.4.dp.toPx()
             val innerCrescentBrush = Brush.linearGradient(
                 colors = listOf(
-                    palette.dispersionCoralRose.copy(alpha = if (enabled) 0.44f else 0.12f),
-                    Color.White.copy(alpha = if (enabled) 0.50f else 0.15f),
-                    palette.dispersionCyan.copy(alpha = if (enabled) 0.50f else 0.15f),
-                    palette.dispersionEmerald.copy(alpha = if (enabled) 0.44f else 0.12f)
+                    Color.White.copy(alpha = if (enabled) 0.60f else 0.18f),
+                    Color(0xFFBAE6FD).copy(alpha = if (enabled) 0.50f else 0.15f),
+                    Color(0xFF38BDF8).copy(alpha = if (enabled) 0.50f else 0.15f),
+                    Color.White.copy(alpha = if (enabled) 0.40f else 0.12f)
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
@@ -1240,7 +1145,7 @@ fun Modifier.liquidModalGlass(
                     palette.specularRimBright,
                     palette.dispersionCyan,
                     palette.specularRimMid,
-                    palette.dispersionMagenta,
+                    palette.dispersionCyan.copy(alpha = 0.50f),
                     palette.specularRimEnd
                 ),
                 start = Offset(0f, 0f),
@@ -1345,7 +1250,7 @@ fun Modifier.liquidHeroGlass(
                 colors = listOf(
                     Color.White.copy(alpha = 0.92f),
                     Color(0xFF38BDF8).copy(alpha = 0.85f),
-                    Color(0xFFA855F7).copy(alpha = 0.60f),
+                    Color(0xFF0284C7).copy(alpha = 0.70f),
                     Color(0xFF7DD3FC).copy(alpha = 0.90f)
                 ),
                 start = Offset(0f, 0f),
@@ -1391,14 +1296,17 @@ fun Modifier.liquidPressEffect(
     val scale by animateFloatAsState(
         targetValue = if (isPressed) pressedScale else 1f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
+            dampingRatio = 0.70f,
+            stiffness = 450f
         ),
         label = "liquidPressScale"
     )
     val flareAlpha by animateFloatAsState(
         targetValue = if (isPressed) 1f else 0f,
-        animationSpec = tween(durationMillis = if (isPressed) 90 else 220),
+        animationSpec = spring(
+            dampingRatio = 0.80f,
+            stiffness = 500f
+        ),
         label = "liquidPressFlare"
     )
 
@@ -1592,16 +1500,16 @@ fun LiquidGlassSegmentedControl(
         options.forEach { option ->
             val isSelected = option == selectedOption
             val scale by animateFloatAsState(
-                targetValue = if (isSelected) 1.0f else 0.97f,
+                targetValue = if (isSelected) 1.0f else 0.96f,
                 animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
+                    dampingRatio = 0.72f,
+                    stiffness = 380f
                 ),
                 label = "segmentScale_$option"
             )
             val textColor by animateColorAsState(
                 targetValue = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
-                animationSpec = tween(180),
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                 label = "segmentText_$option"
             )
 
@@ -1734,14 +1642,14 @@ fun LiquidGlassBottomDock(
                 val selected = selectedTab == item.index
                 val contentColor by animateColorAsState(
                     targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
-                    animationSpec = tween(200),
+                    animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
                     label = "dockColor_${item.index}"
                 )
                 val tabScale by animateFloatAsState(
-                    targetValue = if (selected) 1.0f else 0.96f,
+                    targetValue = if (selected) 1.0f else 0.94f,
                     animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
+                        dampingRatio = 0.72f,
+                        stiffness = 380f
                     ),
                     label = "dockScale_${item.index}"
                 )
