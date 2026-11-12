@@ -2,50 +2,69 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>SAIT Group — Touchless Visitor Registration</title>
+  
+  <!-- Immediate Theme Initialization to prevent white/dark flash -->
+  <script>
+    (function() {
+      try {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var saved = localStorage.getItem('sait_liquid_theme');
+        var theme = saved ? saved : (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
     :root, [data-theme="light"] {
-      --bg-start: #E8F1FC;
-      --bg-end: #F4F8FE;
-      --orb-1: rgba(56, 189, 248, 0.32);
+      --bg-start: #E6EFF9;
+      --bg-end: #F4F8FD;
+      --orb-1: rgba(56, 189, 248, 0.35);
       --orb-2: rgba(99, 102, 241, 0.22);
-      --orb-3: rgba(20, 184, 166, 0.24);
-      --glass-bg: rgba(255, 255, 255, 0.74);
-      --glass-elevated: rgba(255, 255, 255, 0.88);
-      --glass-input: rgba(255, 255, 255, 0.82);
-      --glass-border-top: rgba(255, 255, 255, 0.96);
-      --glass-border-side: rgba(125, 211, 252, 0.45);
-      --glass-shadow: 0 16px 40px -8px rgba(15, 41, 66, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+      --orb-3: rgba(20, 184, 166, 0.25);
+      --glass-bg: rgba(255, 255, 255, 0.82);
+      --glass-elevated: #FFFFFF;
+      --glass-input: #FFFFFF;
+      --glass-border-top: rgba(255, 255, 255, 0.98);
+      --glass-border-side: rgba(186, 230, 253, 0.65);
+      --glass-shadow: 0 16px 40px -10px rgba(15, 41, 66, 0.12), 0 2px 6px rgba(15, 41, 66, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.95);
       --primary: #0F2942;
       --primary-accent: #0284C7;
-      --pill-grad: linear-gradient(135deg, rgba(15, 41, 66, 0.95), rgba(2, 132, 199, 0.90));
+      --pill-grad: linear-gradient(135deg, #0F2942 0%, #0284C7 100%);
       --text-main: #0F172A;
       --text-muted: #475569;
-      --border-subtle: rgba(148, 163, 184, 0.35);
+      --border-subtle: #CBD5E1;
+      --input-border-focus: #0284C7;
+      --focus-ring: rgba(2, 132, 199, 0.22);
+      --chip-bg: rgba(241, 245, 249, 0.85);
       --success: #10B981;
       --error: #EF4444;
       --warning: #F59E0B;
     }
 
     [data-theme="dark"] {
-      --bg-start: #050914;
-      --bg-end: #0B1528;
-      --orb-1: rgba(14, 165, 233, 0.28);
-      --orb-2: rgba(79, 70, 229, 0.25);
+      --bg-start: #060B18;
+      --bg-end: #0B1426;
+      --orb-1: rgba(14, 165, 233, 0.30);
+      --orb-2: rgba(79, 70, 229, 0.28);
       --orb-3: rgba(16, 185, 129, 0.22);
-      --glass-bg: rgba(30, 41, 59, 0.65);
-      --glass-elevated: rgba(38, 53, 77, 0.76);
-      --glass-input: rgba(15, 23, 42, 0.72);
-      --glass-border-top: rgba(224, 242, 254, 0.38);
+      --glass-bg: rgba(17, 24, 39, 0.86);
+      --glass-elevated: #1E293B;
+      --glass-input: rgba(15, 23, 42, 0.94);
+      --glass-border-top: rgba(224, 242, 254, 0.35);
       --glass-border-side: rgba(56, 189, 248, 0.28);
-      --glass-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(224, 242, 254, 0.24);
+      --glass-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(224, 242, 254, 0.22);
       --primary: #38BDF8;
-      --primary-accent: #0284C7;
-      --pill-grad: linear-gradient(135deg, rgba(2, 132, 199, 0.92), rgba(3, 105, 161, 0.88));
+      --primary-accent: #38BDF8;
+      --pill-grad: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
       --text-main: #F8FAFC;
       --text-muted: #94A3B8;
-      --border-subtle: rgba(71, 85, 105, 0.48);
+      --border-subtle: #334155;
+      --input-border-focus: #38BDF8;
+      --focus-ring: rgba(56, 189, 248, 0.25);
+      --chip-bg: rgba(30, 41, 59, 0.7);
       --success: #34D399;
       --error: #F87171;
       --warning: #FBBF24;
@@ -63,15 +82,17 @@
       background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
       color: var(--text-main);
       min-height: 100vh;
-      padding: 16px;
+      padding: 16px 14px 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
       overflow-x: hidden;
-      transition: background 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+      touch-action: manipulation;
+      transition: background 0.35s ease, color 0.3s ease;
     }
 
+    /* Ambient Optical Liquid Glass Backdrop */
     .aurora-canvas {
       position: fixed;
       inset: 0;
@@ -86,26 +107,26 @@
       animation: floatOrb 14s ease-in-out infinite alternate;
     }
     .aurora-orb.orb-1 {
-      width: 320px;
-      height: 320px;
+      width: 340px;
+      height: 340px;
       background: var(--orb-1);
-      top: -60px;
-      left: -60px;
+      top: -70px;
+      left: -70px;
     }
     .aurora-orb.orb-2 {
-      width: 290px;
-      height: 290px;
+      width: 300px;
+      height: 300px;
       background: var(--orb-2);
-      top: 38%;
-      right: -70px;
+      top: 36%;
+      right: -80px;
       animation-delay: -5s;
     }
     .aurora-orb.orb-3 {
-      width: 280px;
-      height: 280px;
+      width: 290px;
+      height: 290px;
       background: var(--orb-3);
-      bottom: -50px;
-      left: 10%;
+      bottom: -60px;
+      left: 8%;
       animation-delay: -9s;
     }
     @keyframes floatOrb {
@@ -115,22 +136,23 @@
 
     .container {
       width: 100%;
-      max-width: 490px;
+      max-width: 480px;
       position: relative;
       z-index: 1;
     }
 
+    /* Corporate Header Card */
     .header {
-      background: linear-gradient(145deg, rgba(15, 41, 66, 0.90), rgba(2, 132, 199, 0.80));
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      background: linear-gradient(145deg, rgba(15, 41, 66, 0.95), rgba(2, 132, 199, 0.88));
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
       color: #ffffff;
-      border-radius: 26px;
-      padding: 24px 20px 20px;
+      border-radius: 24px;
+      padding: 22px 18px 20px;
       text-align: center;
-      box-shadow: var(--glass-shadow);
-      border: 1.5px solid rgba(255, 255, 255, 0.38);
-      margin-bottom: 16px;
+      box-shadow: 0 16px 36px -8px rgba(15, 41, 66, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      margin-bottom: 14px;
       position: relative;
     }
 
@@ -138,66 +160,73 @@
       position: absolute;
       top: 14px;
       right: 14px;
-      width: 38px;
-      height: 38px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      background: rgba(255, 255, 255, 0.16);
-      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
       color: #fff;
-      font-size: 16px;
+      font-size: 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
+      touch-action: manipulation;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
     }
     .theme-toggle-btn:active {
       transform: scale(0.88);
+      background: rgba(255, 255, 255, 0.32);
     }
 
     .header h1 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
+      line-height: 1.35;
+      padding: 0 34px;
     }
     .header p {
-      font-size: 13px;
+      font-size: 12.5px;
       color: #BAE6FD;
-      margin-top: 4px;
+      margin-top: 5px;
       font-weight: 500;
+      line-height: 1.4;
     }
     .session-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       background: rgba(255, 255, 255, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.32);
-      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 5px 14px;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
       color: #E0F2FE;
-      margin-top: 12px;
+      margin-top: 10px;
+      letter-spacing: 0.4px;
     }
 
+    /* Main Form Card */
     .card {
       background: var(--glass-bg);
       backdrop-filter: blur(28px) saturate(190%);
       -webkit-backdrop-filter: blur(28px) saturate(190%);
-      border-radius: 28px;
-      padding: 22px;
+      border-radius: 26px;
+      padding: 22px 18px;
       box-shadow: var(--glass-shadow);
       border-top: 1.5px solid var(--glass-border-top);
       border-left: 1.2px solid var(--glass-border-top);
       border-right: 1px solid var(--glass-border-side);
       border-bottom: 1px solid var(--glass-border-side);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       transition: background 0.35s ease, box-shadow 0.35s ease;
     }
 
     .card-title {
-      font-size: 17px;
+      font-size: 16.5px;
       font-weight: 800;
       color: var(--text-main);
       margin-bottom: 16px;
@@ -206,7 +235,7 @@
       gap: 8px;
     }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 14px;
     }
     label {
       display: block;
@@ -217,48 +246,81 @@
     }
     .required {
       color: var(--error);
+      margin-left: 2px;
     }
 
+    /* Form Controls with iOS 16px font-size to prevent automatic zoom */
     input, select {
       width: 100%;
-      padding: 13px 14px;
+      height: 48px;
+      padding: 12px 14px;
       border: 1.5px solid var(--border-subtle);
-      border-radius: 15px;
-      font-size: 14.5px;
+      border-radius: 14px;
+      font-size: 16px;
       color: var(--text-main);
       background: var(--glass-input);
-      backdrop-filter: blur(12px);
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.25s;
       outline: none;
+      touch-action: manipulation;
+    }
+    input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+      font-size: 14.5px;
     }
     input:focus, select:focus {
-      border-color: var(--primary-accent);
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+      border-color: var(--input-border-focus);
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
 
+    /* Dropdown Options Explicit Styling */
+    select option {
+      background-color: var(--glass-elevated);
+      color: var(--text-main);
+      font-size: 15px;
+      padding: 10px;
+    }
+    [data-theme="dark"] select option {
+      background-color: #1E293B;
+      color: #F8FAFC;
+    }
+    [data-theme="light"] select option {
+      background-color: #FFFFFF;
+      color: #0F172A;
+    }
+
+    /* Country Code & Phone Layout */
     .phone-row {
       display: flex;
       gap: 8px;
+      align-items: center;
     }
     .phone-row select {
-      width: 138px;
-      flex-shrink: 0;
-      font-size: 13.5px;
-      padding: 13px 8px;
+      flex: 0 0 130px;
+      max-width: 130px;
+      font-size: 14px;
+      padding: 12px 8px;
+    }
+    .phone-row input {
+      flex: 1;
+      min-width: 0;
     }
 
+    /* Visit Type Selection: BUTTONS ONLY (no dropdown) */
     .visit-type-row {
       display: flex;
       gap: 8px;
-      padding: 5px;
-      border-radius: 18px;
-      background: var(--glass-input);
+      padding: 4px;
+      border-radius: 16px;
+      background: var(--chip-bg);
       border: 1.2px solid var(--border-subtle);
     }
     .visit-chip {
       flex: 1;
-      padding: 12px 14px;
-      border-radius: 14px;
+      min-height: 46px;
+      padding: 10px 12px;
+      border-radius: 12px;
       border: 1.2px solid transparent;
       background: transparent;
       color: var(--text-main);
@@ -269,7 +331,8 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
+      touch-action: manipulation;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s, box-shadow 0.2s;
     }
     .visit-chip:active {
       transform: scale(0.96);
@@ -278,16 +341,16 @@
       background: var(--pill-grad);
       color: #ffffff;
       border-color: rgba(125, 211, 252, 0.75);
-      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
 
-    /* QHSE Interactive Card */
+    /* Safety & QHSE Section */
     .qhse-card {
-      background: var(--glass-input);
-      border: 1.2px solid rgba(2, 132, 199, 0.28);
-      border-radius: 18px;
+      background: var(--chip-bg);
+      border: 1.2px solid rgba(2, 132, 199, 0.30);
+      border-radius: 16px;
       overflow: hidden;
-      margin: 16px 0 12px;
+      margin: 14px 0 12px;
       transition: border-color 0.2s;
     }
     .qhse-header {
@@ -298,13 +361,14 @@
       justify-content: space-between;
       cursor: pointer;
       user-select: none;
+      touch-action: manipulation;
     }
     .qhse-header:active {
-      background: rgba(2, 132, 199, 0.14);
+      background: rgba(2, 132, 199, 0.16);
     }
     .qhse-body {
       padding: 14px;
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-main);
       line-height: 1.55;
       border-top: 1px solid var(--border-subtle);
@@ -315,7 +379,7 @@
       margin: 0;
     }
     .qhse-list li {
-      padding: 4px 0;
+      padding: 5px 0;
       display: flex;
       align-items: flex-start;
       gap: 8px;
@@ -324,23 +388,24 @@
     .safety-box {
       background: rgba(2, 132, 199, 0.08);
       border: 1.2px solid rgba(56, 189, 248, 0.35);
-      border-radius: 16px;
-      padding: 13px;
-      margin: 12px 0 16px;
+      border-radius: 14px;
+      padding: 12px;
+      margin: 10px 0 16px;
       display: flex;
       gap: 10px;
       align-items: flex-start;
+      cursor: pointer;
     }
     .safety-box input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      margin-top: 2px;
+      width: 22px;
+      height: 22px;
+      margin-top: 1px;
       accent-color: var(--primary-accent);
       flex-shrink: 0;
       cursor: pointer;
     }
     .safety-box label {
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 500;
       color: var(--text-main);
       line-height: 1.45;
@@ -348,32 +413,35 @@
       cursor: pointer;
     }
 
+    /* Submit Button */
     .btn-submit {
       width: 100%;
-      padding: 16px;
+      min-height: 52px;
+      padding: 14px 18px;
       background: var(--pill-grad);
       color: #ffffff;
       font-size: 15.5px;
       font-weight: 800;
       border: 1.2px solid rgba(125, 211, 252, 0.65);
-      border-radius: 18px;
+      border-radius: 16px;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(2, 132, 199, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+      box-shadow: 0 10px 24px rgba(2, 132, 199, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+      touch-action: manipulation;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
     }
     .btn-submit:active {
       transform: scale(0.97);
     }
     .btn-submit:disabled {
-      opacity: 0.6;
+      opacity: 0.65;
       cursor: not-allowed;
     }
 
     .status-alert {
       display: none;
-      padding: 14px;
-      border-radius: 16px;
-      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin-bottom: 14px;
       font-size: 13px;
       font-weight: 600;
       line-height: 1.4;
@@ -386,32 +454,33 @@
       border: 1px solid rgba(239, 68, 68, 0.4);
     }
 
+    /* Confirmation Modal Card */
     .success-modal {
       display: none;
       background: var(--glass-elevated);
       backdrop-filter: blur(28px) saturate(190%);
       -webkit-backdrop-filter: blur(28px) saturate(190%);
-      border-radius: 28px;
-      padding: 26px 22px;
+      border-radius: 26px;
+      padding: 24px 20px;
       text-align: center;
       border: 1.5px solid var(--success);
       box-shadow: var(--glass-shadow);
-      animation: popSpring 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: popSpring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes popSpring {
       0% { opacity: 0; transform: scale(0.92) translateY(10px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .badge-icon {
-      font-size: 48px;
-      margin-bottom: 8px;
+      font-size: 46px;
+      margin-bottom: 6px;
     }
     .badge-pass {
-      background: var(--glass-input);
+      background: var(--chip-bg);
       border: 1.5px dashed var(--primary-accent);
       border-radius: 16px;
       padding: 16px;
-      margin: 18px 0;
+      margin: 16px 0;
       text-align: left;
     }
     .badge-row {
@@ -427,6 +496,7 @@
     .badge-row b {
       color: var(--text-main);
     }
+
     .footer {
       text-align: center;
       font-size: 12px;
@@ -445,11 +515,11 @@
   </div>
 
   <div class="container">
-    <!-- Refined Header without company logo as requested -->
+    <!-- Header without company logo as requested -->
     <div class="header">
-      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleLiquidTheme()" title="Switch Light / Dark Mode">🌙</button>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Switch Light / Dark Mode">🌙</button>
       <h1 id="branchTitle">SAIT Group — Visitor Check-In</h1>
-      <p id="branchLocation">Marine, Oil & Gas Engineering Services</p>
+      <p id="branchLocation">Marine, Oil &amp; Gas Engineering Services</p>
       <div class="session-pill" id="sessionPill">
         <span>🟢</span>
         <span id="sessionText">KIOSK STATION CONNECTED</span>
@@ -463,14 +533,14 @@
         <span>📋</span>
         <span>Visitor Entry Details</span>
       </div>
-      <form id="checkInForm" onsubmit="handleRegistrationSubmit(event)">
+      <form id="checkInForm">
         <div class="form-group">
           <label for="fullName">Full Name <span class="required">*</span></label>
           <input type="text" id="fullName" placeholder="e.g. David Miller" autocomplete="name" required>
         </div>
 
         <div class="form-group">
-          <label for="email">Email ID <span class="required">*</span> <small style="color: var(--text-muted); font-weight: normal;">(Pass & safety rules copy)</small></label>
+          <label for="email">Email ID <span class="required">*</span> <small style="color: var(--text-muted); font-weight: normal;">(Pass &amp; safety rules copy)</small></label>
           <input type="email" id="email" placeholder="e.g. david.miller@example.com" autocomplete="email" required>
         </div>
 
@@ -637,7 +707,7 @@
               <option value="+255">🇹🇿 Tanzania (+255)</option>
               <option value="+66">🇹🇭 Thailand (+66)</option>
               <option value="+228">🇹🇬 Togo (+228)</option>
-              <option value="+1-868">🇹🇹 Trinidad & Tobago (+1-868)</option>
+              <option value="+1-868">🇹🇹 Trinidad &amp; Tobago (+1-868)</option>
               <option value="+216">🇹🇳 Tunisia (+216)</option>
               <option value="+90">🇹🇷 Turkey (+90)</option>
               <option value="+993">🇹🇲 Turkmenistan (+993)</option>
@@ -660,16 +730,16 @@
           <input type="text" id="companyName" placeholder="e.g. PetroTech International" autocomplete="organization" required>
         </div>
 
-        <!-- Type of Visit selection ONLY buttons (dropdown removed as requested) -->
+        <!-- Type of Visit selection: ONLY BUTTONS (as requested) -->
         <div class="form-group">
           <label>Type of Visit <span class="required">*</span></label>
           <input type="hidden" id="visitType" value="Walk-In" required>
           <div class="visit-type-row">
-            <button type="button" class="visit-chip active" id="chipWalkIn" onclick="selectVisitType('Walk-In')">
+            <button type="button" class="visit-chip active" id="chipWalkIn">
               <span id="iconWalkIn">✓</span>
               <span>Walk-In</span>
             </button>
-            <button type="button" class="visit-chip" id="chipAppointment" onclick="selectVisitType('Appointment')">
+            <button type="button" class="visit-chip" id="chipAppointment">
               <span id="iconAppointment" style="display:none;">✓</span>
               <span>Appointment</span>
             </button>
@@ -680,27 +750,27 @@
           <label for="department">Department to Visit <span class="required">*</span></label>
           <select id="department">
             <option value="PROJECTS" selected>PROJECTS</option>
-            <option value="QHSE">QHSE (Safety & Environment)</option>
-            <option value="SALES & MARKETING">SALES & MARKETING</option>
+            <option value="QHSE">QHSE (Safety &amp; Environment)</option>
+            <option value="SALES &amp; MARKETING">SALES &amp; MARKETING</option>
             <option value="OPERATIONS">OPERATIONS</option>
             <option value="FINANCE">FINANCE</option>
             <option value="MANAGEMENT">MANAGEMENT</option>
-            <option value="PROCUREMENT">PROCUREMENT & LOGISTICS</option>
+            <option value="PROCUREMENT">PROCUREMENT &amp; LOGISTICS</option>
             <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="purpose">Purpose of Visit <span class="required">*</span></label>
-          <select id="purpose" onchange="handlePurposeChange()">
+          <select id="purpose">
             <option value="Meeting" selected>Meeting</option>
             <option value="Inspection">Inspection</option>
             <option value="Resume Submission">Resume Submission</option>
             <option value="Interview">Interview</option>
             <option value="Factory Visit">Factory Visit</option>
             <option value="Material Delivery">Material Delivery</option>
-            <option value="Technical Audit">Technical Audit & Review</option>
-            <option value="Maintenance / Service">Maintenance & Contractor Work</option>
+            <option value="Technical Audit">Technical Audit &amp; Review</option>
+            <option value="Maintenance / Service">Maintenance &amp; Contractor Work</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -717,7 +787,7 @@
 
         <!-- Safety & QHSE Section in Web Form (as requested) -->
         <div class="qhse-card">
-          <div class="qhse-header" onclick="toggleQhseGuidelines()">
+          <div class="qhse-header" id="qhseHeader">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 18px;">🛡️</span>
               <div>
@@ -739,7 +809,7 @@
           </div>
         </div>
 
-        <div class="safety-box">
+        <div class="safety-box" id="safetyBox">
           <input type="checkbox" id="safetyAgree" required checked>
           <label for="safetyAgree">
             I confirm that I have read and agree to comply with <b>SAIT Group QHSE Safety Guidelines</b>, wear required PPE, and follow safety protocols.
@@ -752,6 +822,7 @@
       </form>
     </div>
 
+    <!-- Confirmation Modal Card -->
     <div class="success-modal" id="successCard">
       <div class="badge-icon">✅</div>
       <h2 style="color: var(--success); font-size: 22px; font-weight: 800;">Registration Confirmed!</h2>
@@ -767,6 +838,7 @@
         <div class="badge-row"><span>Purpose:</span> <b id="displayPurpose">Meeting</b></div>
         <div class="badge-row"><span>Host Person:</span> <b id="displayHost">Reception Desk</b></div>
         <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
+        <div class="badge-row"><span>Pass Number:</span> <b id="displayPass" style="color: var(--primary-accent); font-family: monospace; font-size: 14px;">PASS-0001</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
 
@@ -774,7 +846,7 @@
         Please look at the <b>Kiosk Screen</b> in front of you — your official Visitor Pass has been generated and emailed to your address!
       </p>
 
-      <button type="button" class="btn-submit" onclick="resetFormForNextVisitor()" style="background: var(--text-muted); font-size: 14px; padding: 12px;">
+      <button type="button" class="btn-submit" id="resetBtn" style="background: var(--text-muted); font-size: 14px; min-height: 44px;">
         Register Another Visitor
       </button>
     </div>
@@ -785,53 +857,58 @@
     </div>
   </div>
 
+  <!-- Main Logic & Real-Time Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const savedTheme = localStorage.getItem('sait_liquid_theme') || (prefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeToggleBtn').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+    // Theme Switcher Logic
+    function updateThemeUI(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try {
+        localStorage.setItem('sait_liquid_theme', theme);
+      } catch (e) {}
+      var btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+      }
+    }
+
+    var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateThemeUI(currentTheme);
 
     window.toggleLiquidTheme = function() {
-      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('sait_liquid_theme', next);
-      document.getElementById('themeToggleBtn').innerText = next === 'dark' ? '☀️' : '🌙';
+      var active = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = active === 'dark' ? 'light' : 'dark';
+      updateThemeUI(next);
     };
 
+    var themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', window.toggleLiquidTheme);
+    }
+
+    // Collapsible QHSE Guidelines
     window.toggleQhseGuidelines = function() {
-      const body = document.getElementById('qhseBody');
-      const arrow = document.getElementById('qhseArrow');
+      var body = document.getElementById('qhseBody');
+      var arrow = document.getElementById('qhseArrow');
+      if (!body) return;
       if (body.style.display === 'none') {
         body.style.display = 'block';
-        arrow.innerText = '▲';
+        if (arrow) arrow.innerText = '▲';
       } else {
         body.style.display = 'none';
-        arrow.innerText = '▼';
+        if (arrow) arrow.innerText = '▼';
       }
     };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
-      authDomain: "gen-lang-client-0825227043.firebaseapp.com",
-      projectId: "gen-lang-client-0825227043",
-      storageBucket: "gen-lang-client-0825227043.firebasestorage.app",
-      messagingSenderId: "381421809663",
-      appId: "1:381421809663:web:sait-visitor-portal"
-    };
-
-    let db = null;
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app, "ai-studio-android-saitvisi-226bc4de-7e87-4603-a3f9-5c674f11f3ca");
-    } catch (err) {
-      console.warn("Firebase initialization notice:", err);
+    var qhseHdr = document.getElementById('qhseHeader');
+    if (qhseHdr) {
+      qhseHdr.addEventListener('click', window.toggleQhseGuidelines);
     }
 
-    const BRANCH_REGISTRY = {
+    // Branch Directory Registry
+    var BRANCH_REGISTRY = {
       'BSST-DXB': { name: 'BSS Tech / BSMC - Dubai', city: 'Dubai', location: 'Engineering & Corrosion Control, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'OPERATIONS'] },
       'SAIT-DXB': { name: 'Sait FZCO - Dubai', city: 'Dubai', location: 'Industrial Free Zone Facility, Dubai', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'SALES & MARKETING', 'FINANCE', 'MANAGEMENT', 'MAINTENANCE'] },
       'BSST-AUH': { name: 'BSS Tech - Abu Dhabi', city: 'Abu Dhabi', location: 'Cathodic Protection & Inspection, Abu Dhabi', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'COMMERCIAL', 'FINANCE', 'MANAGEMENT', 'ENGINEERING'] },
@@ -840,69 +917,94 @@
       '3E-RAK':   { name: '3E - RAK', city: 'Ras Al Khaimah', location: 'Northern Emirates Engineering Branch, Ras Al Khaimah', countryCode: '+971', depts: ['PROJECTS', 'QHSE', 'TECHNICAL SERVICES', 'FINANCE', 'MANAGEMENT', 'WORKSHOP'] }
     };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
-    const matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
+    // Parse Query Params
+    var urlParams = new URLSearchParams(window.location.search);
+    var rawBranchCode = (urlParams.get('branch') || 'SAIT-DXB').trim().toUpperCase();
+    var matchedBranch = BRANCH_REGISTRY[rawBranchCode] || BRANCH_REGISTRY['SAIT-DXB'];
 
-    const branchCode = rawBranchCode.includes('-') ? rawBranchCode : (matchedBranch ? rawBranchCode : 'SAIT-DXB');
-    const branchName = urlParams.get('branchName') || (matchedBranch ? matchedBranch.name : 'Sait FZCO - Dubai');
-    const branchCity = urlParams.get('city') || (matchedBranch ? matchedBranch.city : 'Dubai');
-    const branchLocation = urlParams.get('location') || (matchedBranch ? matchedBranch.location : (branchCity + ' Facility'));
-    const sessionId = urlParams.get('session') || ('KS-' + branchCode + '-T01');
-    const countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
-    const deptsParam = urlParams.get('depts');
+    var branchCode = rawBranchCode.includes('-') ? rawBranchCode : (matchedBranch ? rawBranchCode : 'SAIT-DXB');
+    var branchName = urlParams.get('branchName') || (matchedBranch ? matchedBranch.name : 'Sait FZCO - Dubai');
+    var branchCity = urlParams.get('city') || (matchedBranch ? matchedBranch.city : 'Dubai');
+    var branchLocation = urlParams.get('location') || (matchedBranch ? matchedBranch.location : (branchCity + ' Facility'));
+    var sessionId = urlParams.get('session') || ('KS-' + branchCode + '-T01');
+    var countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
+    var deptsParam = urlParams.get('depts');
 
-    document.getElementById('branchTitle').innerText = branchName;
-    document.getElementById('branchLocation').innerText = branchLocation + ' • Code: ' + branchCode;
-    document.getElementById('sessionText').innerText = 'TERMINAL: ' + sessionId;
+    // Populate Dynamic Branch Data
+    var branchTitleEl = document.getElementById('branchTitle');
+    if (branchTitleEl) branchTitleEl.innerText = branchName;
 
-    const deptList = deptsParam ? deptsParam.split(',').map(d => d.trim()).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
+    var branchLocEl = document.getElementById('branchLocation');
+    if (branchLocEl) branchLocEl.innerText = branchLocation + ' • Code: ' + branchCode;
+
+    var sessionTextEl = document.getElementById('sessionText');
+    if (sessionTextEl) sessionTextEl.innerText = 'TERMINAL: ' + sessionId;
+
+    // Populate Departments
+    var deptList = deptsParam ? deptsParam.split(',').map(function(d) { return d.trim(); }).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
     if (deptList && deptList.length > 0) {
-      const deptSelect = document.getElementById('department');
-      deptSelect.innerHTML = '';
-      deptList.forEach((d, idx) => {
-        const opt = document.createElement('option');
-        opt.value = d;
-        opt.textContent = d;
-        if (idx === 0) opt.selected = true;
-        deptSelect.appendChild(opt);
-      });
+      var deptSelect = document.getElementById('department');
+      if (deptSelect) {
+        deptSelect.innerHTML = '';
+        deptList.forEach(function(d, idx) {
+          var opt = document.createElement('option');
+          opt.value = d;
+          opt.textContent = d;
+          if (idx === 0) opt.selected = true;
+          deptSelect.appendChild(opt);
+        });
+      }
     }
 
+    // Set Default Country Code
     if (countryCodeParam) {
-      const ccSelect = document.getElementById('countryCode');
-      for (let i = 0; i < ccSelect.options.length; i++) {
-        if (ccSelect.options[i].value === countryCodeParam) {
-          ccSelect.selectedIndex = i;
-          break;
+      var ccSelect = document.getElementById('countryCode');
+      if (ccSelect) {
+        for (var i = 0; i < ccSelect.options.length; i++) {
+          if (ccSelect.options[i].value === countryCodeParam) {
+            ccSelect.selectedIndex = i;
+            break;
+          }
         }
       }
     }
 
+    // Visit Type Chip Handlers
     window.selectVisitType = function(type) {
-      document.getElementById('visitType').value = type;
-      const walkInBtn = document.getElementById('chipWalkIn');
-      const apptBtn = document.getElementById('chipAppointment');
-      const iconWalkIn = document.getElementById('iconWalkIn');
-      const iconAppt = document.getElementById('iconAppointment');
+      var visitTypeInput = document.getElementById('visitType');
+      if (visitTypeInput) visitTypeInput.value = type;
+
+      var walkInBtn = document.getElementById('chipWalkIn');
+      var apptBtn = document.getElementById('chipAppointment');
+      var iconWalkIn = document.getElementById('iconWalkIn');
+      var iconAppt = document.getElementById('iconAppointment');
+
       if (type === 'Appointment') {
-        walkInBtn.classList.remove('active');
-        apptBtn.classList.add('active');
-        iconWalkIn.style.display = 'none';
-        iconAppt.style.display = 'inline';
+        if (walkInBtn) walkInBtn.classList.remove('active');
+        if (apptBtn) apptBtn.classList.add('active');
+        if (iconWalkIn) iconWalkIn.style.display = 'none';
+        if (iconAppt) iconAppt.style.display = 'inline';
       } else {
-        walkInBtn.classList.add('active');
-        apptBtn.classList.remove('active');
-        iconWalkIn.style.display = 'inline';
-        iconAppt.style.display = 'none';
+        if (walkInBtn) walkInBtn.classList.add('active');
+        if (apptBtn) apptBtn.classList.remove('active');
+        if (iconWalkIn) iconWalkIn.style.display = 'inline';
+        if (iconAppt) iconAppt.style.display = 'none';
       }
     };
 
+    var chipWalkIn = document.getElementById('chipWalkIn');
+    if (chipWalkIn) chipWalkIn.addEventListener('click', function() { window.selectVisitType('Walk-In'); });
+
+    var chipAppt = document.getElementById('chipAppointment');
+    if (chipAppt) chipAppt.addEventListener('click', function() { window.selectVisitType('Appointment'); });
+
+    // Purpose Dropdown Change Handler
     window.handlePurposeChange = function() {
-      const purposeVal = document.getElementById('purpose').value;
-      const customGroup = document.getElementById('customPurposeGroup');
-      const customInput = document.getElementById('customPurpose');
-      if (purposeVal === 'Other') {
+      var purposeSelect = document.getElementById('purpose');
+      var customGroup = document.getElementById('customPurposeGroup');
+      var customInput = document.getElementById('customPurpose');
+      if (!purposeSelect || !customGroup || !customInput) return;
+      if (purposeSelect.value === 'Other') {
         customGroup.style.display = 'block';
         customInput.required = true;
       } else {
@@ -911,53 +1013,80 @@
       }
     };
 
-    function formatTimeNow() {
-      const now = new Date();
-      let hours = now.getHours();
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12 || 12;
-      return ;
+    var purposeSelect = document.getElementById('purpose');
+    if (purposeSelect) {
+      purposeSelect.addEventListener('change', window.handlePurposeChange);
     }
 
+    // Time Formatter
+    function formatTimeNow() {
+      var now = new Date();
+      var hours = now.getHours();
+      var minutes = String(now.getMinutes()).padStart(2, '0');
+      var ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return hours + ':' + minutes + ' ' + ampm;
+    }
+
+    // Firebase Initialization
+    var firebaseConfig = {
+      apiKey: "AIzaSyBrvUO4UT_SsxTjUXlR-NFbxJhe6t8lTGM",
+      authDomain: "gen-lang-client-0825227043.firebaseapp.com",
+      projectId: "gen-lang-client-0825227043",
+      storageBucket: "gen-lang-client-0825227043.firebasestorage.app",
+      messagingSenderId: "381421809663",
+      appId: "1:381421809663:web:sait-visitor-portal"
+    };
+
+    var db = null;
+    try {
+      var app = initializeApp(firebaseConfig);
+      db = getFirestore(app, "ai-studio-android-saitvisi-226bc4de-7e87-4603-a3f9-5c674f11f3ca");
+    } catch (err) {
+      console.warn("Firebase initialization note (offline mode fallback enabled):", err);
+    }
+
+    // Form Submission & Pass Generation
     window.handleRegistrationSubmit = async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      const alertBox = document.getElementById('alertBox');
-      alertBox.style.display = 'none';
+      if (e && e.preventDefault) e.preventDefault();
+      var btn = document.getElementById('submitBtn');
+      var alertBox = document.getElementById('alertBox');
+      if (alertBox) alertBox.style.display = 'none';
 
-      btn.innerText = 'Synchronizing with Kiosk...';
-      btn.disabled = true;
+      if (btn) {
+        btn.innerText = 'Synchronizing with Kiosk...';
+        btn.disabled = true;
+      }
 
-      const fullName = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const countryCode = document.getElementById('countryCode').value;
-      const rawMobile = document.getElementById('mobileNumber').value.trim();
-      const fullMobile = .trim();
-      const companyName = document.getElementById('companyName').value.trim();
-      const visitType = document.getElementById('visitType').value || 'Walk-In';
-      const department = document.getElementById('department').value;
-      const selectedPurpose = document.getElementById('purpose').value;
-      const customPurpose = document.getElementById('customPurpose').value.trim();
-      const purpose = (selectedPurpose === 'Other' && customPurpose) ? customPurpose : selectedPurpose;
-      const personToMeet = document.getElementById('personToMeet').value.trim() || 'Reception Desk';
+      var fullName = (document.getElementById('fullName') ? document.getElementById('fullName').value : '').trim();
+      var email = (document.getElementById('email') ? document.getElementById('email').value : '').trim();
+      var countryCode = document.getElementById('countryCode') ? document.getElementById('countryCode').value : '+971';
+      var rawMobile = (document.getElementById('mobileNumber') ? document.getElementById('mobileNumber').value : '').trim();
+      var fullMobile = (countryCode + ' ' + rawMobile).trim();
+      var companyName = (document.getElementById('companyName') ? document.getElementById('companyName').value : '').trim();
+      var visitType = (document.getElementById('visitType') ? document.getElementById('visitType').value : '') || 'Walk-In';
+      var department = document.getElementById('department') ? document.getElementById('department').value : 'PROJECTS';
+      var selectedPurpose = document.getElementById('purpose') ? document.getElementById('purpose').value : 'Meeting';
+      var customPurpose = (document.getElementById('customPurpose') ? document.getElementById('customPurpose').value : '').trim();
+      var purpose = (selectedPurpose === 'Other' && customPurpose) ? customPurpose : selectedPurpose;
+      var personToMeet = (document.getElementById('personToMeet') ? document.getElementById('personToMeet').value : '').trim() || 'Reception Desk';
 
-      const yearCode = new Date().getFullYear().toString().slice(-2);
-      const codeParts = branchCode.split('-');
-      const companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
-      const cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
-      const expectedPrefix = ;
+      var yearCode = new Date().getFullYear().toString().slice(-2);
+      var codeParts = branchCode.split('-');
+      var companyPrefix = (codeParts.length > 1 && codeParts[0]) ? codeParts[0].toUpperCase() : 'SAIT';
+      var cityShort = (codeParts.length > 1 && codeParts[1]) ? codeParts[1].toUpperCase() : (codeParts[0] || 'DXB').toUpperCase();
+      var expectedPrefix = companyPrefix + '-' + cityShort + '-' + yearCode + '-';
 
-      let maxSeq = 0;
+      var maxSeq = 0;
       try {
         if (db) {
-          const snapshot = await getDocs(collection(db, "visitors"));
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const p = data.passNumber || "";
+          var snapshot = await getDocs(collection(db, "visitors"));
+          snapshot.forEach(function(docSnap) {
+            var data = docSnap.data();
+            var p = data.passNumber || "";
             if (p.toUpperCase().startsWith(expectedPrefix)) {
-              const seqStr = p.slice(-4);
-              const num = parseInt(seqStr, 10);
+              var seqStr = p.slice(-4);
+              var num = parseInt(seqStr, 10);
               if (!isNaN(num) && num >= 1 && num <= 999 && num > maxSeq) {
                 maxSeq = num;
               }
@@ -968,13 +1097,13 @@
         console.warn("Could not query existing pass sequences:", err);
       }
 
-      const nextSeq = maxSeq + 1;
-      const formattedSeq = String(nextSeq).padStart(4, '0');
-      const passNumber = ;
-      const nowTs = Date.now();
-      const formattedTime = formatTimeNow();
+      var nextSeq = maxSeq + 1;
+      var formattedSeq = String(nextSeq).padStart(4, '0');
+      var passNumber = expectedPrefix + formattedSeq;
+      var nowTs = Date.now();
+      var formattedTime = formatTimeNow();
 
-      const visitorPayload = {
+      var visitorPayload = {
         passNumber: passNumber,
         branchName: branchName,
         branchCode: branchCode,
@@ -995,35 +1124,64 @@
       try {
         if (db) {
           await setDoc(doc(db, "visitors", passNumber), visitorPayload);
-          console.log("Visitor record synced to Firestore:", passNumber);
+          console.log("Visitor record synced to Firestore successfully:", passNumber);
         }
       } catch (err) {
-        console.warn("Cloud Firestore write note:", err);
+        console.warn("Cloud Firestore write notice:", err);
       }
 
-      document.getElementById('formCard').style.display = 'none';
-      document.getElementById('displayVisitorName').innerText = fullName;
-      document.getElementById('displayCompany').innerText = companyName;
-      document.getElementById('displayVisitType').innerText = visitType;
-      document.getElementById('displayDept').innerText = department;
-      document.getElementById('displayPurpose').innerText = purpose;
-      document.getElementById('displayHost').innerText = personToMeet;
-      document.getElementById('displayTime').innerText = formattedTime;
-      document.getElementById('successCard').style.display = 'block';
+      // Store in LocalStorage for terminal redundancy
+      try {
+        var localQueue = JSON.parse(localStorage.getItem('sait_pending_passes') || '[]');
+        localQueue.push(visitorPayload);
+        localStorage.setItem('sait_pending_passes', JSON.stringify(localQueue));
+      } catch (e) {}
+
+      // Render Confirmation Card
+      var formCard = document.getElementById('formCard');
+      if (formCard) formCard.style.display = 'none';
+
+      if (document.getElementById('displayVisitorName')) document.getElementById('displayVisitorName').innerText = fullName;
+      if (document.getElementById('displayCompany')) document.getElementById('displayCompany').innerText = companyName;
+      if (document.getElementById('displayVisitType')) document.getElementById('displayVisitType').innerText = visitType;
+      if (document.getElementById('displayDept')) document.getElementById('displayDept').innerText = department;
+      if (document.getElementById('displayPurpose')) document.getElementById('displayPurpose').innerText = purpose;
+      if (document.getElementById('displayHost')) document.getElementById('displayHost').innerText = personToMeet;
+      if (document.getElementById('displayTime')) document.getElementById('displayTime').innerText = formattedTime;
+      if (document.getElementById('displayPass')) document.getElementById('displayPass').innerText = passNumber;
+
+      var successCard = document.getElementById('successCard');
+      if (successCard) successCard.style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    var formEl = document.getElementById('checkInForm');
+    if (formEl) {
+      formEl.addEventListener('submit', window.handleRegistrationSubmit);
+    }
+
+    // Reset Form for Next Visitor
     window.resetFormForNextVisitor = function() {
-      document.getElementById('checkInForm').reset();
+      var form = document.getElementById('checkInForm');
+      if (form) form.reset();
       window.selectVisitType('Walk-In');
       window.handlePurposeChange();
-      document.getElementById('formCard').style.display = 'block';
-      document.getElementById('successCard').style.display = 'none';
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = 'Complete Check-In & Sync to Kiosk';
-      btn.disabled = false;
+      var formCard = document.getElementById('formCard');
+      if (formCard) formCard.style.display = 'block';
+      var successCard = document.getElementById('successCard');
+      if (successCard) successCard.style.display = 'none';
+      var btn = document.getElementById('submitBtn');
+      if (btn) {
+        btn.innerText = 'Complete Check-In & Sync to Kiosk';
+        btn.disabled = false;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    var resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', window.resetFormForNextVisitor);
+    }
   </script>
 </body>
 </html>
