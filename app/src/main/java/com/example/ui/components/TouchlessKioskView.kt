@@ -150,15 +150,21 @@ fun TouchlessKioskView(
 
                 Text(
                     text = activeBranch.name,
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
+                    lineHeight = 23.sp,
+                    maxLines = 2,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
 
+                Spacer(modifier = Modifier.height(3.dp))
+
                 Text(
                     text = activeBranch.displayFacilityLocation,
                     fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    maxLines = 2,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )

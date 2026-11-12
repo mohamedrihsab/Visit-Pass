@@ -553,22 +553,22 @@ private fun AdminComprehensiveDashboard(
                         }
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.weight(1f, fill = false)) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Executive Visitor Intelligence",
-                            fontSize = 14.sp,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            maxLines = 2,
+                            lineHeight = 16.sp
                         )
                         Text(
                             text = "Scope: $scopeLabel",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            maxLines = 2,
+                            lineHeight = 14.sp
                         )
                     }
                 }
@@ -807,7 +807,10 @@ private fun BranchDistributionPanel(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Apartment,
                         contentDescription = "Branch Traffic",
@@ -816,15 +819,18 @@ private fun BranchDistributionPanel(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Branch-by-Branch Visitor Distribution",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "Branch Traffic Distribution",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Tap branch to filter",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = "Tap to filter",
+                    fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -1885,9 +1891,7 @@ private fun VisitorLogCard(
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.widthIn(max = 65.dp)
+                                maxLines = 1
                             )
                         }
                     }

@@ -14,6 +14,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
@@ -1697,7 +1699,7 @@ fun LiquidGlassBottomDock(
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Box(
-                            modifier = Modifier.size(width = 44.dp, height = 22.dp),
+                            modifier = Modifier.wrapContentSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -1712,30 +1714,20 @@ fun LiquidGlassBottomDock(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .offset(x = 4.dp, y = (-3).dp)
-                                        .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
+                                        .offset(x = 10.dp, y = (-6).dp)
+                                        .defaultMinSize(minWidth = 15.dp, minHeight = 15.dp)
                                         .background(
                                             color = badgeBg,
-                                            shape = RoundedCornerShape(9.dp)
+                                            shape = RoundedCornerShape(8.dp)
                                         )
-                                        .drawWithCache {
-                                            val r = size.height / 2f
-                                            onDrawWithContent {
-                                                drawContent()
-                                                drawRoundRect(
-                                                    color = Color.White.copy(alpha = 0.90f),
-                                                    cornerRadius = CornerRadius(r, r),
-                                                    style = Stroke(width = 0.9.dp.toPx())
-                                                )
-                                            }
-                                        }
-                                        .padding(horizontal = 4.5.dp, vertical = 1.dp),
+                                        .border(0.9.dp, Color.White, RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 4.dp, vertical = 0.5.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = if (item.badgeCount > 99) "99+" else item.badgeCount.toString(),
                                         color = badgeFg,
-                                        fontSize = 8.5.sp,
+                                        fontSize = 8.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         textAlign = TextAlign.Center
                                     )

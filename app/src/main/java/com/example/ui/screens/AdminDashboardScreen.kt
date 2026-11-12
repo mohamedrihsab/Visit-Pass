@@ -365,21 +365,21 @@ fun AdminDashboardScreen(
                                 testTag = "company_logo_admin"
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "SAIT Group Admin Portal",
-                                    fontSize = 15.sp,
+                                    fontSize = 14.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    maxLines = 2,
+                                    lineHeight = 17.sp
                                 )
                                 Text(
                                     text = "Terminal Role & Multi-Branch Control",
-                                    fontSize = 11.sp,
+                                    fontSize = 10.5.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    maxLines = 2,
+                                    lineHeight = 13.sp
                                 )
                             }
                         }
@@ -388,16 +388,13 @@ fun AdminDashboardScreen(
 
                         Box(
                             modifier = Modifier
-                                .liquidInnerGlass(
-                                    shape = RoundedCornerShape(8.dp),
-                                    cornerRadius = 8.dp,
-                                    accentColor = MaterialTheme.colorScheme.primary
-                                )
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                .border(0.7.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 7.dp, vertical = 3.dp)
                         ) {
                             Text(
                                 text = "Admin Mode",
-                                fontSize = 10.sp,
+                                fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1
@@ -1014,18 +1011,18 @@ fun AdminDashboardScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
-                            Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Branches, Logos & Safety Info",
-                                    fontSize = 15.sp,
+                                    fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    maxLines = 2,
+                                    lineHeight = 17.sp
                                 )
                                 Text(
-                                    text = if (isFirebaseLoggedIn) "Cloud Synced & Unlocked for Edits" else "Sign in with Google above to edit",
-                                    fontSize = 11.5.sp,
+                                    text = if (isFirebaseLoggedIn) "Cloud Synced & Unlocked for Edits" else "Sign in with Google to edit",
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = if (isFirebaseLoggedIn) StatusSuccess else StatusWarning,
                                     maxLines = 1,
@@ -1084,80 +1081,64 @@ fun AdminDashboardScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
-                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = branch.name,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2,
+                                lineHeight = 17.sp
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text(
-                                    text = branch.name,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f, fill = false)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Box(
                                     modifier = Modifier
-                                        .liquidInnerGlass(
-                                            shape = RoundedCornerShape(5.dp),
-                                            cornerRadius = 5.dp,
-                                            accentColor = MaterialTheme.colorScheme.primary
-                                        )
-                                        .padding(horizontal = 4.dp, vertical = 1.5.dp)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f), RoundedCornerShape(5.dp))
+                                        .border(0.6.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(5.dp))
+                                        .padding(horizontal = 5.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
                                         text = branch.shortCode,
-                                        fontSize = 9.sp,
+                                        fontSize = 9.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary,
                                         maxLines = 1
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(3.dp))
                                 Box(
                                     modifier = Modifier
-                                        .liquidInnerGlass(
-                                            shape = RoundedCornerShape(5.dp),
-                                            cornerRadius = 5.dp,
-                                            accentColor = MaterialTheme.colorScheme.secondary
-                                        )
-                                        .padding(horizontal = 4.dp, vertical = 1.5.dp)
+                                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f), RoundedCornerShape(5.dp))
+                                        .border(0.6.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), RoundedCornerShape(5.dp))
+                                        .padding(horizontal = 5.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
                                         text = branch.countryCode,
-                                        fontSize = 9.sp,
+                                        fontSize = 9.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.secondary,
                                         maxLines = 1
                                     )
                                 }
+                                Text(
+                                    text = "${branch.city} • ${branch.subtitle}",
+                                    fontSize = 10.5.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
-                            Text(
-                                text = "${branch.city} • ${branch.subtitle}",
-                                fontSize = 10.5.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = "Facility Location: ${branch.displayFacilityLocation}",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
 
                         Spacer(modifier = Modifier.width(6.dp))
 
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Edit Branch Details button
@@ -1185,7 +1166,7 @@ fun AdminDashboardScreen(
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Spacer(modifier = Modifier.width(3.dp))
-                                Text("Edit Branch", fontSize = 10.5.sp, maxLines = 1)
+                                Text("Edit", fontSize = 10.5.sp, maxLines = 1)
                             }
 
                             // Delete Branch button (if more than 1)
@@ -1194,7 +1175,7 @@ fun AdminDashboardScreen(
                                     onClick = { branchToDelete = branch },
                                     enabled = isFirebaseLoggedIn,
                                     modifier = Modifier
-                                        .size(32.dp)
+                                        .size(30.dp)
                                         .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                 ) {
                                     Icon(
@@ -1207,6 +1188,16 @@ fun AdminDashboardScreen(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Facility: ${branch.displayFacilityLocation}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 2,
+                        lineHeight = 14.sp
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -1833,26 +1824,26 @@ fun AdminDashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Google Firebase Trigger Email",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 17.sp,
+                                    maxLines = 2,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = StatusSuccess.copy(alpha = 0.15f)
+                                ) {
                                     Text(
-                                        text = "Google Firebase Trigger Email",
+                                        text = "Firestore 'mail'",
+                                        fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = StatusSuccess,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = StatusSuccess.copy(alpha = 0.15f)
-                                    ) {
-                                        Text(
-                                            text = "Firestore 'mail'",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = StatusSuccess,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                        )
-                                    }
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(

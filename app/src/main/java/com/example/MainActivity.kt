@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -544,23 +545,24 @@ private fun LiquidGlassTopAppBar(
 
                 Column(
                     modifier = Modifier
-                        .weight(1f, fill = false)
+                        .weight(1f)
+                        .padding(horizontal = 2.dp)
                         .animateContentSize()
                 ) {
+                    Text(
+                        text = activeBranch.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.5.sp,
+                        lineHeight = 15.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(
-                            text = activeBranch.name,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 13.5.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
                         val roleBadgeColor = when {
                             isKioskMode -> StatusSuccess
                             isReceptionistMode -> MaterialTheme.colorScheme.secondary
@@ -573,21 +575,24 @@ private fun LiquidGlassTopAppBar(
                         }
                         Box(
                             modifier = Modifier
-                                .liquidInnerGlass(
-                                    shape = RoundedCornerShape(6.dp),
-                                    cornerRadius = 6.dp,
-                                    accentColor = roleBadgeColor
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .background(roleBadgeColor.copy(alpha = 0.16f), RoundedCornerShape(5.dp))
+                                .border(0.6.dp, roleBadgeColor.copy(alpha = 0.6f), RoundedCornerShape(5.dp))
+                                .padding(horizontal = 5.dp, vertical = 1.dp)
                         ) {
                             Text(
                                 text = roleLabel,
-                                fontSize = 8.5.sp,
+                                fontSize = 8.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = roleBadgeColor,
                                 maxLines = 1
                             )
                         }
+                        Text(
+                            text = activeBranch.city,
+                            fontSize = 9.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
                     }
                 }
             }
@@ -662,42 +667,46 @@ private fun TopBarGlassIconButton(
     onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .size(32.dp)
-            .liquidPressEffect(pressedScale = 0.90f)
-            .liquidInnerGlass(
-                shape = CircleShape,
-                cornerRadius = 16.dp
-            )
-            .clickable(onClick = onClick)
-            .testTag(testTag),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.wrapContentSize(),
+        contentAlignment = Alignment.TopEnd
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = tint,
+        Box(
             modifier = Modifier
-                .size(16.dp)
-                .graphicsLayer {
-                    rotationZ = iconRotation
-                }
-        )
+                .size(32.dp)
+                .liquidPressEffect(pressedScale = 0.90f)
+                .liquidInnerGlass(
+                    shape = CircleShape,
+                    cornerRadius = 16.dp
+                )
+                .clickable(onClick = onClick)
+                .testTag(testTag),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = tint,
+                modifier = Modifier
+                    .size(16.dp)
+                    .graphicsLayer {
+                        rotationZ = iconRotation
+                    }
+            )
+        }
         if (badgeCount > 0) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 3.dp, y = (-2).dp)
-                    .defaultMinSize(minWidth = 15.dp, minHeight = 15.dp)
+                    .offset(x = 5.dp, y = (-4).dp)
+                    .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
                     .background(NotificationAlertColor, RoundedCornerShape(8.dp))
-                    .border(0.7.dp, Color.White.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
+                    .border(0.9.dp, Color.White, RoundedCornerShape(8.dp))
                     .padding(horizontal = 3.5.dp, vertical = 0.5.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (badgeCount > 9) "9+" else badgeCount.toString(),
+                    text = if (badgeCount > 99) "99+" else badgeCount.toString(),
                     color = Color(0xFF051020),
-                    fontSize = 8.sp,
+                    fontSize = 8.5.sp,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center
                 )

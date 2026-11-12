@@ -75,6 +75,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -442,27 +443,31 @@ fun RegistrationScreen(
                         }
 
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .height(56.dp)
-                                        .width(80.dp)
-                                        .liquidInnerGlass(
-                                            shape = RoundedCornerShape(14.dp),
-                                            cornerRadius = 14.dp
-                                        )
-                                        .clickable { showCountryPickerDialog = true }
-                                        .padding(horizontal = 6.dp)
-                                        .testTag("dropdown_country_code"),
-                                    contentAlignment = Alignment.Center
-                                ) {
+                            if (showCountryPickerDialog) {
+                                CountryCodePickerDialog(
+                                    options = allCountryOptions,
+                                    selectedDialCode = formState.countryCode,
+                                    onSelect = { option ->
+                                        viewModel.onCountryCodeChange(option.dialCode)
+                                        showCountryPickerDialog = false
+                                    },
+                                    onDismiss = { showCountryPickerDialog = false }
+                                )
+                            }
+
+                            OutlinedTextField(
+                                value = formState.mobileNumber,
+                                onValueChange = { viewModel.onMobileNumberChange(it) },
+                                textStyle = LocalTextStyle.current.copy(fontSize = 13.5.sp),
+                                label = { Text("Mobile Number *", fontSize = 12.sp) },
+                                placeholder = { Text("50 123 4567", fontSize = 12.sp) },
+                                leadingIcon = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
+                                        modifier = Modifier
+                                            .clickable { showCountryPickerDialog = true }
+                                            .padding(start = 10.dp, end = 6.dp)
+                                            .testTag("dropdown_country_code")
                                     ) {
                                         Text(
                                             text = if (selectedCountryOption != null) {
@@ -470,7 +475,7 @@ fun RegistrationScreen(
                                             } else {
                                                 formState.countryCode
                                             },
-                                            fontSize = 12.sp,
+                                            fontSize = 12.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1
@@ -479,45 +484,29 @@ fun RegistrationScreen(
                                         Icon(
                                             imageVector = Icons.Default.ArrowDropDown,
                                             contentDescription = "Select Country Code",
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(16.dp)
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        VerticalDivider(
+                                            modifier = Modifier
+                                                .height(24.dp)
+                                                .width(1.dp),
+                                            color = MaterialTheme.colorScheme.outlineVariant
                                         )
                                     }
-                                }
-
-                                if (showCountryPickerDialog) {
-                                    CountryCodePickerDialog(
-                                        options = allCountryOptions,
-                                        selectedDialCode = formState.countryCode,
-                                        onSelect = { option ->
-                                            viewModel.onCountryCodeChange(option.dialCode)
-                                            showCountryPickerDialog = false
-                                        },
-                                        onDismiss = { showCountryPickerDialog = false }
-                                    )
-                                }
-
-                                OutlinedTextField(
-                                    value = formState.mobileNumber,
-                                    onValueChange = { viewModel.onMobileNumberChange(it) },
-                                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp),
-                                    label = { Text("Mobile Number *", fontSize = 12.sp) },
-                                    placeholder = { Text("50 123 4567", fontSize = 12.sp) },
-                                    leadingIcon = {
-                                        Icon(imageVector = Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(20.dp))
-                                    },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Phone,
-                                        imeAction = ImeAction.Next
-                                    ),
-                                    shape = RoundedCornerShape(14.dp),
-                                    colors = liquidTextFieldColors(),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .testTag("input_mobile")
-                                )
-                            }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Phone,
+                                    imeAction = ImeAction.Next
+                                ),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = liquidTextFieldColors(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("input_mobile")
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -960,12 +949,12 @@ private fun HeroHeader(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Column(modifier = Modifier.weight(1f, fill = false)) {
+                Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "SAIT GROUP",
                             color = Color.White,
-                            fontSize = 14.sp,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 0.5.sp,
                             maxLines = 1,
@@ -991,7 +980,8 @@ private fun HeroHeader(
                         color = Color(0xFFE0F2FE),
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1,
+                        lineHeight = 15.sp,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
 
