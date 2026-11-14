@@ -91,14 +91,6 @@ fun TouchlessKioskView(
 ) {
     val touchlessUrl by viewModel.touchlessQrUrl.collectAsState()
     val touchlessSessionId by viewModel.touchlessSessionId.collectAsState()
-    var showSafetyDialog by remember { mutableStateOf(false) }
-
-    if (showSafetyDialog) {
-        SafetyInfoDialog(
-            branch = activeBranch,
-            onDismiss = { showSafetyDialog = false }
-        )
-    }
 
     val pulseTransition = rememberInfiniteTransition(label = "kioskListeningPulse")
     val dotScale by pulseTransition.animateFloat(
@@ -305,45 +297,20 @@ fun TouchlessKioskView(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Bottom Actions: Safety Guidelines & Fallback to Touchscreen (well-spaced to prevent mistouches)
+        // Bottom Action: Fallback to Touchscreen
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 6.dp)
                 .liquidAppearAnimation(delayMillis = 130),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
-            FilledTonalButton(
-                onClick = { showSafetyDialog = true },
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 40.dp)
-                    .liquidPressEffect()
-                    .testTag("btn_touchless_safety_info"),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.HealthAndSafety,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    text = "Safety Rules",
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
             Button(
                 onClick = onSwitchToTouchscreen,
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
                 modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 40.dp)
+                    .fillMaxWidth()
+                    .heightIn(min = 42.dp)
                     .liquidButtonGlass(
                         shape = RoundedCornerShape(12.dp),
                         cornerRadius = 12.dp,
@@ -359,12 +326,12 @@ fun TouchlessKioskView(
                 Icon(
                     imageVector = Icons.Default.TouchApp,
                     contentDescription = null,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Use Touchscreen",
-                    fontSize = 11.5.sp,
+                    fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

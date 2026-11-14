@@ -229,17 +229,17 @@ fun SafetyInfoDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Emergency Exit & Assembly Point Map",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
                 if (!branch.emergencyExitDrawingUri.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Emergency Exit & Evacuation Drawing",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
                     AsyncImage(
                         model = branch.emergencyExitDrawingUri,
                         contentDescription = "Emergency Exit Plan",
@@ -250,8 +250,6 @@ fun SafetyInfoDialog(
                             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp)),
                         contentScale = ContentScale.Fit
                     )
-                } else {
-                    EmergencyEvacuationPlanCanvas()
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))

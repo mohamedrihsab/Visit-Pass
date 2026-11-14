@@ -63,6 +63,9 @@ import com.example.ui.theme.liquidHeroGlass
 import com.example.ui.theme.liquidInnerGlass
 import com.example.ui.theme.liquidModalGlass
 import com.example.ui.theme.liquidPressEffect
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun VisitorPassDialog(
@@ -76,6 +79,20 @@ fun VisitorPassDialog(
 ) {
     val context = LocalContext.current
     val isCheckedIn = visitor.status == "CHECKED_IN"
+
+    val formattedParts = visitor.checkInFormattedTime.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    val registrationDateStr = when {
+        formattedParts.size >= 2 -> formattedParts[0]
+        visitor.timestamp > 0L -> SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(visitor.timestamp))
+        else -> visitor.checkInFormattedTime
+    }
+    val registrationTimeStr = when {
+        formattedParts.size >= 2 -> formattedParts.drop(1).joinToString(", ")
+        visitor.checkInFormattedTime.isNotBlank() && !visitor.checkInFormattedTime.contains(",") && visitor.checkInFormattedTime.length <= 12 -> visitor.checkInFormattedTime
+        visitor.timestamp > 0L -> SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(visitor.timestamp))
+        else -> visitor.checkInFormattedTime
+    }
+    val fullDateTimeStr = "$registrationDateStr, $registrationTimeStr"
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -157,26 +174,20 @@ fun VisitorPassDialog(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "SAIT GROUP",
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 2.sp
-                                )
-                                Text(
                                     text = visitor.branchName.uppercase(),
-                                    color = Color(0xFFE0F2FE),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,
-                                    letterSpacing = 1.sp
+                                    letterSpacing = 1.2.sp
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "OFFICIAL VISITOR PASS",
-                                    color = Color.White.copy(alpha = 0.90f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = 1.sp
+                                    color = Color(0xFFE0F2FE),
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.4.sp
                                 )
                             }
                         }
@@ -249,6 +260,8 @@ fun VisitorPassDialog(
 
                             PassDetailRow(label = "Branch", value = visitor.branchName)
                             PassDetailRow(label = "Pass ID", value = visitor.passNumber, isMono = true)
+                            PassDetailRow(label = "Registration Date", value = registrationDateStr)
+                            PassDetailRow(label = "Registration Time", value = registrationTimeStr)
                             if (visitor.email.isNotBlank()) {
                                 PassDetailRow(label = "Email ID", value = visitor.email)
                             }
@@ -258,7 +271,9 @@ fun VisitorPassDialog(
                             if (visitor.personToMeet.isNotBlank()) {
                                 PassDetailRow(label = "Person to Meet", value = visitor.personToMeet)
                             }
-                            PassDetailRow(label = "Registered At", value = visitor.checkInFormattedTime)
+                            if (!visitor.checkOutFormattedTime.isNullOrBlank()) {
+                                PassDetailRow(label = "Check-Out Time", value = visitor.checkOutFormattedTime)
+                            }
 
                             Spacer(modifier = Modifier.height(14.dp))
 
@@ -364,12 +379,14 @@ fun VisitorPassDialog(
                             onClick = {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
-                                    putExtra(Intent.EXTRA_SUBJECT, "SAIT Group Visitor Pass - ${visitor.fullName}")
+                                    putExtra(Intent.EXTRA_SUBJECT, "Visitor Pass - ${visitor.fullName} (${visitor.passNumber})")
                                     putExtra(
                                         Intent.EXTRA_TEXT,
                                         """
-                                        SAIT GROUP - VISITOR PASS
+                                        ${visitor.branchName.uppercase()} - OFFICIAL VISITOR PASS
                                         Pass ID: ${visitor.passNumber}
+                                        Registration Date: $registrationDateStr
+                                        Registration Time: $registrationTimeStr
                                         Visitor: ${visitor.fullName}
                                         Email: ${visitor.email}
                                         Company: ${visitor.companyName}
@@ -377,7 +394,6 @@ fun VisitorPassDialog(
                                         Department: ${visitor.department}
                                         Purpose: ${visitor.purpose}
                                         Person to Meet: ${if (visitor.personToMeet.isNotBlank()) visitor.personToMeet else "Reception"}
-                                        Registered: ${visitor.checkInFormattedTime}
                                         """.trimIndent()
                                     )
                                 }

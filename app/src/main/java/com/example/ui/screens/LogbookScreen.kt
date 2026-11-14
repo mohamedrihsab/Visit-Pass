@@ -212,7 +212,7 @@ fun LogbookScreen(
                     visitor.department.equals(selectedDepartment, ignoreCase = true)
 
             val matchesType = selectedVisitType == "ALL" ||
-                    visitor.visitType.equals(selectedVisitType, ignoreCase = true)
+                    visitor.visitType.startsWith(selectedVisitType, ignoreCase = true)
 
             branchSafe && matchesTime && matchesDept && matchesType
         }
@@ -277,13 +277,11 @@ fun LogbookScreen(
                         selectedDepartment = selectedDepartment,
                         onExportCsv = {
                             val csv = viewModel.getCsvData()
-                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/csv"
-                                putExtra(Intent.EXTRA_SUBJECT, "SAIT_Visitor_Logbook_Export.csv")
-                                putExtra(Intent.EXTRA_TEXT, csv)
-                            }
-                            context.startActivity(
-                                Intent.createChooser(sendIntent, "Export Visitor Logbook CSV")
+                            val scopeBranchName = if (logBranchFilter == "ALL") "All_Branches" else activeBranch.name
+                            com.example.util.GoogleDriveExportHelper.shareCsvFile(
+                                context = context,
+                                csvContent = csv,
+                                branchName = scopeBranchName
                             )
                         }
                     )
@@ -465,10 +463,10 @@ private fun AdminComprehensiveDashboard(
         scopedVisitors.count { it.timestamp >= sevenDaysAgoMillis }
     }
     val walkInCount = remember(scopedVisitors) {
-        scopedVisitors.count { it.visitType.equals("Walk-In", ignoreCase = true) }
+        scopedVisitors.count { it.visitType.startsWith("Walk-In", ignoreCase = true) }
     }
     val appointmentCount = remember(scopedVisitors) {
-        scopedVisitors.count { it.visitType.equals("Appointment", ignoreCase = true) }
+        scopedVisitors.count { it.visitType.startsWith("Appointment", ignoreCase = true) }
     }
     val syncedCount = remember(scopedVisitors) {
         scopedVisitors.count { it.isSyncedToGoogleForm }
@@ -1473,10 +1471,10 @@ private fun ReceptionistBranchLogbookHeader(
         branchVisitors.count { it.timestamp >= startOfTodayMillis }
     }
     val branchWalkIns = remember(branchVisitors) {
-        branchVisitors.count { it.visitType.equals("Walk-In", ignoreCase = true) }
+        branchVisitors.count { it.visitType.startsWith("Walk-In", ignoreCase = true) }
     }
     val branchAppointments = remember(branchVisitors) {
-        branchVisitors.count { it.visitType.equals("Appointment", ignoreCase = true) }
+        branchVisitors.count { it.visitType.startsWith("Appointment", ignoreCase = true) }
     }
     val branchSynced = remember(branchVisitors) {
         branchVisitors.count { it.isSyncedToGoogleForm }
@@ -1840,9 +1838,12 @@ private fun VisitorLogCard(
                         tint = if (visitor.isSyncedToGoogleForm) StatusSuccess else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    val isAppointment = visitor.visitType.equals("Appointment", ignoreCase = true)
+                    val isAppointment = visitor.visitType.startsWith("Appointment", ignoreCase = true)
+                    val isQrEntry = visitor.visitType.contains("(QR)", ignoreCase = true)
                     val visitAccent = if (isAppointment) {
                         MaterialTheme.colorScheme.tertiary
+                    } else if (isQrEntry) {
+                        MaterialTheme.colorScheme.secondary
                     } else {
                         MaterialTheme.colorScheme.primary
                     }

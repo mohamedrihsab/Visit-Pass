@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "SAIT Group Visitor Pass"
+rootProject.name = "SAIT Pass+"
 
 include(":app")

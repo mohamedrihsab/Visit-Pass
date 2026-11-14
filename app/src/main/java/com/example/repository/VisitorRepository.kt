@@ -224,11 +224,29 @@ class VisitorRepository(
             null
         }
 
+        val normalizedFormattedTime = if (remote.checkInFormattedTime.contains(",")) {
+            remote.checkInFormattedTime
+        } else if (remote.timestamp > 0L) {
+            SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date(remote.timestamp))
+        } else {
+            remote.checkInFormattedTime
+        }
+
+        val isRemoteQr = remote.passNumber.startsWith("WEB-REG-", ignoreCase = true) ||
+            remote.visitType.contains("(QR)", ignoreCase = true)
+        val normalizedVisitType = if (isRemoteQr && !remote.visitType.contains("(QR)", ignoreCase = true)) {
+            "${remote.visitType.trim()} (QR)"
+        } else {
+            remote.visitType
+        }
+
         val normalizedVisitor = remote.copy(
             id = 0,
             passNumber = finalPassNumber,
             branchName = resolvedBranch.name,
             branchCode = "$prefix-$cityCode",
+            visitType = normalizedVisitType,
+            checkInFormattedTime = normalizedFormattedTime,
             isSyncedToGoogleForm = true
         )
 

@@ -251,25 +251,25 @@ fun SafetyInfoScreen(
             }
         }
 
-        // Emergency Exit Drawing Card
-        item {
-            LiquidGlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .liquidAppearAnimation(delayMillis = 150),
-                cornerRadius = 24.dp,
-                elevated = true
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Emergency Exit & Evacuation Drawing",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
+        // Emergency Exit Drawing Card (Optional — shown only if admin added the image for it)
+        if (!branch.emergencyExitDrawingUri.isNullOrBlank()) {
+            item {
+                LiquidGlassCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidAppearAnimation(delayMillis = 150),
+                    cornerRadius = 24.dp,
+                    elevated = true
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = "Emergency Exit & Evacuation Drawing",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    if (!branch.emergencyExitDrawingUri.isNullOrBlank()) {
                         AsyncImage(
                             model = branch.emergencyExitDrawingUri,
                             contentDescription = "Emergency Exit Plan",
@@ -280,8 +280,6 @@ fun SafetyInfoScreen(
                                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp)),
                             contentScale = ContentScale.Fit
                         )
-                    } else {
-                        EmergencyEvacuationPlanCanvas()
                     }
                 }
             }

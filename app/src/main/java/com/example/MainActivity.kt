@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -107,8 +108,10 @@ import com.example.ui.VisitorViewModel
 import com.example.ui.VisitorViewModelFactory
 import com.example.ui.components.AdminPinDialog
 import com.example.ui.components.CompanyBrandLogoBadge
+import com.example.ui.components.LiquidSplashScreen
 import com.example.ui.components.NotificationCenterDialog
 import com.example.ui.components.VisitorPassDialog
+import kotlinx.coroutines.delay
 import com.example.ui.screens.AdminDashboardScreen
 import com.example.ui.screens.LogbookScreen
 import com.example.ui.screens.RegistrationScreen
@@ -128,6 +131,11 @@ import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { splashScreenView ->
+                splashScreenView.remove()
+            }
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -210,6 +218,14 @@ fun SaitVisitorApp(
     val showPinDialog by viewModel.showPinDialog.collectAsState()
     val pinDialogTargetRole by viewModel.targetPinRole.collectAsState()
     val showNotificationDialog by viewModel.showNotificationCenter.collectAsState()
+    var showSplash by rememberSaveable { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        if (showSplash) {
+            delay(1150L)
+            showSplash = false
+        }
+    }
 
     val activeBranchVisitorsCount = remember(allVisitors, activeBranch) {
         allVisitors.count { visitor ->
@@ -482,6 +498,16 @@ fun SaitVisitorApp(
                 onReceptionistSuccess = {
                     viewModel.enterReceptionistMode()
                 }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showSplash,
+            enter = fadeIn(animationSpec = tween(0)),
+            exit = fadeOut(animationSpec = tween(320))
+        ) {
+            LiquidSplashScreen(
+                onDismiss = { showSplash = false }
             )
         }
     }

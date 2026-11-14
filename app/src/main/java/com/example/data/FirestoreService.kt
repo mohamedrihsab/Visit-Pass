@@ -366,7 +366,16 @@ class FirestoreService(private val context: Context) {
                                 val fullName = doc.getString("fullName") ?: continue
                                 val mobileNumber = doc.getString("mobileNumber") ?: ""
                                 val companyName = doc.getString("companyName") ?: ""
-                                val visitType = doc.getString("visitType") ?: "Walk-In"
+                                val rawVisitType = doc.getString("visitType") ?: "Walk-In"
+                                val kioskSessionId = doc.getString("kioskSessionId") ?: ""
+                                val isQrEntry = rawVisitType.contains("(QR)", ignoreCase = true) ||
+                                    passNumber.startsWith("WEB-REG-", ignoreCase = true) ||
+                                    kioskSessionId.isNotBlank()
+                                val visitType = if (isQrEntry && !rawVisitType.contains("(QR)", ignoreCase = true)) {
+                                    "${rawVisitType.trim()} (QR)"
+                                } else {
+                                    rawVisitType
+                                }
                                 val department = doc.getString("department") ?: "PROJECTS"
                                 val purpose = doc.getString("purpose") ?: "Meeting"
                                 val personToMeet = doc.getString("personToMeet") ?: ""
@@ -511,7 +520,7 @@ class FirestoreService(private val context: Context) {
                                 username = it["username"] as? String ?: "",
                                 password = it["password"] as? String ?: "",
                                 senderEmail = it["senderEmail"] as? String ?: "",
-                                senderName = it["senderName"] as? String ?: "SAIT Group Visitor Pass",
+                                senderName = it["senderName"] as? String ?: "SAIT Pass+",
                                 firebaseTriggerEnabled = it["firebaseTriggerEnabled"] as? Boolean ?: true
                             )
                         }

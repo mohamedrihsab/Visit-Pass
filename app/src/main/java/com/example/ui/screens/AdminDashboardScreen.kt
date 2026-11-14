@@ -445,7 +445,6 @@ fun AdminDashboardScreen(
                                 .weight(1f)
                                 .heightIn(min = 38.dp)
                                 .liquidButtonGlass(cornerRadius = 10.dp)
-                                .liquidPressEffect()
                                 .testTag("btn_switch_to_kiosk")
                         ) {
                             Icon(imageVector = Icons.Default.Store, contentDescription = null, modifier = Modifier.size(15.dp))
@@ -949,7 +948,6 @@ fun AdminDashboardScreen(
                                 .padding(horizontal = 2.dp)
                                 .heightIn(min = 42.dp)
                                 .liquidButtonGlass(cornerRadius = 12.dp, enabled = !isSigningIn)
-                                .liquidPressEffect(enabled = !isSigningIn)
                                 .testTag("btn_google_signin"),
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -1026,7 +1024,6 @@ fun AdminDashboardScreen(
                             .padding(horizontal = 2.dp)
                             .heightIn(min = 42.dp)
                             .liquidButtonGlass(cornerRadius = 12.dp, enabled = !isSyncing && isFirebaseLoggedIn)
-                            .liquidPressEffect(enabled = !isSyncing && isFirebaseLoggedIn)
                             .testTag("btn_sync_firestore"),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -1127,7 +1124,6 @@ fun AdminDashboardScreen(
                             modifier = Modifier
                                 .heightIn(min = 36.dp)
                                 .liquidButtonGlass(cornerRadius = 10.dp, enabled = isFirebaseLoggedIn)
-                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                 .testTag("btn_add_branch")
                         ) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.White)
@@ -1498,7 +1494,6 @@ fun AdminDashboardScreen(
                                 modifier = Modifier
                                     .heightIn(min = 30.dp)
                                     .liquidButtonGlass(cornerRadius = 8.dp, enabled = isFirebaseLoggedIn)
-                                    .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                     .testTag("btn_edit_safety_${branch.shortCode}")
                             ) {
                                 Icon(imageVector = Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color.White)
@@ -1577,7 +1572,6 @@ fun AdminDashboardScreen(
                             modifier = Modifier
                                 .height(38.dp)
                                 .liquidButtonGlass(cornerRadius = 10.dp, enabled = isFirebaseLoggedIn)
-                                .liquidPressEffect(enabled = isFirebaseLoggedIn)
                                 .testTag("btn_add_visit_purpose")
                         ) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
@@ -2205,7 +2199,6 @@ fun AdminDashboardScreen(
                                                 cornerRadius = 12.dp,
                                                 baseColor = MaterialTheme.colorScheme.primary
                                             )
-                                            .liquidPressEffect()
                                             .testTag("btn_save_smtp_config")
                                     ) {
                                         Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -2288,7 +2281,6 @@ fun AdminDashboardScreen(
                                                     baseColor = MaterialTheme.colorScheme.secondary,
                                                     enabled = !isTestingSmtp && testRecipientEmail.isNotBlank()
                                                 )
-                                                .liquidPressEffect()
                                                 .testTag("btn_test_smtp_connection")
                                         ) {
                                             if (isTestingSmtp) {
@@ -2397,7 +2389,6 @@ fun AdminDashboardScreen(
                                 cornerRadius = 12.dp,
                                 baseColor = MaterialTheme.colorScheme.secondary
                             )
-                            .liquidPressEffect()
                             .testTag("btn_save_to_google_drive"),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
@@ -2587,8 +2578,7 @@ fun AdminDashboardScreen(
                                         shape = RoundedCornerShape(10.dp),
                                         cornerRadius = 10.dp,
                                         baseColor = MaterialTheme.colorScheme.primary
-                                    )
-                                    .liquidPressEffect(),
+                                    ),
                                 shape = RoundedCornerShape(10.dp),
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -3437,9 +3427,9 @@ fun AdminDashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Emergency Evacuation Plan Drawing", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                Text("Emergency Exit & Evacuation Drawing (Optional)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                 Text(
-                                    text = if (safetyExitDrawingUri != null) "Custom floor plan active (PNG / JPG / WEBP)" else "Preferred: PNG or JPG landscape (1280×720 px)",
+                                    text = if (safetyExitDrawingUri != null) "Custom drawing active — shown in app" else "No image added — hidden in app until uploaded",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -3458,7 +3448,7 @@ fun AdminDashboardScreen(
                                         .liquidPressEffect()
                                         .testTag("btn_upload_exit_plan")
                                 ) {
-                                    Text(if (safetyExitDrawingUri != null) "Replace" else "Upload Drawing", fontSize = 11.sp)
+                                    Text(if (safetyExitDrawingUri != null) "Replace" else "Add Image", fontSize = 11.sp)
                                 }
                                 if (safetyExitDrawingUri != null) {
                                     OutlinedButton(
@@ -3470,7 +3460,7 @@ fun AdminDashboardScreen(
                                             .height(32.dp)
                                             .liquidPressEffect()
                                     ) {
-                                        Text("Reset", fontSize = 11.sp)
+                                        Text("Remove", fontSize = 11.sp)
                                     }
                                 }
                             }

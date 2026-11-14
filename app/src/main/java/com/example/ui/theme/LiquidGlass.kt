@@ -281,111 +281,112 @@ data class LiquidGlassPalette(
 
 val LightLiquidGlassPalette = LiquidGlassPalette(
     isDark = false,
-    meshBgTopLeft = Color(0xFFE0F2FE),
-    meshBgCenter = Color(0xFFF0F9FF),
-    meshBgBottomRight = Color(0xFFE0F7FA),
-    waveSpherePrimary = Color(0xFF0284C7).copy(alpha = 0.32f),
-    waveSphereSecondary = Color(0xFF0369A1).copy(alpha = 0.18f),
-    waveEmeraldStart = Color(0xFF0EA5E9).copy(alpha = 0.38f),
-    waveEmeraldEnd = Color(0xFF06B6D4).copy(alpha = 0.28f),
-    waveEmeraldRim = Color(0xFFFFFFFF).copy(alpha = 0.90f),
-    waveIndigoStart = Color(0xFF0284C7).copy(alpha = 0.25f),
-    waveIndigoEnd = Color(0xFF2563EB).copy(alpha = 0.16f),
-    waveIndigoRim = Color(0xFFBAE6FD).copy(alpha = 0.90f),
-    orbCyan = Color(0xFF0284C7).copy(alpha = 0.28f),
-    orbViolet = Color(0xFF38BDF8).copy(alpha = 0.22f),
-    orbEmerald = Color(0xFF0284C7).copy(alpha = 0.22f),
-    orbRose = Color(0xFF7DD3FC).copy(alpha = 0.16f),
-    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.70f),
-    ambientShadowColor = Color(0xFF082647),
-    outerContrastRim = Color(0xFF0284C7).copy(alpha = 0.30f),
-    // High-contrast frosted glass surfaces so dark ink text is 100% legible in Light Mode
-    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.88f),
-    glassSurfaceBottom = Color(0xFFF8FAFC).copy(alpha = 0.78f),
-    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.94f),
-    glassElevatedBottom = Color(0xFFF1F5F9).copy(alpha = 0.84f),
-    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.86f),
-    innerTileBottom = Color(0xFFF0F9FF).copy(alpha = 0.72f),
-    innerTileSelectedTop = Color(0xFFBAE6FD).copy(alpha = 0.88f),
-    innerTileSelectedBottom = Color(0xFFC7D2FE).copy(alpha = 0.78f),
+    meshBgTopLeft = Color(0xFFC8E2FF),        // QWEA0 Vibrant Sapphire-Sky Top-Left
+    meshBgCenter = Color(0xFFDCEEFF),         // Luminous Ice-Azure Center
+    meshBgBottomRight = Color(0xFFBFD9FF),    // Rich Cobalt-Sky Bottom-Right
+    waveSpherePrimary = Color(0xFF2563EB).copy(alpha = 0.54f), // QWEA0 3D Lit Royal Sapphire Sphere
+    waveSphereSecondary = Color(0xFF1D4ED8).copy(alpha = 0.32f),
+    waveEmeraldStart = Color(0xFF00C896).copy(alpha = 0.72f),  // QWEA0 Signature Bottom-Left Turquoise-Emerald Wave
+    waveEmeraldEnd = Color(0xFF00897B).copy(alpha = 0.56f),
+    waveEmeraldRim = Color(0xFFB8FFF2).copy(alpha = 0.96f),   // Crisp Aquamarine-White Rim
+    waveIndigoStart = Color(0xFF1E3A8A).copy(alpha = 0.42f),  // QWEA0 Right Ultramarine Crescent Arc
+    waveIndigoEnd = Color(0xFF0F256E).copy(alpha = 0.30f),
+    waveIndigoRim = Color(0xFF60A5FA).copy(alpha = 0.90f),    // Glowing Royal-Blue Rim
+    orbCyan = Color(0xFF00E5FF).copy(alpha = 0.26f),
+    orbViolet = Color(0xFF3B82F6).copy(alpha = 0.22f),
+    orbEmerald = Color(0xFF00D2A0).copy(alpha = 0.28f),
+    orbRose = Color(0xFF60A5FA).copy(alpha = 0.22f),
+    causticBeamColor = Color(0xFFFFFFFF).copy(alpha = 0.65f),
+    ambientShadowColor = Color(0xFF061A40),                   // Deep Sapphire-Navy Shadow
+    outerContrastRim = Color(0xFF1D4ED8).copy(alpha = 0.28f),
+    // High-clarity Frosted Ice-Sapphire Glass: guarantees 100% crisp dark text contrast while refracting background hues
+    glassSurfaceTop = Color(0xFFFFFFFF).copy(alpha = 0.90f),
+    glassSurfaceBottom = Color(0xFFF2F8FF).copy(alpha = 0.86f),
+    glassElevatedTop = Color(0xFFFFFFFF).copy(alpha = 0.95f),
+    glassElevatedBottom = Color(0xFFF5FAFF).copy(alpha = 0.92f),
+    innerTileTop = Color(0xFFFFFFFF).copy(alpha = 0.88f),
+    innerTileBottom = Color(0xFFF0F7FF).copy(alpha = 0.82f),
+    innerTileSelectedTop = Color(0xFFE6F2FF).copy(alpha = 0.95f),
+    innerTileSelectedBottom = Color(0xFFD8EAFF).copy(alpha = 0.91f),
     sdfRefractionRingTop = Color(0xFFFFFFFF).copy(alpha = 0.95f),
-    sdfRefractionRingBottom = Color(0xFF0284C7).copy(alpha = 0.40f),
-    dispersionCoralRose = Color(0xFF38BDF8).copy(alpha = 0.48f),
-    dispersionGold = Color(0xFFBAE6FD).copy(alpha = 0.42f),
-    dispersionCyan = Color(0xFF00B8D4).copy(alpha = 0.60f),
-    dispersionEmerald = Color(0xFF0284C7).copy(alpha = 0.50f),
-    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.42f),
+    sdfRefractionRingBottom = Color(0xFF38BDF8).copy(alpha = 0.44f),
+    // Subtle QWEA0 Prismatic RGB Chromatic Dispersion Fringe
+    dispersionCoralRose = Color(0xFFFF5E7E).copy(alpha = 0.48f),
+    dispersionGold = Color(0xFFFFD166).copy(alpha = 0.42f),
+    dispersionCyan = Color(0xFF00E5FF).copy(alpha = 0.58f),
+    dispersionEmerald = Color(0xFF00E6A8).copy(alpha = 0.54f),
+    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.46f),
     specularRimBright = Color(0xFFFFFFFF).copy(alpha = 0.98f),
-    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.76f),
+    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.82f),   // QWEA0 Sky-Blue Fresnel Rim
     specularRimEnd = Color(0xFFFFFFFF).copy(alpha = 0.92f),
-    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.90f),
-    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.45f),
+    innerMeniscusGlow = Color(0xFFFFFFFF).copy(alpha = 0.85f),
+    diagonalSheenColor = Color(0xFFFFFFFF).copy(alpha = 0.42f),
     pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.35f),
-    pillActiveTop = Color(0xFF00558F),
-    pillActiveBottom = Color(0xFF0284C7),
-    pillActiveBorder = Color(0xFFBAE6FD),
-    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.90f),
-    inputFieldBorderUnfocused = Color(0xFF026AA7).copy(alpha = 0.42f),
-    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.84f)
+    pillActiveTop = Color(0xFF155EEF),                        // QWEA0 Royal Sapphire Capsule
+    pillActiveBottom = Color(0xFF2563EB),                     // Luminous Cobalt Blue
+    pillActiveBorder = Color(0xFF93C5FD),                     // Glowing Ice-Blue Rim
+    inputFieldContainer = Color(0xFFFFFFFF).copy(alpha = 0.93f),
+    inputFieldBorderUnfocused = Color(0xFF1D4ED8).copy(alpha = 0.42f),
+    chipUnselectedContainer = Color(0xFFFFFFFF).copy(alpha = 0.90f)
 )
 
 val DarkLiquidGlassPalette = LiquidGlassPalette(
     isDark = true,
-    meshBgTopLeft = Color(0xFF02091A),
-    meshBgCenter = Color(0xFF061430),
-    meshBgBottomRight = Color(0xFF020712),
-    waveSpherePrimary = Color(0xFF0369A1).copy(alpha = 0.56f),
-    waveSphereSecondary = Color(0xFF024370).copy(alpha = 0.38f),
-    waveEmeraldStart = Color(0xFF0284C7).copy(alpha = 0.60f),
-    waveEmeraldEnd = Color(0xFF0369A1).copy(alpha = 0.44f),
-    waveEmeraldRim = Color(0xFF7DD3FC).copy(alpha = 0.88f),
-    waveIndigoStart = Color(0xFF031636).copy(alpha = 0.85f),
-    waveIndigoEnd = Color(0xFF09295C).copy(alpha = 0.68f),
-    waveIndigoRim = Color(0xFF0284C7).copy(alpha = 0.88f),
+    meshBgTopLeft = Color(0xFF01133C),                        // QWEA0 Deep Royal Navy Top-Left
+    meshBgCenter = Color(0xFF000C29),                         // Deep Ultramarine Center
+    meshBgBottomRight = Color(0xFF000514),                    // Midnight Abyss Bottom-Right
+    waveSpherePrimary = Color(0xFF3B7BF6).copy(alpha = 0.80f), // QWEA0 3D Lit Royal Sapphire Sphere
+    waveSphereSecondary = Color(0xFF10378A).copy(alpha = 0.65f),
+    waveEmeraldStart = Color(0xFF1CE5B5).copy(alpha = 0.85f),  // QWEA0 Signature Bottom-Left Turquoise-Emerald Wave
+    waveEmeraldEnd = Color(0xFF00796B).copy(alpha = 0.72f),
+    waveEmeraldRim = Color(0xFF80FFE5).copy(alpha = 0.94f),   // Luminous Aquamarine Specular Rim
+    waveIndigoStart = Color(0xFF041B6B).copy(alpha = 0.92f),  // QWEA0 Right Ultramarine Crescent Arc
+    waveIndigoEnd = Color(0xFF010A2E).copy(alpha = 0.88f),
+    waveIndigoRim = Color(0xFF3B82F6).copy(alpha = 0.92f),    // Electric Royal-Blue Rim
     orbCyan = Color(0xFF00E5FF).copy(alpha = 0.28f),
-    orbViolet = Color(0xFF38BDF8).copy(alpha = 0.25f),
-    orbEmerald = Color(0xFF0284C7).copy(alpha = 0.24f),
-    orbRose = Color(0xFF7DD3FC).copy(alpha = 0.16f),
-    causticBeamColor = Color(0xFF38BDF8).copy(alpha = 0.20f),
-    ambientShadowColor = Color(0xFF000000),
-    outerContrastRim = Color(0xFF38BDF8).copy(alpha = 0.38f),
-    // High-contrast deep sapphire glass surfaces so ice-white text pops with 100% clarity
-    glassSurfaceTop = Color(0xFF0F1E3A).copy(alpha = 0.82f),
-    glassSurfaceBottom = Color(0xFF071022).copy(alpha = 0.74f),
-    glassElevatedTop = Color(0xFF14274B).copy(alpha = 0.88f),
-    glassElevatedBottom = Color(0xFF09142A).copy(alpha = 0.80f),
-    innerTileTop = Color(0xFF16294E).copy(alpha = 0.76f),
-    innerTileBottom = Color(0xFF0A152C).copy(alpha = 0.66f),
-    innerTileSelectedTop = Color(0xFF0284C7).copy(alpha = 0.78f),
-    innerTileSelectedBottom = Color(0xFF0369A1).copy(alpha = 0.68f),
-    sdfRefractionRingTop = Color(0xFFBAE6FD).copy(alpha = 0.48f),
-    sdfRefractionRingBottom = Color(0xFF38BDF8).copy(alpha = 0.35f),
-    dispersionCoralRose = Color(0xFF7DD3FC).copy(alpha = 0.65f),
-    dispersionGold = Color(0xFFBAE6FD).copy(alpha = 0.55f),
-    dispersionCyan = Color(0xFF00E5FF).copy(alpha = 0.75f),
-    dispersionEmerald = Color(0xFF38BDF8).copy(alpha = 0.65f),
-    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.55f),
-    specularRimBright = Color(0xFFE0F2FE).copy(alpha = 0.94f),
-    specularRimMid = Color(0xFF38BDF8).copy(alpha = 0.75f),
-    specularRimEnd = Color(0xFF7DD3FC).copy(alpha = 0.82f),
-    innerMeniscusGlow = Color(0xFFBAE6FD).copy(alpha = 0.38f),
-    diagonalSheenColor = Color(0xFF38BDF8).copy(alpha = 0.20f),
-    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.40f),
-    pillActiveTop = Color(0xFF0284C7),
-    pillActiveBottom = Color(0xFF0369A1),
-    pillActiveBorder = Color(0xFF7DD3FC),
-    inputFieldContainer = Color(0xFF0A1833).copy(alpha = 0.84f),
-    inputFieldBorderUnfocused = Color(0xFF38BDF8).copy(alpha = 0.45f),
-    chipUnselectedContainer = Color(0xFF112242).copy(alpha = 0.80f)
+    orbViolet = Color(0xFF3B82F6).copy(alpha = 0.25f),
+    orbEmerald = Color(0xFF1CE5B5).copy(alpha = 0.30f),
+    orbRose = Color(0xFF60A5FA).copy(alpha = 0.20f),
+    causticBeamColor = Color(0xFF60A5FA).copy(alpha = 0.22f),
+    ambientShadowColor = Color(0xFF00030C),
+    outerContrastRim = Color(0xFF3B82F6).copy(alpha = 0.45f),
+    // Rich Deep Royal Sapphire Glass: guarantees 100% crisp white & ice-blue text contrast over bright background waves
+    glassSurfaceTop = Color(0xFF071A44).copy(alpha = 0.88f),
+    glassSurfaceBottom = Color(0xFF04102C).copy(alpha = 0.85f),
+    glassElevatedTop = Color(0xFF0B2358).copy(alpha = 0.93f),
+    glassElevatedBottom = Color(0xFF06163A).copy(alpha = 0.90f),
+    innerTileTop = Color(0xFF0D275E).copy(alpha = 0.84f),
+    innerTileBottom = Color(0xFF071840).copy(alpha = 0.78f),
+    innerTileSelectedTop = Color(0xFF103178).copy(alpha = 0.90f),
+    innerTileSelectedBottom = Color(0xFF091E4D).copy(alpha = 0.86f),
+    sdfRefractionRingTop = Color(0xFFBAE6FD).copy(alpha = 0.58f),
+    sdfRefractionRingBottom = Color(0xFF38BDF8).copy(alpha = 0.40f),
+    // Subtle QWEA0 Prismatic RGB Chromatic Dispersion Fringe
+    dispersionCoralRose = Color(0xFFFF5E7E).copy(alpha = 0.58f),
+    dispersionGold = Color(0xFFFFD166).copy(alpha = 0.50f),
+    dispersionCyan = Color(0xFF00E5FF).copy(alpha = 0.68f),
+    dispersionEmerald = Color(0xFF1CE5B5).copy(alpha = 0.64f),
+    dispersionMagenta = Color(0xFF60A5FA).copy(alpha = 0.56f),
+    specularRimBright = Color(0xFFEFF6FF).copy(alpha = 0.94f),
+    specularRimMid = Color(0xFF60A5FA).copy(alpha = 0.84f),   // QWEA0 Sky-Blue Fresnel Rim
+    specularRimEnd = Color(0xFF93C5FD).copy(alpha = 0.86f),
+    innerMeniscusGlow = Color(0xFF93C5FD).copy(alpha = 0.36f),
+    diagonalSheenColor = Color(0xFF60A5FA).copy(alpha = 0.18f),
+    pressFlareColor = Color(0xFF38BDF8).copy(alpha = 0.42f),
+    pillActiveTop = Color(0xFF1D63DC),                        // QWEA0 Royal Sapphire Capsule
+    pillActiveBottom = Color(0xFF10378A),                     // Deep Cobalt Base
+    pillActiveBorder = Color(0xFF7CC4FA),
+    inputFieldContainer = Color(0xFF051334).copy(alpha = 0.88f),
+    inputFieldBorderUnfocused = Color(0xFF60A5FA).copy(alpha = 0.52f),
+    chipUnselectedContainer = Color(0xFF0D275E).copy(alpha = 0.86f)
 )
 
 val LocalLiquidGlassPalette = staticCompositionLocalOf { LightLiquidGlassPalette }
 
 /**
- * Animated QWEA0/Liquid-Glass-Android Curved Geometric Wave & Sphere Wallpaper Background.
- *
- * Features smooth, continuous floating and breathing motion on the refractive spheres,
- * emerald wave, and caustic light shaft so glass lenses dynamically refract moving light.
+ * Hardware-Cached QWEA0/Liquid-Glass-Android Curved Geometric Wave & Sphere Wallpaper Background.
+ * Pre-allocates all gradients and strokes once inside `drawWithCache` so scrolling and touch interactions
+ * run at a locked 60/120 FPS with zero background invalidation overhead.
  */
 @Composable
 fun LiquidGlassBackground(
@@ -393,35 +394,12 @@ fun LiquidGlassBackground(
     content: @Composable BoxScope.() -> Unit
 ) {
     val palette = LocalLiquidGlassPalette.current
-    val infiniteTransition = rememberInfiniteTransition(label = "liquidGlassAmbientWave")
-
-    val phaseAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 18000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "phaseAngle"
-    )
-
-    val secondaryPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 26000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "secondaryPhase"
-    )
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .drawWithCache {
                 val w = size.width.coerceAtLeast(1f)
                 val h = size.height.coerceAtLeast(1f)
-                val minDim = size.minDimension.coerceAtLeast(1f)
                 val maxDim = size.maxDimension.coerceAtLeast(1f)
 
                 val baseBrush = Brush.linearGradient(
@@ -434,112 +412,127 @@ fun LiquidGlassBackground(
                     end = Offset(w, h)
                 )
 
-                val indigoWaveBrush = Brush.linearGradient(
+                // 1. Giant QWEA0 3D Lit Cobalt-Sapphire Sphere (Upper-Left / Center)
+                val sphereCenter = Offset(w * 0.36f, h * 0.38f)
+                val sphereRadius = maxDim * 0.46f
+                val sphereLightFocal = Offset(w * 0.16f, h * 0.32f)
+                val sphereBrush = Brush.radialGradient(
+                    colors = listOf(
+                        palette.waveSpherePrimary,
+                        palette.waveSphereSecondary,
+                        if (palette.isDark) Color(0xFF030E2E).copy(alpha = 0.88f) else Color(0xFF93C5FD).copy(alpha = 0.22f),
+                        Color.Transparent
+                    ),
+                    center = sphereLightFocal,
+                    radius = sphereRadius * 1.15f
+                )
+                val sphereRimBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = if (palette.isDark) 0.52f else 0.72f),
+                        palette.waveIndigoRim.copy(alpha = 0.62f),
+                        Color.Transparent
+                    ),
+                    start = Offset(0f, h * 0.15f),
+                    end = Offset(w * 0.7f, h * 0.65f)
+                )
+                val sphereRimStroke = Stroke(width = 1.8.dp.toPx())
+
+                // 2. Secondary Lower-Right Intersecting Ultramarine Ribbon Fold
+                val lowerFoldCenter = Offset(w * 0.90f, h * 0.82f)
+                val lowerFoldRadius = maxDim * 0.48f
+                val lowerFoldBrush = Brush.linearGradient(
+                    colors = listOf(
+                        palette.waveSpherePrimary.copy(alpha = if (palette.isDark) 0.42f else 0.28f),
+                        palette.waveIndigoStart,
+                        palette.waveIndigoEnd
+                    ),
+                    start = Offset(w * 0.45f, h * 0.55f),
+                    end = Offset(w, h)
+                )
+                val lowerFoldRimColor = palette.waveIndigoRim.copy(alpha = 0.75f)
+                val lowerFoldStroke = Stroke(width = 2.0.dp.toPx())
+
+                // 3. Primary Overlapping Right Deep Ultramarine Crescent Arc
+                val indigoCenter = Offset(w * 0.94f, h * 0.42f)
+                val indigoRadius = maxDim * 0.55f
+                val indigoBrush = Brush.linearGradient(
                     colors = listOf(
                         palette.waveIndigoStart,
                         palette.waveIndigoEnd
                     ),
-                    start = Offset(w * 0.40f, 0f),
-                    end = Offset(w, h)
+                    start = Offset(w * 0.42f, 0f),
+                    end = Offset(w, h * 0.85f)
                 )
+                val indigoRimBrush = Brush.verticalGradient(
+                    colors = listOf(
+                        palette.waveIndigoRim,
+                        Color(0xFF60A5FA).copy(alpha = 0.90f),
+                        palette.waveIndigoRim
+                    )
+                )
+                val indigoStroke = Stroke(width = 2.4.dp.toPx())
 
-                val emeraldWaveBrush = Brush.linearGradient(
+                // 4. Signature Bottom-Left Turquoise-Emerald Curved Wave
+                val emeraldCenter = Offset(-w * 0.10f, h * 0.84f)
+                val emeraldRadius = maxDim * 0.52f
+                val emeraldBrush = Brush.linearGradient(
                     colors = listOf(
                         palette.waveEmeraldStart,
                         palette.waveEmeraldEnd
                     ),
-                    start = Offset(0f, h * 0.38f),
-                    end = Offset(w * 0.65f, h)
+                    start = Offset(0f, h * 0.45f),
+                    end = Offset(w * 0.55f, h)
                 )
+                val emeraldStroke = Stroke(width = 2.6.dp.toPx())
 
-                val causticBeam = Brush.linearGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        palette.causticBeamColor,
-                        Color.Transparent
-                    ),
-                    start = Offset(0f, h * 0.16f),
-                    end = Offset(w, h * 0.52f)
-                )
+                // 5. Subtle Concentric Liquid Caustic Refraction Rings
+                val rippleRadius1 = maxDim * 0.26f
+                val rippleColor1 = palette.specularRimBright.copy(alpha = if (palette.isDark) 0.12f else 0.20f)
+                val rippleRadius2 = maxDim * 0.36f
+                val rippleColor2 = palette.dispersionCyan.copy(alpha = if (palette.isDark) 0.10f else 0.16f)
+                val rippleStroke = Stroke(width = 1.2.dp.toPx())
 
                 onDrawBehind {
-                    val rad = Math.toRadians(phaseAngle.toDouble()).toFloat()
-                    val rad2 = Math.toRadians(secondaryPhase.toDouble()).toFloat()
-                    val driftX = (kotlin.math.sin(rad) * 0.65f + kotlin.math.cos(rad2) * 0.35f) * (w * 0.038f)
-                    val driftY = (kotlin.math.cos(rad * 0.8f) * 0.60f + kotlin.math.sin(rad2 * 0.7f) * 0.40f) * (h * 0.026f)
-                    val orbBreath = 1.0f + (kotlin.math.sin(rad * 1.4f) * 0.045f)
-
-                    // 1. Base Sky/Midnight Canvas
                     drawRect(brush = baseBrush)
 
-                    // 2. Ambient Upper Orbs with gentle breathing motion
-                    val topOrbCenter = Offset(w * 0.85f - driftX, h * 0.14f + driftY)
-                    val topOrbRadius = minDim * 0.62f * orbBreath
                     drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(palette.orbCyan, Color.Transparent),
-                            center = topOrbCenter,
-                            radius = topOrbRadius
-                        ),
-                        radius = topOrbRadius,
-                        center = topOrbCenter
+                        brush = sphereBrush,
+                        radius = sphereRadius,
+                        center = sphereCenter
+                    )
+                    drawCircle(
+                        brush = sphereRimBrush,
+                        radius = sphereRadius,
+                        center = sphereCenter,
+                        style = sphereRimStroke
                     )
 
-                    val midOrbCenter = Offset(w * 0.18f + driftX, h * 0.24f - driftY)
-                    val midOrbRadius = minDim * 0.48f * orbBreath
                     drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(palette.orbRose, Color.Transparent),
-                            center = midOrbCenter,
-                            radius = midOrbRadius
-                        ),
-                        radius = midOrbRadius,
-                        center = midOrbCenter
+                        brush = lowerFoldBrush,
+                        radius = lowerFoldRadius,
+                        center = lowerFoldCenter
+                    )
+                    drawCircle(
+                        color = lowerFoldRimColor,
+                        radius = lowerFoldRadius,
+                        center = lowerFoldCenter,
+                        style = lowerFoldStroke
                     )
 
-                    // 3. Large Cobalt-Sapphire Lit Sphere
-                    val cobaltCenter = Offset(w * 0.44f + driftX * 0.7f, h * 0.36f + driftY * 0.5f)
-                    val cobaltRadius = maxDim * 0.48f * orbBreath
                     drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                palette.waveSpherePrimary,
-                                palette.waveSphereSecondary,
-                                Color.Transparent
-                            ),
-                            center = Offset(w * 0.34f + driftX, h * 0.28f + driftY),
-                            radius = cobaltRadius
-                        ),
-                        radius = cobaltRadius,
-                        center = cobaltCenter
-                    )
-                    drawCircle(
-                        color = palette.waveIndigoRim.copy(alpha = 0.45f),
-                        radius = cobaltRadius,
-                        center = cobaltCenter,
-                        style = Stroke(width = 2.dp.toPx())
-                    )
-
-                    // 4. Overlapping Right Indigo Crescent Arc with Glowing Blue Specular Edge
-                    val indigoCenter = Offset(w * 0.92f - driftX * 0.5f, h * 0.46f + driftY * 0.6f)
-                    val indigoRadius = maxDim * 0.56f
-                    drawCircle(
-                        brush = indigoWaveBrush,
+                        brush = indigoBrush,
                         radius = indigoRadius,
                         center = indigoCenter
                     )
                     drawCircle(
-                        color = palette.waveIndigoRim,
+                        brush = indigoRimBrush,
                         radius = indigoRadius,
                         center = indigoCenter,
-                        style = Stroke(width = 2.4.dp.toPx())
+                        style = indigoStroke
                     )
 
-                    // 5. Signature Bottom-Left Emerald-Teal Curved Wave with Bright Specular Rim
-                    val emeraldCenter = Offset(-w * 0.12f + driftX * 0.6f, h * 0.82f - driftY * 0.5f)
-                    val emeraldRadius = maxDim * 0.58f
                     drawCircle(
-                        brush = emeraldWaveBrush,
+                        brush = emeraldBrush,
                         radius = emeraldRadius,
                         center = emeraldCenter
                     )
@@ -547,68 +540,43 @@ fun LiquidGlassBackground(
                         color = palette.waveEmeraldRim,
                         radius = emeraldRadius,
                         center = emeraldCenter,
-                        style = Stroke(width = 2.6.dp.toPx())
+                        style = emeraldStroke
                     )
 
-                    // 6. Diagonal Caustic Light Shaft
-                    drawRect(brush = causticBeam)
+                    drawCircle(
+                        color = rippleColor1,
+                        radius = rippleRadius1,
+                        center = sphereLightFocal,
+                        style = rippleStroke
+                    )
+                    drawCircle(
+                        color = rippleColor2,
+                        radius = rippleRadius2,
+                        center = sphereLightFocal,
+                        style = rippleStroke
+                    )
                 }
-            }
-    ) {
-        content()
-    }
+            },
+        content = content
+    )
 }
 
 /**
- * Smooth iOS 26 Liquid Glass Spring Entrance Animation Modifier.
- * Animates a subtle vertical float, refractive scale bloom, and alpha fade-in when entering composition.
+ * Lightweight Modifier hook for card entry.
+ * Returns `this` directly to avoid creating per-card offscreen hardware layers or
+ * competing with `AnimatedContent` tab transitions and `LazyColumn` fling scrolling.
  */
 @Composable
 fun Modifier.liquidAppearAnimation(
     delayMillis: Int = 0,
     initialScale: Float = 0.95f,
     initialOffsetYDp: Float = 14f
-): Modifier {
-    var appeared by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        if (delayMillis > 0) {
-            delay(delayMillis.toLong())
-        }
-        appeared = true
-    }
-
-    val alpha by animateFloatAsState(
-        targetValue = if (appeared) 1f else 0f,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-        label = "liquidAppearAlpha"
-    )
-    val scale by animateFloatAsState(
-        targetValue = if (appeared) 1f else initialScale,
-        animationSpec = spring(
-            dampingRatio = 0.80f,
-            stiffness = 280f
-        ),
-        label = "liquidAppearScale"
-    )
-    val offsetY by animateFloatAsState(
-        targetValue = if (appeared) 0f else initialOffsetYDp,
-        animationSpec = spring(
-            dampingRatio = 0.82f,
-            stiffness = 260f
-        ),
-        label = "liquidAppearOffsetY"
-    )
-
-    return this.graphicsLayer {
-        this.alpha = alpha
-        this.scaleX = scale
-        this.scaleY = scale
-        this.translationY = offsetY * density
-    }
-}
+): Modifier = this
 
 /**
  * Core QWEA0/Liquid-Glass-Android & iOS 26 Convex Lens Surface Modifier.
+ * Single-pass cached optical pipeline with frosted sapphire clarity, subtle chromatic dispersion bevel,
+ * and curved water-droplet meniscus reflection.
  */
 @Composable
 fun Modifier.liquidGlass(
@@ -616,17 +584,17 @@ fun Modifier.liquidGlass(
     cornerRadius: Dp = 24.dp,
     elevated: Boolean = false,
     tintColor: Color? = null,
-    strokeWidth: Dp = 1.6.dp,
-    shadowElevation: Dp = 10.dp
+    strokeWidth: Dp = 1.5.dp,
+    shadowElevation: Dp = 8.dp
 ): Modifier {
     val palette = LocalLiquidGlassPalette.current
     val topFill = when {
-        tintColor != null -> tintColor.copy(alpha = if (palette.isDark) 0.68f else 0.76f)
+        tintColor != null -> tintColor.copy(alpha = if (palette.isDark) 0.78f else 0.86f)
         elevated -> palette.glassElevatedTop
         else -> palette.glassSurfaceTop
     }
     val bottomFill = when {
-        tintColor != null -> tintColor.copy(alpha = if (palette.isDark) 0.54f else 0.62f)
+        tintColor != null -> tintColor.copy(alpha = if (palette.isDark) 0.68f else 0.78f)
         elevated -> palette.glassElevatedBottom
         else -> palette.glassSurfaceBottom
     }
@@ -634,126 +602,62 @@ fun Modifier.liquidGlass(
     return this
         .drawWithCache {
             val radiusPx = cornerRadius.toPx()
-            val elevPx = if (elevated) shadowElevation.toPx() else (shadowElevation * 0.65f).toPx()
-            val shadowBaseAlpha = if (palette.isDark) {
-                if (elevated) 0.36f else 0.22f
-            } else {
-                if (elevated) 0.14f else 0.08f
-            }
-
-            onDrawBehind {
-                if (elevPx > 0.5f) {
-                    // Deep ambient diffusion
-                    drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.22f),
-                        topLeft = Offset(0f, elevPx * 0.85f),
-                        size = Size(size.width, size.height + elevPx * 0.30f),
-                        cornerRadius = CornerRadius(radiusPx + 4.dp.toPx(), radiusPx + 4.dp.toPx())
-                    )
-                    // Mid-field soft shadow
-                    drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.45f),
-                        topLeft = Offset(0f, elevPx * 0.48f),
-                        size = Size(size.width, size.height + elevPx * 0.12f),
-                        cornerRadius = CornerRadius(radiusPx + 2.dp.toPx(), radiusPx + 2.dp.toPx())
-                    )
-                    // Contact occlusion shadow
-                    drawRoundRect(
-                        color = palette.ambientShadowColor.copy(alpha = shadowBaseAlpha * 0.75f),
-                        topLeft = Offset(0f, elevPx * 0.20f),
-                        size = size,
-                        cornerRadius = CornerRadius(radiusPx, radiusPx)
-                    )
-                }
-            }
-        }
-        .clip(shape)
-        .drawWithCache {
-            val radiusPx = cornerRadius.toPx()
             val strokePx = strokeWidth.toPx()
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
 
-            val agslLensBrush: Brush? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                LiquidGlassShaderEngine.createConfiguredLensBrush(
-                    width = w,
-                    height = h,
-                    cornerRadiusPx = radiusPx,
-                    isDark = palette.isDark,
-                    isButton = false,
-                    topColor = topFill,
-                    bottomColor = bottomFill
-                )
+            val elevPx = if (elevated) shadowElevation.toPx() else (shadowElevation * 0.55f).toPx()
+            val shadowAlpha = if (palette.isDark) {
+                if (elevated) 0.36f else 0.22f
             } else {
-                null
+                if (elevated) 0.14f else 0.08f
             }
+            val shadowColor = palette.ambientShadowColor.copy(alpha = shadowAlpha)
+            val shadowTopLeft = Offset(0f, elevPx * 0.35f)
+            val shadowSize = Size(w, h + elevPx * 0.12f)
+            val shadowCorner = CornerRadius(radiusPx + 1.5.dp.toPx(), radiusPx + 1.5.dp.toPx())
+            val cardCorner = CornerRadius(radiusPx, radiusPx)
 
-            val bodyBrush: Brush = agslLensBrush ?: Brush.verticalGradient(
+            val bodyBrush = Brush.verticalGradient(
                 colors = listOf(topFill, bottomFill)
             )
 
-            val sheenBrush = Brush.linearGradient(
-                colors = listOf(
-                    palette.diagonalSheenColor,
-                    Color.Transparent,
-                    palette.diagonalSheenColor.copy(alpha = palette.diagonalSheenColor.alpha * 0.55f)
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
-            )
-
-            val meniscusBrush = Brush.verticalGradient(
+            // Top Curved Liquid Meniscus & Subtle Diagonal Refraction Sheen
+            val meniscusBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.innerMeniscusGlow,
-                    palette.innerMeniscusGlow.copy(alpha = palette.innerMeniscusGlow.alpha * 0.35f),
-                    Color.Transparent
+                    palette.diagonalSheenColor,
+                    Color.Transparent,
+                    palette.dispersionCyan.copy(alpha = if (palette.isDark) 0.10f else 0.12f)
                 ),
-                startY = 0f,
-                endY = (h * 0.38f).coerceAtLeast(18f)
+                start = Offset(0f, 0f),
+                end = Offset(w, h * 0.75f)
             )
 
-            val cornerGlintBrush = Brush.radialGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = if (palette.isDark) 0.48f else 0.75f),
-                    Color(0xFF38BDF8).copy(alpha = if (palette.isDark) 0.20f else 0.35f),
-                    Color.Transparent
-                ),
-                center = Offset(radiusPx * 0.65f, radiusPx * 0.65f),
-                radius = (radiusPx * 1.8f).coerceAtLeast(24.dp.toPx())
-            )
-
-            val sdfInset = 3.2.dp.toPx()
-            val sdfStroke = 2.4.dp.toPx()
+            // Subtle Inset Prismatic Chromatic Dispersion + SDF Refraction Bevel
+            val sdfInset = 2.2.dp.toPx()
+            val sdfStroke = Stroke(width = 1.4.dp.toPx())
+            val innerCorner = CornerRadius((radiusPx - sdfInset).coerceAtLeast(2f), (radiusPx - sdfInset).coerceAtLeast(2f))
+            val innerTopLeft = Offset(sdfInset, sdfInset)
+            val innerSize = Size((w - sdfInset * 2).coerceAtLeast(1f), (h - sdfInset * 2).coerceAtLeast(1f))
             val sdfBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.sdfRefractionRingTop,
-                    palette.dispersionCyan.copy(alpha = 0.25f),
+                    palette.dispersionCoralRose.copy(alpha = if (palette.isDark) 0.34f else 0.28f),
                     Color.Transparent,
-                    palette.dispersionCyan.copy(alpha = 0.15f),
+                    palette.dispersionEmerald.copy(alpha = if (palette.isDark) 0.34f else 0.28f),
                     palette.sdfRefractionRingBottom
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
             )
 
-            val crescentInset = 5.0.dp.toPx()
-            val crescentStroke = 1.3.dp.toPx()
-            val crescentBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = if (palette.isDark) 0.42f else 0.65f),
-                    Color.Transparent,
-                    Color.Transparent,
-                    palette.dispersionCyan.copy(alpha = if (palette.isDark) 0.25f else 0.40f)
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
-            )
-
+            val rimStroke = Stroke(width = strokePx)
             val rimBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.specularRimBright,
                     palette.specularRimMid,
-                    palette.specularRimBright.copy(alpha = 0.60f),
+                    palette.dispersionCyan.copy(alpha = 0.65f),
                     palette.specularRimMid,
                     palette.specularRimEnd
                 ),
@@ -762,64 +666,46 @@ fun Modifier.liquidGlass(
             )
 
             onDrawWithContent {
-                // 1. Base Refractive Lens Body
+                if (elevPx > 0.5f) {
+                    drawRoundRect(
+                        color = shadowColor,
+                        topLeft = shadowTopLeft,
+                        size = shadowSize,
+                        cornerRadius = shadowCorner
+                    )
+                }
+
+                // 1. High-Clarity Frosted Lens Body
                 drawRoundRect(
                     brush = bodyBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx)
+                    cornerRadius = cardCorner
                 )
-                // 2. Diagonal Caustic Sheen
-                drawRoundRect(
-                    brush = sheenBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx)
-                )
-                // 3. Top Curved Liquid Meniscus Glow
+
+                // 2. Top-Left Curved Water-Droplet Meniscus & Refraction Sheen
                 drawRoundRect(
                     brush = meniscusBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx)
+                    cornerRadius = cardCorner
                 )
-                // 4. Corner Specular Focal Glint
-                drawRoundRect(
-                    brush = cornerGlintBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx)
-                )
-                // 5. Inset SDF Refractive Bevel
+
+                // 3. Subtle Inset Prismatic & SDF Refraction Bevel
                 if (w > sdfInset * 4 && h > sdfInset * 4) {
-                    val innerR = (radiusPx - sdfInset).coerceAtLeast(2f)
                     drawRoundRect(
                         brush = sdfBrush,
-                        topLeft = Offset(sdfInset, sdfInset),
-                        size = Size(w - sdfInset * 2, h - sdfInset * 2),
-                        cornerRadius = CornerRadius(innerR, innerR),
-                        style = Stroke(width = sdfStroke)
-                    )
-                }
-                // 6. Inset Crescent Reflection
-                if (w > crescentInset * 4 && h > crescentInset * 4) {
-                    val crescR = (radiusPx - crescentInset).coerceAtLeast(2f)
-                    drawRoundRect(
-                        brush = crescentBrush,
-                        topLeft = Offset(crescentInset, crescentInset),
-                        size = Size(w - crescentInset * 2, h - crescentInset * 2),
-                        cornerRadius = CornerRadius(crescR, crescR),
-                        style = Stroke(width = crescentStroke)
+                        topLeft = innerTopLeft,
+                        size = innerSize,
+                        cornerRadius = innerCorner,
+                        style = sdfStroke
                     )
                 }
 
-                // 7. Draw Composable UI Content Cleanly
+                // 4. Composable UI Content
                 drawContent()
 
-                // 8. Outer Contrast Perimeter
-                drawRoundRect(
-                    color = palette.outerContrastRim,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx),
-                    style = Stroke(width = (strokePx + 0.6.dp.toPx()))
-                )
-
-                // 9. Pristine Specular Rim Highlight
+                // 5. Crisp Specular Fresnel Rim Highlight
                 drawRoundRect(
                     brush = rimBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx),
-                    style = Stroke(width = strokePx)
+                    cornerRadius = cardCorner,
+                    style = rimStroke
                 )
             }
         }
@@ -843,35 +729,35 @@ fun Modifier.liquidInnerGlass(
 
     val topColor = when {
         effectiveAccent != null -> if (palette.isDark) {
-            effectiveAccent.copy(alpha = 0.22f)
+            effectiveAccent.copy(alpha = 0.18f)
         } else {
-            effectiveAccent.copy(alpha = 0.14f)
+            effectiveAccent.copy(alpha = 0.12f)
         }
         selected -> palette.innerTileSelectedTop
         else -> palette.innerTileTop
     }
     val bottomColor = when {
         effectiveAccent != null -> if (palette.isDark) {
-            effectiveAccent.copy(alpha = 0.12f)
+            effectiveAccent.copy(alpha = 0.10f)
         } else {
-            effectiveAccent.copy(alpha = 0.08f)
+            effectiveAccent.copy(alpha = 0.06f)
         }
         selected -> palette.innerTileSelectedBottom
         else -> palette.innerTileBottom
     }
     val borderTop = when {
-        effectiveAccent != null -> effectiveAccent.copy(alpha = if (palette.isDark) 0.74f else 0.60f)
-        selected -> primary.copy(alpha = 0.90f)
-        else -> palette.specularRimBright.copy(alpha = if (palette.isDark) 0.56f else 0.90f)
+        effectiveAccent != null -> effectiveAccent.copy(alpha = if (palette.isDark) 0.72f else 0.58f)
+        selected -> primary.copy(alpha = 0.92f)
+        else -> palette.specularRimBright.copy(alpha = if (palette.isDark) 0.52f else 0.88f)
     }
     val borderMid = when {
-        effectiveAccent != null -> effectiveAccent.copy(alpha = 0.44f)
-        selected -> palette.dispersionCyan.copy(alpha = 0.75f)
-        else -> palette.dispersionCyan.copy(alpha = 0.35f)
+        effectiveAccent != null -> effectiveAccent.copy(alpha = 0.42f)
+        selected -> palette.dispersionCyan.copy(alpha = 0.72f)
+        else -> palette.specularRimMid.copy(alpha = 0.45f)
     }
     val borderBottom = when {
-        effectiveAccent != null -> effectiveAccent.copy(alpha = 0.32f)
-        selected -> palette.dispersionCyan.copy(alpha = 0.65f)
+        effectiveAccent != null -> effectiveAccent.copy(alpha = 0.30f)
+        selected -> primary.copy(alpha = 0.65f)
         else -> palette.outerContrastRim
     }
 
@@ -881,50 +767,32 @@ fun Modifier.liquidInnerGlass(
             val r = cornerRadius.toPx()
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
+            val corner = CornerRadius(r, r)
 
             val fillBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
             val meniscus = Brush.verticalGradient(
                 colors = listOf(
-                    palette.innerMeniscusGlow.copy(alpha = palette.innerMeniscusGlow.alpha * 0.65f),
+                    palette.innerMeniscusGlow.copy(alpha = palette.innerMeniscusGlow.alpha * 0.55f),
                     Color.Transparent
                 ),
                 startY = 0f,
                 endY = (h * 0.38f).coerceAtLeast(12f)
-            )
-            val sdfInset = 2.2.dp.toPx()
-            val sdfBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = if (palette.isDark) 0.22f else 0.50f),
-                    Color.Transparent,
-                    borderMid.copy(alpha = 0.25f)
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
             )
             val borderBrush = Brush.linearGradient(
                 colors = listOf(borderTop, borderMid, borderBottom),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
             )
+            val borderStroke = Stroke(width = strokeWidth.toPx())
 
             onDrawWithContent {
-                drawRoundRect(brush = fillBrush, cornerRadius = CornerRadius(r, r))
-                drawRoundRect(brush = meniscus, cornerRadius = CornerRadius(r, r))
-                if (w > sdfInset * 4 && h > sdfInset * 4) {
-                    val innerR = (r - sdfInset).coerceAtLeast(2f)
-                    drawRoundRect(
-                        brush = sdfBrush,
-                        topLeft = Offset(sdfInset, sdfInset),
-                        size = Size(w - sdfInset * 2, h - sdfInset * 2),
-                        cornerRadius = CornerRadius(innerR, innerR),
-                        style = Stroke(width = 1.4.dp.toPx())
-                    )
-                }
+                drawRoundRect(brush = fillBrush, cornerRadius = corner)
+                drawRoundRect(brush = meniscus, cornerRadius = corner)
                 drawContent()
                 drawRoundRect(
                     brush = borderBrush,
-                    cornerRadius = CornerRadius(r, r),
-                    style = Stroke(width = strokeWidth.toPx())
+                    cornerRadius = corner,
+                    style = borderStroke
                 )
             }
         }
@@ -933,8 +801,12 @@ fun Modifier.liquidInnerGlass(
 /**
  * QWEA0/Liquid-Glass-Android 3D Convex Water-Droplet Button Surface Modifier.
  *
- * Draws the 3D convex droplet depth and meniscus gloss *behind* `drawContent()` so
- * button text and icons remain 100% crisp, bright, and high-contrast in both Light & Dark modes.
+ * Recreates the exact "✨ LiquidGlass Effect Demo" & "Liquid Glass" capsule from the reference images:
+ * - Deep Royal Navy-Indigo left/top-left lens refraction shadow
+ * - Luminous Royal Sapphire Blue convex body with center-right illumination
+ * - Subtle Prismatic RGB chromatic dispersion fringe along the curved ends
+ * - Curved white water-droplet crescent meniscus reflection
+ * - Crisp Sky-Blue & White Fresnel outer rim
  */
 @Composable
 fun Modifier.liquidButtonGlass(
@@ -946,87 +818,107 @@ fun Modifier.liquidButtonGlass(
 ): Modifier {
     val palette = LocalLiquidGlassPalette.current
     val rawColor = baseColor ?: accentColor
-    // Ensure button fill is rich enough in Dark Mode so crisp white text is always 100% legible
-    val effectiveColor = if (palette.isDark && rawColor == MaterialTheme.colorScheme.primary) {
-        Color(0xFF0277BD)
-    } else if (palette.isDark && rawColor == MaterialTheme.colorScheme.secondary) {
-        Color(0xFF00897B)
-    } else {
-        rawColor
+
+    val isPrimary = rawColor == MaterialTheme.colorScheme.primary ||
+        rawColor == SaitPrimary ||
+        rawColor == SaitDarkPrimary
+    val isSecondary = rawColor == MaterialTheme.colorScheme.secondary ||
+        rawColor == SaitSecondary ||
+        rawColor == SaitDarkSecondary
+
+    // Match the exact QWEA0 Royal Sapphire Blue droplet capsule for primary buttons,
+    // and the QWEA0 Turquoise-Emerald wave droplet for secondary buttons
+    val leftRefractionShadow = when {
+        !enabled -> Color(0xFF1E3A8A).copy(alpha = 0.42f)
+        isSecondary -> Color(0xFF004D40)
+        isPrimary -> Color(0xFF071D54) // Deep Navy-Indigo left droplet shadow (Reference Image 1)
+        else -> Color(
+            red = (rawColor.red * 0.45f).coerceIn(0f, 1f),
+            green = (rawColor.green * 0.48f).coerceIn(0f, 1f),
+            blue = (rawColor.blue * 0.60f).coerceIn(0f, 1f),
+            alpha = 0.96f
+        )
+    }
+
+    val centerLensBody = when {
+        !enabled -> Color(0xFF2563EB).copy(alpha = 0.48f)
+        isSecondary -> Color(0xFF00897B) // Rich Turquoise-Emerald with high white-text contrast
+        isPrimary -> Color(0xFF1D63DC)   // QWEA0 Royal Sapphire Blue
+        else -> rawColor
+    }
+
+    val rightRefractionGlow = when {
+        !enabled -> Color(0xFF3B82F6).copy(alpha = 0.44f)
+        isSecondary -> Color(0xFF00BFA5) // Luminous Aquamarine-Emerald
+        isPrimary -> Color(0xFF3B82F6)   // Luminous Cornflower-Azure right glow (Reference Image 1)
+        else -> Color(
+            red = (rawColor.red * 1.15f).coerceIn(0f, 1f),
+            green = (rawColor.green * 1.15f).coerceIn(0f, 1f),
+            blue = (rawColor.blue * 1.20f).coerceIn(0f, 1f),
+            alpha = 0.96f
+        )
     }
 
     return this
-        .liquidPressEffect(enabled = enabled)
+        .liquidPressEffect(enabled = enabled, cornerRadius = cornerRadius)
         .drawWithCache {
             val r = cornerRadius.toPx()
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
+            val corner = CornerRadius(r, r)
 
-            val shadowAlpha = if (!enabled) 0f else if (palette.isDark) 0.42f else 0.25f
+            val shadowAlpha = if (!enabled) 0f else if (palette.isDark) 0.45f else 0.28f
+            val shadowColor = Color(0xFF020C28).copy(alpha = shadowAlpha)
+            val shadowOffset = Offset(0f, 3.dp.toPx())
 
-            val topBtnColor = effectiveColor.copy(alpha = if (enabled) 0.95f else 0.48f)
-            val bottomBtnColor = Color(
-                red = (effectiveColor.red * 0.76f).coerceIn(0f, 1f),
-                green = (effectiveColor.green * 0.82f).coerceIn(0f, 1f),
-                blue = (effectiveColor.blue * 0.98f).coerceIn(0f, 1f),
-                alpha = if (enabled) 0.98f else 0.48f
-            )
-
-            val agslBtnBrush: Brush? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                LiquidGlassShaderEngine.createConfiguredLensBrush(
-                    width = w,
-                    height = h,
-                    cornerRadiusPx = r,
-                    isDark = palette.isDark,
-                    isButton = true,
-                    topColor = topBtnColor,
-                    bottomColor = bottomBtnColor
-                )
-            } else {
-                null
-            }
-            val baseBtnBrush = agslBtnBrush ?: Brush.verticalGradient(
-                colors = listOf(topBtnColor, bottomBtnColor)
-            )
-
-            val dropletDepthBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color(0xFF031236).copy(alpha = if (enabled) 0.24f else 0.08f),
-                    Color.Transparent,
-                    Color(0xFF38BDF8).copy(alpha = if (enabled) 0.22f else 0.06f)
+            // 1. QWEA0 3D Convex Lens Body (Deep Left Refraction Shadow -> Royal Sapphire Center -> Azure Right Glow)
+            val baseBtnBrush = Brush.linearGradient(
+                colorStops = arrayOf(
+                    0.00f to leftRefractionShadow,
+                    0.36f to centerLensBody,
+                    0.78f to rightRefractionGlow,
+                    1.00f to centerLensBody
                 ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
+                start = Offset(0f, h * 0.15f),
+                end = Offset(w, h * 0.85f)
             )
 
+            // 2. Curved 3D Meniscus Top-Gloss & Left Water-Droplet Highlight
             val topGloss = Brush.verticalGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = if (enabled) 0.30f else 0.10f),
-                    Color.White.copy(alpha = if (enabled) 0.06f else 0.02f),
+                    Color.White.copy(alpha = if (enabled) 0.44f else 0.14f),
+                    Color(0xFFBAE6FD).copy(alpha = if (enabled) 0.16f else 0.04f),
                     Color.Transparent
                 ),
                 startY = 0f,
-                endY = (h * 0.44f).coerceAtLeast(10f)
+                endY = (h * 0.46f).coerceAtLeast(10f)
             )
 
-            val innerInset = 2.4.dp.toPx()
-            val innerCrescentBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = if (enabled) 0.60f else 0.18f),
-                    Color(0xFFBAE6FD).copy(alpha = if (enabled) 0.50f else 0.15f),
-                    Color(0xFF38BDF8).copy(alpha = if (enabled) 0.50f else 0.15f),
-                    Color.White.copy(alpha = if (enabled) 0.40f else 0.12f)
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
+            // 3. QWEA0 Prismatic RGB Chromatic Dispersion Fringe along curved ends (Reference Image 2)
+            val dispersionInset = 1.6.dp.toPx()
+            val dispCorner = CornerRadius((r - dispersionInset).coerceAtLeast(2f), (r - dispersionInset).coerceAtLeast(2f))
+            val dispTopLeft = Offset(dispersionInset, dispersionInset)
+            val dispSize = Size((w - dispersionInset * 2).coerceAtLeast(1f), (h - dispersionInset * 2).coerceAtLeast(1f))
+            val dispStroke = Stroke(width = 1.2.dp.toPx())
+            val chromaticFringeBrush = Brush.horizontalGradient(
+                colorStops = arrayOf(
+                    0.00f to palette.dispersionCoralRose.copy(alpha = if (enabled) 0.72f else 0.18f),
+                    0.12f to palette.dispersionGold.copy(alpha = if (enabled) 0.56f else 0.14f),
+                    0.30f to Color.White.copy(alpha = if (enabled) 0.42f else 0.10f),
+                    0.70f to Color(0xFF93C5FD).copy(alpha = if (enabled) 0.45f else 0.12f),
+                    0.88f to palette.dispersionEmerald.copy(alpha = if (enabled) 0.72f else 0.18f),
+                    1.00f to palette.dispersionCyan.copy(alpha = if (enabled) 0.80f else 0.20f)
+                )
             )
 
+            // 4. Crisp Sky-Blue & White Fresnel Outer Rim (Reference Image 1 & 2)
+            val rimStroke = Stroke(width = 1.5.dp.toPx())
             val rimBrush = Brush.linearGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = if (enabled) 0.92f else 0.25f),
-                    Color(0xFF7DD3FC).copy(alpha = if (enabled) 0.85f else 0.20f),
-                    Color(0xFF38BDF8).copy(alpha = if (enabled) 0.78f else 0.20f),
-                    Color.White.copy(alpha = if (enabled) 0.88f else 0.20f)
+                    Color.White.copy(alpha = if (enabled) 0.94f else 0.30f),
+                    Color(0xFF7CC4FA).copy(alpha = if (enabled) 0.90f else 0.26f),
+                    Color(0xFF60A5FA).copy(alpha = if (enabled) 0.84f else 0.22f),
+                    Color.White.copy(alpha = if (enabled) 0.92f else 0.28f)
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
@@ -1035,48 +927,44 @@ fun Modifier.liquidButtonGlass(
             onDrawWithContent {
                 if (shadowAlpha > 0f) {
                     drawRoundRect(
-                        color = effectiveColor.copy(alpha = shadowAlpha * 0.50f),
-                        topLeft = Offset(-1.dp.toPx(), 3.5.dp.toPx()),
-                        size = Size(w + 2.dp.toPx(), h + 1.dp.toPx()),
-                        cornerRadius = CornerRadius(r + 1.dp.toPx(), r + 1.dp.toPx())
-                    )
-                    drawRoundRect(
-                        color = Color.Black.copy(alpha = shadowAlpha * 0.40f),
-                        topLeft = Offset(0f, 2.dp.toPx()),
-                        size = Size(w, h),
-                        cornerRadius = CornerRadius(r, r)
+                        color = shadowColor,
+                        topLeft = shadowOffset,
+                        size = size,
+                        cornerRadius = corner
                     )
                 }
-                // 1. Draw 3D convex button base fill & water-droplet shading BEHIND text
+
+                // 1. Draw QWEA0 3D Convex Lens Base
                 drawRoundRect(
                     brush = baseBtnBrush,
-                    cornerRadius = CornerRadius(r, r)
+                    cornerRadius = corner
                 )
-                drawRoundRect(
-                    brush = dropletDepthBrush,
-                    cornerRadius = CornerRadius(r, r)
-                )
+
+                // 2. Draw Curved 3D Meniscus Top Gloss
                 drawRoundRect(
                     brush = topGloss,
-                    cornerRadius = CornerRadius(r, r)
+                    cornerRadius = corner
                 )
-                // 2. Draw crisp button text and icons on top of the lens background
+
+                // 3. Draw Button Content (Crisp White Text & Icons)
                 drawContent()
-                // 3. Draw inner crescent rim and outer specular border
-                if (w > innerInset * 4 && h > innerInset * 4) {
-                    val innerR = (r - innerInset).coerceAtLeast(2f)
+
+                // 4. Subtle Prismatic Chromatic Dispersion Fringe along curved ends
+                if (w > dispersionInset * 4 && h > dispersionInset * 4) {
                     drawRoundRect(
-                        brush = innerCrescentBrush,
-                        topLeft = Offset(innerInset, innerInset),
-                        size = Size(w - innerInset * 2, h - innerInset * 2),
-                        cornerRadius = CornerRadius(innerR, innerR),
-                        style = Stroke(width = 1.3.dp.toPx())
+                        brush = chromaticFringeBrush,
+                        topLeft = dispTopLeft,
+                        size = dispSize,
+                        cornerRadius = dispCorner,
+                        style = dispStroke
                     )
                 }
+
+                // 5. Outer Sky-Blue & White Fresnel Perimeter Rim
                 drawRoundRect(
                     brush = rimBrush,
-                    cornerRadius = CornerRadius(r, r),
-                    style = Stroke(width = 1.5.dp.toPx())
+                    cornerRadius = corner,
+                    style = rimStroke
                 )
             }
         }
@@ -1084,7 +972,6 @@ fun Modifier.liquidButtonGlass(
 
 /**
  * Self-contained Liquid Glass Modal surface for Android `Dialog` windows.
- * Includes a spring pop-in entrance animation.
  */
 @Composable
 fun Modifier.liquidModalGlass(
@@ -1094,33 +981,21 @@ fun Modifier.liquidModalGlass(
 ): Modifier {
     val palette = LocalLiquidGlassPalette.current
     return this
-        .liquidAppearAnimation(initialScale = 0.92f, initialOffsetYDp = 18f)
         .clip(shape)
         .drawWithCache {
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
-            val minDim = size.minDimension.coerceAtLeast(1f)
             val radiusPx = cornerRadius.toPx()
+            val corner = CornerRadius(radiusPx, radiusPx)
 
             val modalBaseBrush = Brush.linearGradient(
                 colors = if (palette.isDark) {
-                    listOf(Color(0xFF071326), Color(0xFF0E2040), Color(0xFF08142A))
+                    listOf(Color(0xFF04102E), Color(0xFF0A2154), Color(0xFF051336))
                 } else {
-                    listOf(Color(0xFFF0F8FF), Color(0xFFF5F8FF), Color(0xFFF0FDFA))
+                    listOf(Color(0xFFF2F8FF), Color(0xFFFFFFFF), Color(0xFFEAF4FF))
                 },
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
-            )
-
-            val orb1 = Brush.radialGradient(
-                colors = listOf(palette.orbCyan.copy(alpha = 0.24f), Color.Transparent),
-                center = Offset(w * 0.18f, h * 0.15f),
-                radius = minDim * 0.72f
-            )
-            val orb2 = Brush.radialGradient(
-                colors = listOf(palette.orbViolet.copy(alpha = 0.22f), Color.Transparent),
-                center = Offset(w * 0.85f, h * 0.80f),
-                radius = minDim * 0.72f
             )
 
             val meniscusBrush = Brush.verticalGradient(
@@ -1129,7 +1004,11 @@ fun Modifier.liquidModalGlass(
                 endY = (h * 0.28f).coerceAtLeast(24f)
             )
 
-            val sdfInset = 3.2.dp.toPx()
+            val sdfInset = 2.8.dp.toPx()
+            val innerCorner = CornerRadius((radiusPx - sdfInset).coerceAtLeast(2f), (radiusPx - sdfInset).coerceAtLeast(2f))
+            val innerTopLeft = Offset(sdfInset, sdfInset)
+            val innerSize = Size((w - sdfInset * 2).coerceAtLeast(1f), (h - sdfInset * 2).coerceAtLeast(1f))
+            val sdfStroke = Stroke(width = 1.8.dp.toPx())
             val sdfBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.sdfRefractionRingTop,
@@ -1140,12 +1019,13 @@ fun Modifier.liquidModalGlass(
                 end = Offset(w, h)
             )
 
+            val rimStroke = Stroke(width = strokeWidth.toPx())
             val rimBrush = Brush.linearGradient(
                 colors = listOf(
                     palette.specularRimBright,
                     palette.dispersionCyan,
                     palette.specularRimMid,
-                    palette.dispersionCyan.copy(alpha = 0.50f),
+                    palette.dispersionEmerald.copy(alpha = 0.65f),
                     palette.specularRimEnd
                 ),
                 start = Offset(0f, 0f),
@@ -1153,32 +1033,29 @@ fun Modifier.liquidModalGlass(
             )
 
             onDrawWithContent {
-                drawRoundRect(brush = modalBaseBrush, cornerRadius = CornerRadius(radiusPx, radiusPx))
-                drawCircle(brush = orb1, radius = minDim * 0.72f, center = Offset(w * 0.18f, h * 0.15f))
-                drawCircle(brush = orb2, radius = minDim * 0.72f, center = Offset(w * 0.85f, h * 0.80f))
-                drawRoundRect(brush = meniscusBrush, cornerRadius = CornerRadius(radiusPx, radiusPx))
+                drawRoundRect(brush = modalBaseBrush, cornerRadius = corner)
+                drawRoundRect(brush = meniscusBrush, cornerRadius = corner)
                 if (w > sdfInset * 4 && h > sdfInset * 4) {
-                    val innerR = (radiusPx - sdfInset).coerceAtLeast(2f)
                     drawRoundRect(
                         brush = sdfBrush,
-                        topLeft = Offset(sdfInset, sdfInset),
-                        size = Size(w - sdfInset * 2, h - sdfInset * 2),
-                        cornerRadius = CornerRadius(innerR, innerR),
-                        style = Stroke(width = 2.2.dp.toPx())
+                        topLeft = innerTopLeft,
+                        size = innerSize,
+                        cornerRadius = innerCorner,
+                        style = sdfStroke
                     )
                 }
                 drawContent()
                 drawRoundRect(
                     brush = rimBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx),
-                    style = Stroke(width = strokeWidth.toPx())
+                    cornerRadius = corner,
+                    style = rimStroke
                 )
             }
         }
 }
 
 /**
- * Deep Sapphire-Cyan Refractive Hero Glass Modifier for corporate headers & badges.
+ * QWEA0 Deep Royal Sapphire & Turquoise-Emerald Refractive Hero Glass Modifier for corporate headers & badges.
  * Guarantees crisp white text & logos pop with 100% legibility in both Light and Dark modes.
  */
 @Composable
@@ -1188,35 +1065,25 @@ fun Modifier.liquidHeroGlass(
 ): Modifier {
     val palette = LocalLiquidGlassPalette.current
     return this
-        .drawWithCache {
-            val r = cornerRadius.toPx()
-            onDrawBehind {
-                drawRoundRect(
-                    color = Color(0xFF0284C7).copy(alpha = if (palette.isDark) 0.32f else 0.22f),
-                    topLeft = Offset(0f, 4.dp.toPx()),
-                    size = size,
-                    cornerRadius = CornerRadius(r, r)
-                )
-            }
-        }
         .clip(shape)
         .drawWithCache {
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
             val radiusPx = cornerRadius.toPx()
+            val corner = CornerRadius(radiusPx, radiusPx)
 
             val heroBodyBrush = Brush.linearGradient(
                 colors = if (palette.isDark) {
                     listOf(
-                        Color(0xFF061B36).copy(alpha = 0.94f),
-                        Color(0xFF034470).copy(alpha = 0.90f),
-                        Color(0xFF1A1846).copy(alpha = 0.92f)
+                        Color(0xFF04143D),
+                        Color(0xFF10378A),
+                        Color(0xFF061F5C)
                     )
                 } else {
                     listOf(
-                        Color(0xFF072B47).copy(alpha = 0.95f),
-                        Color(0xFF02598A).copy(alpha = 0.92f),
-                        Color(0xFF0369A1).copy(alpha = 0.94f)
+                        Color(0xFF072163),
+                        Color(0xFF185ADB),
+                        Color(0xFF0E378C)
                     )
                 },
                 start = Offset(0f, 0f),
@@ -1224,125 +1091,164 @@ fun Modifier.liquidHeroGlass(
             )
 
             val heroOrbBrush = Brush.radialGradient(
-                colors = listOf(Color(0xFF38BDF8).copy(alpha = 0.36f), Color.Transparent),
-                center = Offset(w * 0.85f, h * 0.20f),
-                radius = w * 0.58f
+                colors = listOf(Color(0xFF3B82F6).copy(alpha = 0.38f), Color.Transparent),
+                center = Offset(w * 0.82f, h * 0.22f),
+                radius = (w * 0.58f).coerceAtLeast(10f)
+            )
+
+            val emeraldGlowBrush = Brush.radialGradient(
+                colors = listOf(Color(0xFF1CE5B5).copy(alpha = 0.26f), Color.Transparent),
+                center = Offset(w * 0.14f, h * 0.85f),
+                radius = (w * 0.45f).coerceAtLeast(10f)
             )
 
             val topMeniscus = Brush.verticalGradient(
-                colors = listOf(Color.White.copy(alpha = 0.30f), Color.Transparent),
+                colors = listOf(Color.White.copy(alpha = 0.36f), Color.White.copy(alpha = 0.08f), Color.Transparent),
                 startY = 0f,
-                endY = (h * 0.42f).coerceAtLeast(18f)
+                endY = (h * 0.45f).coerceAtLeast(20f)
             )
 
-            val sdfInset = 3.dp.toPx()
-            val sdfBrush = Brush.linearGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.38f),
-                    Color.Transparent,
-                    Color(0xFF38BDF8).copy(alpha = 0.35f)
-                ),
-                start = Offset(0f, 0f),
-                end = Offset(w, h)
-            )
-
+            val rimStroke = Stroke(width = 1.5.dp.toPx())
             val rimBrush = Brush.linearGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = 0.92f),
-                    Color(0xFF38BDF8).copy(alpha = 0.85f),
-                    Color(0xFF0284C7).copy(alpha = 0.70f),
-                    Color(0xFF7DD3FC).copy(alpha = 0.90f)
+                    Color.White.copy(alpha = 0.94f),
+                    Color(0xFF7CC4FA).copy(alpha = 0.88f),
+                    Color(0xFF38BDF8).copy(alpha = 0.80f),
+                    Color(0xFF80FFE5).copy(alpha = 0.84f)
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
             )
 
             onDrawWithContent {
-                drawRoundRect(brush = heroBodyBrush, cornerRadius = CornerRadius(radiusPx, radiusPx))
-                drawCircle(brush = heroOrbBrush, radius = w * 0.58f, center = Offset(w * 0.85f, h * 0.20f))
-                drawRoundRect(brush = topMeniscus, cornerRadius = CornerRadius(radiusPx, radiusPx))
-                if (w > sdfInset * 4 && h > sdfInset * 4) {
-                    val innerR = (radiusPx - sdfInset).coerceAtLeast(2f)
-                    drawRoundRect(
-                        brush = sdfBrush,
-                        topLeft = Offset(sdfInset, sdfInset),
-                        size = Size(w - sdfInset * 2, h - sdfInset * 2),
-                        cornerRadius = CornerRadius(innerR, innerR),
-                        style = Stroke(width = 2.0.dp.toPx())
-                    )
-                }
+                drawRoundRect(brush = heroBodyBrush, cornerRadius = corner)
+                drawCircle(brush = heroOrbBrush, radius = w * 0.58f, center = Offset(w * 0.82f, h * 0.22f))
+                drawCircle(brush = emeraldGlowBrush, radius = w * 0.45f, center = Offset(w * 0.14f, h * 0.85f))
+                drawRoundRect(brush = topMeniscus, cornerRadius = corner)
                 drawContent()
                 drawRoundRect(
                     brush = rimBrush,
-                    cornerRadius = CornerRadius(radiusPx, radiusPx),
-                    style = Stroke(width = 1.6.dp.toPx())
+                    cornerRadius = corner,
+                    style = rimStroke
                 )
             }
         }
 }
 
 /**
- * Responsive, Non-Blocking iOS 26 Tactile Press & Specular Flare Modifier.
+ * Zero-Idle-Overhead Interactive Tactile Press & Expanding Liquid Water Ripple Modifier.
+ * Only animates when actively pressed/tapped, with zero per-frame object allocations.
  */
 @Composable
 fun Modifier.liquidPressEffect(
-    pressedScale: Float = 0.968f,
-    enabled: Boolean = true
+    pressedScale: Float = 0.972f,
+    enabled: Boolean = true,
+    cornerRadius: Dp = 14.dp
 ): Modifier {
     if (!enabled) return this
     val palette = LocalLiquidGlassPalette.current
     var isPressed by remember { mutableStateOf(false) }
+    var touchOffset by remember { mutableStateOf(Offset.Unspecified) }
+    var rippleTrigger by remember { mutableStateOf(0) }
 
-    val scale by animateFloatAsState(
+    val scaleState = animateFloatAsState(
         targetValue = if (isPressed) pressedScale else 1f,
         animationSpec = spring(
-            dampingRatio = 0.70f,
-            stiffness = 450f
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
         ),
         label = "liquidPressScale"
     )
-    val flareAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = 0.80f,
-            stiffness = 500f
-        ),
-        label = "liquidPressFlare"
-    )
+
+    val rippleAnim = remember { androidx.compose.animation.core.Animatable(0f) }
+
+    LaunchedEffect(rippleTrigger) {
+        if (rippleTrigger > 0) {
+            rippleAnim.snapTo(0.01f)
+            rippleAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)
+            )
+            rippleAnim.snapTo(0f)
+        }
+    }
 
     return this
         .pointerInput(enabled) {
             awaitEachGesture {
-                awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                touchOffset = down.position
                 isPressed = true
+                rippleTrigger++
                 waitForUpOrCancellation(pass = PointerEventPass.Initial)
                 isPressed = false
             }
         }
         .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
+            val s = scaleState.value
+            if (s != 1f) {
+                scaleX = s
+                scaleY = s
+            }
         }
         .drawWithCache {
             val w = size.width.coerceAtLeast(1f)
             val h = size.height.coerceAtLeast(1f)
+            val maxDim = size.maxDimension.coerceAtLeast(1f)
+            val r = cornerRadius.toPx()
+            val corner = CornerRadius(r, r)
+            val outerRingStroke = Stroke(width = 1.6.dp.toPx())
+            val innerRingStroke = Stroke(width = 1.1.dp.toPx())
+
             val flareBrush = Brush.linearGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = 0.28f),
+                    Color.White.copy(alpha = 0.22f),
                     palette.pressFlareColor,
                     Color.Transparent
                 ),
                 start = Offset(0f, 0f),
                 end = Offset(w, h)
             )
+
             onDrawWithContent {
                 drawContent()
-                if (flareAlpha > 0.01f) {
+
+                if (isPressed) {
                     drawRoundRect(
                         brush = flareBrush,
-                        alpha = flareAlpha,
-                        cornerRadius = CornerRadius(14.dp.toPx(), 14.dp.toPx())
+                        cornerRadius = corner
                     )
+                }
+
+                val rProg = rippleAnim.value
+                if (rProg in 0.01f..0.99f) {
+                    val fade = (1f - rProg).coerceIn(0f, 1f)
+                    val center = if (touchOffset != Offset.Unspecified) {
+                        Offset(
+                            touchOffset.x.coerceIn(0f, w),
+                            touchOffset.y.coerceIn(0f, h)
+                        )
+                    } else {
+                        Offset(w * 0.5f, h * 0.5f)
+                    }
+                    val maxRadius = (maxDim * 0.48f).coerceAtMost(minOf(w, h) * 0.85f)
+                    val outerRadius = maxRadius * rProg
+                    val innerRadius = outerRadius * 0.62f
+
+                    drawCircle(
+                        color = Color.White.copy(alpha = fade * 0.48f),
+                        radius = outerRadius,
+                        center = center,
+                        style = outerRingStroke
+                    )
+                    if (innerRadius > 2f) {
+                        drawCircle(
+                            color = palette.dispersionCyan.copy(alpha = fade * 0.42f),
+                            radius = innerRadius,
+                            center = center,
+                            style = innerRingStroke
+                        )
+                    }
                 }
             }
         }
@@ -1362,16 +1268,18 @@ fun LiquidGlassCard(
 ) {
     val shape = RoundedCornerShape(cornerRadius)
     val baseMod = if (onClick != null) {
-        modifier.liquidPressEffect(pressedScale = 0.98f)
+        modifier.liquidPressEffect(pressedScale = 0.985f, cornerRadius = cornerRadius)
     } else {
         modifier
     }
-    val glassMod = baseMod.liquidGlass(
-        shape = shape,
-        cornerRadius = cornerRadius,
-        elevated = elevated,
-        tintColor = tintColor
-    )
+    val glassMod = baseMod
+        .clip(shape)
+        .liquidGlass(
+            shape = shape,
+            cornerRadius = cornerRadius,
+            elevated = elevated,
+            tintColor = tintColor
+        )
 
     Column(
         modifier = if (onClick != null) {
@@ -1391,8 +1299,8 @@ fun liquidTextFieldColors(): TextFieldColors {
     val palette = LocalLiquidGlassPalette.current
     return OutlinedTextFieldDefaults.colors(
         focusedContainerColor = palette.inputFieldContainer,
-        unfocusedContainerColor = palette.inputFieldContainer.copy(alpha = palette.inputFieldContainer.alpha * 0.92f),
-        disabledContainerColor = palette.inputFieldContainer.copy(alpha = 0.50f),
+        unfocusedContainerColor = palette.inputFieldContainer.copy(alpha = palette.inputFieldContainer.alpha * 0.96f),
+        disabledContainerColor = palette.inputFieldContainer.copy(alpha = 0.65f),
         focusedBorderColor = MaterialTheme.colorScheme.primary,
         unfocusedBorderColor = palette.inputFieldBorderUnfocused,
         focusedLabelColor = MaterialTheme.colorScheme.primary,
@@ -1401,8 +1309,8 @@ fun liquidTextFieldColors(): TextFieldColors {
         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
         disabledTextColor = MaterialTheme.colorScheme.onSurface,
         disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f),
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f),
         focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
         unfocusedLeadingIconColor = MaterialTheme.colorScheme.primary,
         disabledLeadingIconColor = MaterialTheme.colorScheme.primary,
@@ -1422,9 +1330,9 @@ fun liquidFilterChipColors(
 ): SelectableChipColors {
     val palette = LocalLiquidGlassPalette.current
     val selectedBg = if (useSecondaryAccent) {
-        if (palette.isDark) Color(0xFF00897B) else MaterialTheme.colorScheme.secondary
+        Color(0xFF00897B)
     } else {
-        if (palette.isDark) Color(0xFF0277BD) else MaterialTheme.colorScheme.primary
+        Color(0xFF1D63DC)
     }
     return FilterChipDefaults.filterChipColors(
         containerColor = palette.chipUnselectedContainer,
@@ -1433,8 +1341,8 @@ fun liquidFilterChipColors(
         selectedContainerColor = selectedBg,
         selectedLabelColor = Color.White,
         selectedLeadingIconColor = Color.White,
-        disabledContainerColor = palette.chipUnselectedContainer.copy(alpha = 0.4f),
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        disabledContainerColor = palette.chipUnselectedContainer.copy(alpha = 0.5f),
+        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
     )
 }
 
@@ -1446,7 +1354,7 @@ fun liquidSwitchColors(): SwitchColors {
     val palette = LocalLiquidGlassPalette.current
     return SwitchDefaults.colors(
         checkedThumbColor = Color.White,
-        checkedTrackColor = if (palette.isDark) Color(0xFF0284C7) else MaterialTheme.colorScheme.primary,
+        checkedTrackColor = Color(0xFF1D63DC),
         checkedBorderColor = palette.pillActiveBorder,
         uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
         uncheckedTrackColor = palette.chipUnselectedContainer,

@@ -785,32 +785,40 @@
           <input type="text" id="personToMeet" placeholder="Host name or employee to see">
         </div>
 
-        <!-- Safety & QHSE Section in Web Form (as requested) -->
+        <!-- Safety & QHSE Section in Web Form (Dynamically synced per Branch) -->
         <div class="qhse-card">
           <div class="qhse-header" id="qhseHeader">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 18px;">🛡️</span>
               <div>
-                <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">Safety &amp; QHSE Guidelines</div>
+                <div id="qhseHeaderTitle" style="font-size: 13px; font-weight: 800; color: var(--text-main);">Safety &amp; QHSE Guidelines</div>
                 <div style="font-size: 11px; color: var(--text-muted);">Review mandatory facility rules &amp; PPE policy</div>
               </div>
             </div>
             <span id="qhseArrow" style="font-size: 12px; color: var(--primary-accent); font-weight: bold;">▲</span>
           </div>
           <div id="qhseBody" class="qhse-body" style="display: block;">
-            <ul class="qhse-list">
+            <ul class="qhse-list" id="qhseRulesList">
               <li><span>🦺</span> <span><b>Mandatory PPE:</b> Safety footwear, high-vis vest and eye protection required in workshop and yard areas.</span></li>
-               <li><span>🚶</span> <span><b>Accompanied Access:</b> Visitors must remain accompanied by their host in operational zones.</span></li>
+              <li><span>🚶</span> <span><b>Accompanied Access:</b> Visitors must remain accompanied by their host in operational zones.</span></li>
               <li><span>📵</span> <span><b>Photography:</b> Unauthorized photography or recording is strictly prohibited.</span></li>
               <li><span>🚨</span> <span><b>Emergency &amp; Evacuation:</b> In case of fire alarm, proceed calmly via green exit signage to <b>Assembly Point</b>.</span></li>
-              <li><span>📞</span> <span><b>Emergency Hotline:</b> <a href="tel:+97148807777" style="color: var(--primary-accent); text-decoration: none; font-weight: 700;">+971 4 880 7777</a> / Safety Dept.</span></li>
             </ul>
+            <ul class="qhse-list" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-glass);">
+              <li id="qhseContactRow"><span>👷</span> <span><b>Safety Contact:</b> <span id="qhseContactName">QHSE Officer / Security Desk</span></span></li>
+              <li id="qhseHelplineRow"><span>📞</span> <span><b>Emergency Helpline:</b> <a id="qhseHelplineLink" href="tel:+97148830000" style="color: var(--primary-accent); text-decoration: none; font-weight: 700;">+971 4 883 0000 / Security Control Ext. 101 / Emergency: 999</a></span></li>
+            </ul>
+            <!-- Optional Emergency Exit & Evacuation Drawing (Shown only if admin added an image for this branch) -->
+            <div id="qhseExitDrawingBox" style="display: none; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-glass);">
+              <div style="font-size: 11.5px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">🗺️ Emergency Exit &amp; Evacuation Drawing</div>
+              <img id="qhseExitDrawingImg" src="" alt="Emergency Exit Plan" style="width: 100%; max-height: 220px; object-fit: contain; border-radius: 10px; border: 1px solid var(--border-glass); background: rgba(15, 23, 42, 0.06);" />
+            </div>
           </div>
         </div>
 
         <div class="safety-box" id="safetyBox">
           <input type="checkbox" id="safetyAgree" required checked>
-          <label for="safetyAgree">
+          <label for="safetyAgree" id="safetyAgreeLabel">
             I confirm that I have read and agree to comply with <b>SAIT Group QHSE Safety Guidelines</b>, wear required PPE, and follow safety protocols.
           </label>
         </div>
@@ -836,7 +844,7 @@
         <div class="badge-row"><span>Department:</span> <b id="displayDept">PROJECTS</b></div>
         <div class="badge-row"><span>Purpose:</span> <b id="displayPurpose">Meeting</b></div>
         <div class="badge-row"><span>Host Person:</span> <b id="displayHost">Reception Desk</b></div>
-        <div class="badge-row"><span>Check-In Time:</span> <b id="displayTime">Just now</b></div>
+        <div class="badge-row"><span>Registration Date &amp; Time:</span> <b id="displayTime">Just now</b></div>
         <div class="badge-row"><span>Status:</span> <b style="color: var(--success);">ACTIVE ON PREMISES</b></div>
       </div>
 
@@ -856,7 +864,7 @@
     </div>
 
     <div class="footer">
-      <p>© 2026 SAIT Group • VISIT+</p>
+      <p>© 2026 SAIT Pass+</p>
       <p style="font-size: 11px; margin-top: 4px; opacity: 0.8;">• Online Visitor Registration Portal •</p>
     </div>
   </div>
@@ -864,7 +872,7 @@
   <!-- Main Logic & Real-Time Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // Theme Switcher Logic
     function updateThemeUI(theme) {
@@ -933,6 +941,83 @@
     var sessionId = urlParams.get('session') || ('KS-' + branchCode + '-T01');
     var countryCodeParam = urlParams.get('countryCode') || (matchedBranch ? matchedBranch.countryCode : '+971');
     var deptsParam = urlParams.get('depts');
+    var helplineParam = urlParams.get('helpline') || '';
+    var contactParam = urlParams.get('contact') || '';
+    var safetyParam = urlParams.get('safety') || '';
+
+    // Helper to dynamically render branch-specific Safety & QHSE Info
+    function renderBranchSafetyInfo(guidelinesText, helplineText, contactNameText, exitDrawingUri, activeBranchTitle) {
+      var hdrEl = document.getElementById('qhseHeaderTitle');
+      if (hdrEl && activeBranchTitle) {
+        hdrEl.innerText = 'Safety & QHSE Guidelines (' + activeBranchTitle + ')';
+      }
+
+      var agreeLbl = document.getElementById('safetyAgreeLabel');
+      if (agreeLbl && activeBranchTitle) {
+        agreeLbl.innerHTML = 'I confirm that I have read and agree to comply with <b>' + activeBranchTitle + ' QHSE Safety Guidelines</b>, wear required PPE, and follow safety protocols.';
+      }
+
+      if (guidelinesText && guidelinesText.trim().length > 0) {
+        var rulesUl = document.getElementById('qhseRulesList');
+        if (rulesUl) {
+          var lines = guidelinesText.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+          if (lines.length > 0) {
+            rulesUl.innerHTML = '';
+            lines.forEach(function(line) {
+              var cleanLine = line.replace(/^\d+[\.\)]\s*/, '');
+              var lower = cleanLine.toLowerCase();
+              var icon = '🛡️';
+              if (lower.indexOf('ppe') !== -1 || lower.indexOf('helmet') !== -1 || lower.indexOf('shoe') !== -1 || lower.indexOf('vest') !== -1) icon = '🦺';
+              else if (lower.indexOf('walkway') !== -1 || lower.indexOf('accompanied') !== -1 || lower.indexOf('host') !== -1) icon = '🚶';
+              else if (lower.indexOf('smok') !== -1) icon = '🚭';
+              else if (lower.indexOf('photo') !== -1 || lower.indexOf('video') !== -1 || lower.indexOf('camera') !== -1) icon = '📵';
+              else if (lower.indexOf('alarm') !== -1 || lower.indexOf('emergency') !== -1 || lower.indexOf('assembly') !== -1 || lower.indexOf('evacuat') !== -1) icon = '🚨';
+
+              var li = document.createElement('li');
+              var iconSpan = document.createElement('span');
+              iconSpan.textContent = icon;
+              var textSpan = document.createElement('span');
+              textSpan.textContent = cleanLine;
+              li.appendChild(iconSpan);
+              li.appendChild(textSpan);
+              rulesUl.appendChild(li);
+            });
+          }
+        }
+      }
+
+      var contactRow = document.getElementById('qhseContactRow');
+      var contactSpan = document.getElementById('qhseContactName');
+      if (contactRow && contactSpan) {
+        if (contactNameText && contactNameText.trim().length > 0) {
+          contactSpan.textContent = contactNameText.trim();
+          contactRow.style.display = 'flex';
+        } else {
+          contactRow.style.display = 'none';
+        }
+      }
+
+      var helplineLink = document.getElementById('qhseHelplineLink');
+      if (helplineLink && helplineText && helplineText.trim().length > 0) {
+        helplineLink.textContent = helplineText.trim();
+        var dialMatch = helplineText.match(/(\+?\d[\d\s\-]{5,})/);
+        if (dialMatch) {
+          helplineLink.href = 'tel:' + dialMatch[1].replace(/[\s\-]/g, '');
+        }
+      }
+
+      var exitBox = document.getElementById('qhseExitDrawingBox');
+      var exitImg = document.getElementById('qhseExitDrawingImg');
+      if (exitBox && exitImg) {
+        if (exitDrawingUri && exitDrawingUri.trim().length > 0 && (exitDrawingUri.indexOf('data:image') === 0 || exitDrawingUri.indexOf('http') === 0)) {
+          exitImg.src = exitDrawingUri.trim();
+          exitBox.style.display = 'block';
+        } else {
+          exitImg.src = '';
+          exitBox.style.display = 'none';
+        }
+      }
+    }
 
     // Populate Dynamic Branch Data
     var branchTitleEl = document.getElementById('branchTitle');
@@ -944,13 +1029,16 @@
     var sessionTextEl = document.getElementById('sessionText');
     if (sessionTextEl) sessionTextEl.innerText = 'TERMINAL: ' + sessionId;
 
-    // Populate Departments
-    var deptList = deptsParam ? deptsParam.split(',').map(function(d) { return d.trim(); }).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
-    if (deptList && deptList.length > 0) {
+    // Initial Safety Info render from URL params
+    renderBranchSafetyInfo(safetyParam, helplineParam, contactParam, '', branchName);
+
+    // Helper to populate Department dropdown
+    function populateDepartmentsDropdown(list) {
+      if (!list || list.length === 0) return;
       var deptSelect = document.getElementById('department');
       if (deptSelect) {
         deptSelect.innerHTML = '';
-        deptList.forEach(function(d, idx) {
+        list.forEach(function(d, idx) {
           var opt = document.createElement('option');
           opt.value = d;
           opt.textContent = d;
@@ -959,6 +1047,9 @@
         });
       }
     }
+
+    var deptList = deptsParam ? deptsParam.split(',').map(function(d) { return d.trim(); }).filter(Boolean) : (matchedBranch ? matchedBranch.depts : null);
+    populateDepartmentsDropdown(deptList);
 
     // Set Default Country Code
     if (countryCodeParam) {
@@ -1022,14 +1113,19 @@
       purposeSelect.addEventListener('change', window.handlePurposeChange);
     }
 
-    // Time Formatter
+    // Date & Time Formatter
     function formatTimeNow() {
       var now = new Date();
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var day = String(now.getDate()).padStart(2, '0');
+      var month = months[now.getMonth()];
+      var year = now.getFullYear();
       var hours = now.getHours();
       var minutes = String(now.getMinutes()).padStart(2, '0');
       var ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12 || 12;
-      return hours + ':' + minutes + ' ' + ampm;
+      var hourStr = String(hours).padStart(2, '0');
+      return day + ' ' + month + ' ' + year + ', ' + hourStr + ':' + minutes + ' ' + ampm;
     }
 
     // Firebase Initialization
@@ -1050,6 +1146,70 @@
       console.warn("Firebase initialization note (offline mode fallback enabled):", err);
     }
 
+    // Fetch Live Saved Branch Configuration & Safety Info from Firestore ('settings/organization')
+    async function syncBranchConfigFromFirestore() {
+      if (!db) return;
+      try {
+        var orgSnap = await getDoc(doc(db, "settings", "organization"));
+        if (!orgSnap.exists()) return;
+        var orgData = orgSnap.data();
+
+        // Sync custom Visit Purposes if configured by Admin
+        if (Array.isArray(orgData.visitPurposes) && orgData.visitPurposes.length > 0) {
+          var purposeEl = document.getElementById('purpose');
+          if (purposeEl) {
+            var currentVal = purposeEl.value;
+            purposeEl.innerHTML = '';
+            orgData.visitPurposes.forEach(function(p) {
+              var opt = document.createElement('option');
+              opt.value = p;
+              opt.textContent = p;
+              if (p === currentVal) opt.selected = true;
+              purposeEl.appendChild(opt);
+            });
+          }
+        }
+
+        // Find matching saved branch
+        if (Array.isArray(orgData.branches)) {
+          var normCode = (branchCode || '').trim().toUpperCase();
+          var normName = (branchName || '').trim().toLowerCase();
+          var savedBranch = orgData.branches.find(function(b) {
+            var bCode = (b.shortCode || '').trim().toUpperCase();
+            var bName = (b.name || '').trim().toLowerCase();
+            var bId = (b.id || '').trim().toUpperCase();
+            return (normCode && (bCode === normCode || bId === normCode || bCode.indexOf(normCode) !== -1 || normCode.indexOf(bCode) !== -1)) ||
+                   (normName && bName === normName);
+          });
+
+          if (savedBranch) {
+            if (savedBranch.name) {
+              branchName = savedBranch.name;
+              if (branchTitleEl) branchTitleEl.innerText = branchName;
+            }
+            var loc = savedBranch.facilityLocation || (savedBranch.subtitle && savedBranch.city ? (savedBranch.subtitle + ', ' + savedBranch.city) : savedBranch.subtitle);
+            if (loc && branchLocEl) {
+              branchLocation = loc;
+              branchLocEl.innerText = branchLocation;
+            }
+            if (Array.isArray(savedBranch.departments) && savedBranch.departments.length > 0) {
+              populateDepartmentsDropdown(savedBranch.departments);
+            }
+            renderBranchSafetyInfo(
+              savedBranch.safetyGuidelines || safetyParam,
+              savedBranch.safetyHelpline || helplineParam,
+              savedBranch.safetyContactName !== undefined ? savedBranch.safetyContactName : contactParam,
+              savedBranch.emergencyExitDrawingUri || '',
+              branchName
+            );
+          }
+        }
+      } catch (e) {
+        console.warn("Branch safety sync notice:", e);
+      }
+    }
+    syncBranchConfigFromFirestore();
+
     // Form Submission & Pass Generation
     window.handleRegistrationSubmit = async function(e) {
       if (e && e.preventDefault) e.preventDefault();
@@ -1068,7 +1228,8 @@
       var rawMobile = (document.getElementById('mobileNumber') ? document.getElementById('mobileNumber').value : '').trim();
       var fullMobile = (countryCode + ' ' + rawMobile).trim();
       var companyName = (document.getElementById('companyName') ? document.getElementById('companyName').value : '').trim();
-      var visitType = (document.getElementById('visitType') ? document.getElementById('visitType').value : '') || 'Walk-In';
+      var rawVisitType = (document.getElementById('visitType') ? document.getElementById('visitType').value : '') || 'Walk-In';
+      var visitType = rawVisitType.indexOf('(QR)') === -1 ? (rawVisitType + ' (QR)') : rawVisitType;
       var department = document.getElementById('department') ? document.getElementById('department').value : 'PROJECTS';
       var selectedPurpose = document.getElementById('purpose') ? document.getElementById('purpose').value : 'Meeting';
       var customPurpose = (document.getElementById('customPurpose') ? document.getElementById('customPurpose').value : '').trim();

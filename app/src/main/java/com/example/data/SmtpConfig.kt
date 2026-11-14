@@ -12,7 +12,7 @@ data class SmtpConfig(
     val username: String = "",
     val password: String = "",
     val senderEmail: String = "",
-    val senderName: String = "SAIT Group Visitor Pass",
+    val senderName: String = "SAIT Pass+",
     val firebaseTriggerEnabled: Boolean = true
 ) {
     fun toJson(): String {
@@ -53,7 +53,7 @@ data class SmtpConfig(
                     username = obj.optString("username", ""),
                     password = obj.optString("password", ""),
                     senderEmail = obj.optString("senderEmail", ""),
-                    senderName = obj.optString("senderName", "SAIT Group Visitor Pass"),
+                    senderName = obj.optString("senderName", "SAIT Pass+"),
                     firebaseTriggerEnabled = obj.optBoolean("firebaseTriggerEnabled", true)
                 )
             } catch (_: Throwable) {

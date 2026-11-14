@@ -2,58 +2,58 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Theme Colors - High-Contrast iOS 26 Refractive Sapphire, Cyan & Prismatic Indigo
-val SaitPrimary = Color(0xFF00558F)         // Deep Luminous Sapphire (high WCAG contrast on light glass)
+// Light Theme Colors - QWEA0/Liquid-Glass-Android Royal Sapphire, Turquoise-Emerald & High-Contrast Ink
+val SaitPrimary = Color(0xFF0F4CD6)         // High-contrast Royal Sapphire Blue for text, icons & borders on light glass
 val SaitOnPrimary = Color(0xFFFFFFFF)
-val SaitPrimaryContainer = Color(0xFFD0EAFF) // Frosted Sky Ice
-val SaitOnPrimaryContainer = Color(0xFF002B4D)
+val SaitPrimaryContainer = Color(0xFFDCEBFF) // Frosted Sapphire Ice
+val SaitOnPrimaryContainer = Color(0xFF03153E)
 
-val SaitSecondary = Color(0xFF006D87)       // Deep Refractive Aqua-Cyan (crisp visibility on light glass)
+val SaitSecondary = Color(0xFF00796B)       // Deep Emerald-Teal for high legibility on light glass surfaces
 val SaitOnSecondary = Color(0xFFFFFFFF)
-val SaitSecondaryContainer = Color(0xFFC4F3FC)
-val SaitOnSecondaryContainer = Color(0xFF002E3B)
+val SaitSecondaryContainer = Color(0xFFCCFBF1) // Soft Turquoise-Mint Ice
+val SaitOnSecondaryContainer = Color(0xFF002E26)
 
-val SaitTertiary = Color(0xFF4338CA)        // Prismatic Royal Indigo
+val SaitTertiary = Color(0xFF1E40AF)        // Deep Ultramarine-Cobalt for high-contrast badges on light glass
 val SaitOnTertiary = Color(0xFFFFFFFF)
-val SaitTertiaryContainer = Color(0xFFE0E7FF)
-val SaitOnTertiaryContainer = Color(0xFF1E1B4B)
+val SaitTertiaryContainer = Color(0xFFDBEAFE)
+val SaitOnTertiaryContainer = Color(0xFF172554)
 
-val SaitBackground = Color(0xFFEEF6FF)      // Crisp Ice-Azure Tint
-val SaitOnBackground = Color(0xFF051020)    // Ultra-Deep Sapphire Ink
-val SaitSurface = Color(0xFFF8FBFF)
-val SaitOnSurface = Color(0xFF051020)       // Maximum contrast primary text in Light Mode
-val SaitSurfaceVariant = Color(0xFFDCEBFA)
-val SaitOnSurfaceVariant = Color(0xFF172C48) // High-contrast dark navy-slate for secondary text
-val SaitOutline = Color(0xFF2B486B)          // High-visibility slate-navy outline & label color
-val SaitOutlineVariant = Color(0xFF9AC0E6)
+val SaitBackground = Color(0xFFDCEBFF)      // Rich Sapphire-Azure Sky
+val SaitOnBackground = Color(0xFF020B1F)    // Deepest Obsidian-Navy Ink
+val SaitSurface = Color(0xFFF7FAFF)
+val SaitOnSurface = Color(0xFF020B1F)       // Maximum 18:1 contrast primary text in Light Mode
+val SaitSurfaceVariant = Color(0xFFDCEBFF)
+val SaitOnSurfaceVariant = Color(0xFF1B3458) // Crisp dark slate-navy for secondary text, labels & subtitles
+val SaitOutline = Color(0xFF2B4C7E)          // Strong sapphire-slate outline & caption color
+val SaitOutlineVariant = Color(0xFF94B8E8)
 
-// Dark Theme Colors - High-Contrast iOS 26 Deep Midnight Obsidian & Electric Neon Glass
-val SaitDarkPrimary = Color(0xFF38BDF8)     // Electric Sky Cyan
+// Dark Theme Colors - QWEA0/Liquid-Glass-Android Deep Navy, Luminous Sky-Sapphire & Aquamarine-Emerald
+val SaitDarkPrimary = Color(0xFF7CC4FA)     // Luminous Sky-Sapphire for high visibility on dark navy glass
 val SaitDarkOnPrimary = Color(0xFFFFFFFF)   // Crisp White on primary buttons/chips
-val SaitDarkPrimaryContainer = Color(0xFF0A4A78)
-val SaitDarkOnPrimaryContainer = Color(0xFFF0F9FF)
+val SaitDarkPrimaryContainer = Color(0xFF123B94)
+val SaitDarkOnPrimaryContainer = Color(0xFFF0F7FF)
 
-val SaitDarkSecondary = Color(0xFF2DD4BF)   // Electric Aqua Teal
-val SaitDarkOnSecondary = Color(0xFF022C2B)
-val SaitDarkSecondaryContainer = Color(0xFF115E59)
-val SaitDarkOnSecondaryContainer = Color(0xFFE6FFFA)
+val SaitDarkSecondary = Color(0xFF38F8C8)   // Luminous Aquamarine-Emerald for high contrast on dark glass
+val SaitDarkOnSecondary = Color(0xFF00261E)
+val SaitDarkSecondaryContainer = Color(0xFF005B4F)
+val SaitDarkOnSecondaryContainer = Color(0xFFD9FFF5)
 
-val SaitDarkTertiary = Color(0xFFA5B4FC)    // Luminous Prismatic Indigo
-val SaitDarkOnTertiary = Color(0xFF1E1B4B)
-val SaitDarkSecondaryAccent = Color(0xFFC084FC)
-val SaitDarkTertiaryContainer = Color(0xFF312E81)
-val SaitDarkOnTertiaryContainer = Color(0xFFE0E7FF)
+val SaitDarkTertiary = Color(0xFF93C5FD)    // Luminous Ice-Azure for tertiary badges/icons on dark glass
+val SaitDarkOnTertiary = Color(0xFF04153B)
+val SaitDarkSecondaryAccent = Color(0xFF38BDF8)
+val SaitDarkTertiaryContainer = Color(0xFF1E3A8A)
+val SaitDarkOnTertiaryContainer = Color(0xFFEFF6FF)
 
-val SaitDarkBackground = Color(0xFF040A16)  // Deep Midnight Space
-val SaitDarkOnBackground = Color(0xFFF8FBFF)
-val SaitDarkSurface = Color(0xFF0A162B)     // Elevated Midnight Glass
-val SaitDarkOnSurface = Color(0xFFF8FBFF)   // Pure luminous ice-white primary text
-val SaitDarkSurfaceVariant = Color(0xFF172B4D)
-val SaitDarkOnSurfaceVariant = Color(0xFFD6E6FF) // High-contrast ice-blue secondary text
-val SaitDarkOutline = Color(0xFF93B8E8)          // High-visibility sky-slate outline & caption color
-val SaitDarkOutlineVariant = Color(0xFF2B466E)
+val SaitDarkBackground = Color(0xFF010B21)  // QWEA0 Deep Royal Navy Space
+val SaitDarkOnBackground = Color(0xFFFFFFFF)
+val SaitDarkSurface = Color(0xFF061638)     // Elevated Royal Cobalt Glass
+val SaitDarkOnSurface = Color(0xFFFFFFFF)   // Pure crisp white primary text in Dark Mode
+val SaitDarkSurfaceVariant = Color(0xFF0F295E)
+val SaitDarkOnSurfaceVariant = Color(0xFFE0EEFF) // Bright ice-white/azure secondary text for effortless reading
+val SaitDarkOutline = Color(0xFF8CC4FA)          // High-visibility sky-sapphire outline & caption color
+val SaitDarkOutlineVariant = Color(0xFF284B8C)
 
-// Cohesive Liquid Glass Status Colors
+// Cohesive High-Visibility Status Colors
 val StatusSuccess = Color(0xFF10B981)       // Emerald Glass
 val StatusWarning = Color(0xFFF59E0B)       // Luminous Amber
 val StatusError = Color(0xFFEF4444)         // Coral Crimson
@@ -65,17 +65,17 @@ val NotificationVisitorColor = Color(0xFF10B981)
 val NotificationSyncColor = Color(0xFF6366F1)
 val NotificationAlertColor = Color(0xFFF59E0B)
 
-// SAIT Heritage Blue + Red Theme Combo (from official SAIT logo)
-val SaitLogoBlue = Color(0xFF001B69)          // Official SAIT Deep Navy Blue
-val SaitLogoRed = Color(0xFFD91B24)           // Official SAIT Dynamic Crimson Curve
+// SAIT Heritage Brand Colors
+val SaitLogoBlue = Color(0xFF001B69)
+val SaitLogoRed = Color(0xFFD91B24)
 val SaitLogoRedHover = Color(0xFFEF4444)
 val SaitLogoRedContainer = Color(0xFFFFE4E6)
 val SaitLogoOnRedContainer = Color(0xFF881337)
 val SaitLogoBlueContainer = Color(0xFFDBEAFE)
 val SaitLogoOnBlueContainer = Color(0xFF001B69)
 
-val SaitDarkLogoBlue = Color(0xFF60A5FA)      // Electric Royal Blue for Dark Mode
-val SaitDarkLogoRed = Color(0xFFF87171)       // Luminous Crimson for Dark Mode
+val SaitDarkLogoBlue = Color(0xFF60A5FA)
+val SaitDarkLogoRed = Color(0xFFF87171)
 val SaitDarkLogoRedContainer = Color(0xFF7F1D1D)
 val SaitDarkLogoOnRedContainer = Color(0xFFFECDD3)
 val SaitDarkLogoBlueContainer = Color(0xFF1E3A8A)

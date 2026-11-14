@@ -41,7 +41,7 @@ object SmtpMailer {
         var socket: Socket? = null
         try {
             val fromEmail = if (config.senderEmail.isNotBlank()) config.senderEmail else config.username
-            val fromName = if (config.senderName.isNotBlank()) config.senderName else "SAIT Group Visitor Pass"
+            val fromName = if (config.senderName.isNotBlank()) config.senderName else "SAIT Pass+"
 
             val cleanRecipients = recipients.flatMap { it.split(",") }
                 .map { it.trim() }
@@ -226,8 +226,8 @@ object SmtpMailer {
     }
 
     suspend fun testConnection(config: SmtpConfig, targetRecipient: String): Result<String> {
-        val testSubject = "SAIT Group Visitor Pass - SMTP Test Connection"
-        val testBody = "This is an automated test message sent from SAIT Group Visitor Pass system.\n\n" +
+        val testSubject = "SAIT Pass+ - SMTP Test Connection"
+        val testBody = "This is an automated test message sent from SAIT Pass+ system.\n\n" +
                 "SMTP Server: ${config.host}:${config.port}\n" +
                 "Encryption: ${config.encryption}\n" +
                 "Sender: ${config.senderEmail}\n" +
@@ -236,7 +236,7 @@ object SmtpMailer {
 
         val testHtml = """
             <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <h2 style="color: #0F2942; margin-top: 0;">SAIT Group Visitor Pass</h2>
+                <h2 style="color: #0F2942; margin-top: 0;">SAIT Pass+</h2>
                 <h4 style="color: #0D9488; margin-top: 0;">SMTP Test Connection Successful</h4>
                 <p>This is an automated confirmation verifying that your outgoing mail server settings are configured correctly.</p>
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
